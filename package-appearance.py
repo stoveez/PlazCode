@@ -1,12 +1,12 @@
 from pathlib import Path
 import json,zipfile,hashlib,io,plistlib,struct,urllib.request,tarfile,subprocess,shutil
-repo=Path.cwd();version='1.19.37';root=repo/'build/PlazCode'
+repo=Path.cwd();version='1.19.38';root=repo/'build/PlazCode'
 notes=json.loads((root/'release-notes.json').read_text());entry=notes[0];assert entry['version']==version
 intro='PlazCode '+version+' — '+entry['title']+'\n\n'+entry['summary']+'\n\n'+'\n'.join('- '+x for key in ['added','improved','fixed'] for x in entry[key])+'\n\n'
-validation='PlazCode 1.19.37 validation\nHide bar: test-bar-hide.js boots ChatGPT, DeepSeek, Claude and Notion and verifies hiding keeps the bar mounted (visibility only, never display:none), leaves every control, desktop Start/Stop/Enhance state and engine unchanged, and restores everything exactly; it fails on 1.19.36. A Chromium extension run on a Notion-style page confirmed the hidden bar is click-through and the show tab restores the same position.\nBar size: a Chromium extension run on a Notion-style page measured the bar at 160 px high in a 680 px window on 1.19.36 (the narrow-viewport brand basis became a height) and 87 px at 680, 1000 and 1400 px on 1.19.37.\nNotion placement: test-notion-bar-seat.js reproduces 1.19.36 seating the temporary anchor at the viewport centre (bar 560 px wide, offset left and overlapping the chat box beside a sidebar) and verifies 1.19.37 seats it on the visible chat box and ignores response blocks.\nBlender on Intel Macs: uv resolution for x86_64-apple-darwin picks cryptography 50.0.2, which has no Intel Mac wheel (the reported maturin failure); refusing source builds selects 48.0.1, while arm64 macOS and Windows still resolve 50.0.2. Rust tests cover the uvx environment default and user overrides.\nmacOS updater: Rust tests cover App Translocation paths, an app moved to /Applications and an invalid record; the Mac target was type-checked.\nNot exercised: live signed-in AI chats, Firefox or Edge on a tester machine, a real Intel Mac with Blender 3.6, Gatekeeper translocation on a real Mac, real Roblox Studio and a user installation.\n\n'
+validation='PlazCode 1.19.38 validation\nNotion Start agent: the start handshake now adopts a provisional agent after 5 s instead of waiting indefinitely, and restarting from a chat with no agent no longer waits for the old run; the Notion startup, pending-start, startup-lock and protocol-retry tests pass.\nBar placement: test-notion-bar-follow.js verifies the PlazCode bar stays directly above the Notion chat box and follows it when the chat box moves or resizes.\nChatGPT tools: test-tool-guard-repair.js covers repairing malformed tool calls (stray characters, wrapped JSON, wrong argument shapes) before they reach the tool, so creation tools no longer fail on recoverable input.\nGit MCP: Rust tests cover the corrected Git MCP add-on launch.\nAuto updater: the Rust updater retries the feed and no longer defers installing a detected update indefinitely; Rust updater tests pass.\nRegression: all 86 JavaScript test files and the full cargo test suite (91 tests) pass locally on Windows.\nNot exercised: live signed-in AI chats, a real Mac, Firefox or Edge on a tester machine, real Roblox Studio and a user installation.\n\n'
 firefox_note='## Firefox page events (maintainers)\n\nFirefox hides DataTransfer data/files created by content scripts from page handlers and ignores clipboardData in the ClipboardEvent constructor. The Firefox package therefore adds core/firefox-events.js (first script in each isolated content-script group) and core/firefox-events-main.js (a MAIN-world entry with the same matches). Synthetic paste, drag/drop and input events that carry text or files are rebuilt in the page world; native events and events without data use the normal dispatch. release-tools/build-firefox.py inserts both entries; the Chromium manifest and scripts do not load them. firefox-transfer-check.js verifies Notion protocol upload, inline paste, Co-Work draft clearing and helper semantics in real Firefox (--without-shim reproduces the original failure).\n\n'
 for name in ['README.md','UPDATE.txt','MAINTENANCE.md']:
- body=(repo/name).read_text().replace('PlazCode-Firefox-1.19.36.zip','PlazCode-Firefox-'+version+'.zip')
+ body=(repo/name).read_text().replace('PlazCode-Firefox-1.19.37.zip','PlazCode-Firefox-'+version+'.zip')
  (repo/name).write_text(intro+(firefox_note if name=='MAINTENANCE.md' and firefox_note not in body else '')+body);(root/name).write_bytes((repo/name).read_bytes())
 (repo/'VALIDATION.txt').write_text(validation+(repo/'VALIDATION.txt').read_text());(root/'VALIDATION.txt').write_bytes((repo/'VALIDATION.txt').read_bytes())
 (repo/'release-notes.json').write_bytes((root/'release-notes.json').read_bytes())
@@ -31,9 +31,9 @@ with zipfile.ZipFile(repo/'artifacts/native-macOS/PlazCode-app.zip') as app:
 p=root/'macos/Info.plist';data=plistlib.loads(p.read_bytes());data['CFBundleShortVersionString']=data['CFBundleVersion']=version;p.write_bytes(plistlib.dumps(data))
 source={f'PlazCode/{p.relative_to(root)}':p.read_bytes() for p in root.rglob('*') if p.is_file() and not any(x in p.relative_to(root).parts for x in ['target','.git','node_modules','__pycache__','PlazCode.app','visual-checks'])}
 source['PlazCode/PlazCode.exe']=(repo/'artifacts/native-Windows/PlazCode.exe').read_bytes()
-original=repo/'PlazCode-1.19.36.zip';assert hashlib.sha256(original.read_bytes()).hexdigest()=='942a295ad8000b560675ef19027ee905f80f29cf65300d65163f672fd26f3ea8'
-with urllib.request.urlopen('https://raw.githubusercontent.com/stoveez/PlazCode/081401bd60ebf320b9d4e9737c0d3b7589c02f3b/PlazCode-source-1.19.36.zip', timeout=60) as response: baseline_source=response.read(8*1024*1024)
-assert hashlib.sha256(baseline_source).hexdigest()=='9d2edc029cd2abdeba276f0a5a36dbc01e2c0923584b7e0d90528fa14a8b74e2'
+original=repo/'PlazCode-1.19.37.zip';assert hashlib.sha256(original.read_bytes()).hexdigest()=='70258e0e9ffa7c3aeca47c56d89ba64997f9766fb6b5e44e6579051106a615a2'
+with urllib.request.urlopen('https://raw.githubusercontent.com/stoveez/PlazCode/33f5aa75003cf5b71905d8745e086666f804f0e1/PlazCode-source-1.19.37.zip', timeout=60) as response: baseline_source=response.read(8*1024*1024)
+assert hashlib.sha256(baseline_source).hexdigest()=='a6da0416608ff769470f49d272cdee3e56c9f7f50c40305882c3abb1e38d0fd0'
 with zipfile.ZipFile(io.BytesIO(baseline_source)) as old:
  for path in source:
   if '/providers/' in path and path in old.namelist() and not path.endswith(('/providers/notion.js',)):assert source[path]==old.read(path), 'Unrelated provider behavior source changed'
@@ -59,7 +59,7 @@ for path in (root/'PlazCode-Extension-Firefox').rglob('*'):
  if path.is_file():source['PlazCode/'+path.relative_to(root).as_posix()]=path.read_bytes()
 
 # Run pure behavioral tests against the actual generated modules.
-for name in ['test-version.js','test-cowork.js','test-page-startup.js','test-cowork-injection-composer.js','test-cowork-notion-plain-text.js','test-notion-tool-status.js','test-notion-localized-composer.js','test-notion-send-receipts.js','test-studio-status.js','test-clarification.js','test-blender-command-results.js','test-firefox-package.js','test-parser-key-order.js','test-bar-hide.js','test-notion-bar-seat.js']:
+for name in ['test-version.js','test-cowork.js','test-page-startup.js','test-cowork-injection-composer.js','test-cowork-notion-plain-text.js','test-notion-tool-status.js','test-notion-localized-composer.js','test-notion-send-receipts.js','test-studio-status.js','test-clarification.js','test-blender-command-results.js','test-firefox-package.js','test-parser-key-order.js','test-bar-hide.js','test-notion-bar-seat.js','test-notion-bar-follow.js','test-tool-guard-repair.js']:
  subprocess.run(['node',name],cwd=root,check=True)
 def development(path):
  relative=path.removeprefix('PlazCode/');parts=Path(relative).parts
@@ -116,5 +116,5 @@ for feed in feeds.values():
 description='**PlazCode '+version+': '+entry['title']+'**\n\n- '+entry['summary']+'\n'
 for key,title in [('added','New additions'),('improved','Improvements'),('fixed','Bug fixes')]:
  description+='\n***'+title+'***\n\n'+('\n'.join('- '+x for x in entry[key]) or '- None.')+'\n'
-(repo/'release-description-1.19.37.txt').write_text(description)
+(repo/'release-description-1.19.38.txt').write_text(description)
 print(json.dumps(metadata,indent=2))
