@@ -164,7 +164,16 @@ jobs:
       - name: Real Windows desktop updater relaunch
         if: runner.os == 'Windows'
         working-directory: build/PlazCode
-        run: python test-update-relaunch.py
+        run: |
+          $out = (python test-update-relaunch.py 2>&1 | Out-String)
+          $code = $LASTEXITCODE
+          Write-Output $out
+          if ($code -ne 0) {
+            $tail = if ($out.Length -gt 3500) { $out.Substring($out.Length - 3500) } else { $out }
+            $msg = $tail.Replace('%','%25').Replace("`r",'').Replace("`n",'%0A')
+            Write-Output "::error title=Real Windows desktop updater relaunch::$msg"
+            exit $code
+          }
       - name: Windows bundled Engram integration
         if: runner.os == 'Windows'
         working-directory: build/PlazCode
