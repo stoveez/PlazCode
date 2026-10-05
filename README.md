@@ -1,3 +1,14 @@
+PlazCode 1.19.37 — Hide bar, steady bar size and Mac fixes
+
+Add a Hide bar button that keeps PlazCode working, keep the bar a steady size and on top of the chat box, fix Blender MCP on Intel Macs and fix macOS updates that could not find the PlazCode folder.
+
+- Hide bar button (›) on the PlazCode bar. Hiding only makes the bar invisible and click-through so it never covers chat text; runs, Co-Work, tools, desktop Start/Stop and every setting keep working. A small PlazCode tab at the bar's right edge shows it again in the same position with every control as it was. The choice is remembered for that browser tab.
+- The bar keeps the same compact height in narrow or zoomed browser windows instead of growing to about twice its normal height below 720 pixels wide.
+- On Notion, while the chat box is still loading or not yet confirmed, the bar sits on top of the visible chat box instead of floating over chat text at the centre of the window.
+- macOS launch scripts clear the download quarantine flag and remember the PlazCode folder, so macOS runs PlazCode.app from its real folder.
+- Fixed Blender MCP (and other uvx servers) failing to start on Intel Macs with "maturin failed" while building cryptography. cryptography 49 and newer have no Intel Mac package, so uv now uses the newest version that does (48.0.1) instead of compiling it; Apple Silicon, Windows and Linux are unchanged.
+- Fixed macOS updates failing with "The application was moved outside its PlazCode installation folder" when macOS ran PlazCode.app from a temporary read-only copy (App Translocation) or when only PlazCode.app was moved. PlazCode now finds its recorded folder, and explains the one-time fix if it cannot.
+
 PlazCode 1.19.36 — Faster ChatGPT startup and reliable unattended runs
 
 Start ChatGPT sessions faster, keep long unattended runs going in background or sleeping browser tabs, and make Windows auto-updates recover from a locked PlazCode.exe without restart loops.
@@ -46,7 +57,7 @@ PlazCode 1.19.33 — Firefox installation and authenticated bridge support
 
 Add a Firefox extension package and correct Firefox background startup and desktop pairing.
 
-- A dedicated PlazCode-Extension-Firefox folder in both desktop downloads and a standalone PlazCode-Firefox-1.19.36.zip with manifest.json at its root.
+- A dedicated PlazCode-Extension-Firefox folder in both desktop downloads and a standalone PlazCode-Firefox-1.19.37.zip with manifest.json at its root.
 - Firefox installation instructions explain selecting manifest.json or the Firefox ZIP in about:debugging, reloading after updates and the unsigned temporary-install limitation.
 - Firefox uses the same provider adapters, tools, bar, creators and settings as the Chromium extension, with a Firefox background script and stable addon identity.
 - Firefox requests use the installation-specific extension UUID for automatic pairing, while authenticated desktop HTTP and WebSocket routes recognize valid moz-extension origins.

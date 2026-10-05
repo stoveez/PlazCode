@@ -1,3 +1,11 @@
+PlazCode 1.19.37 validation
+Hide bar: test-bar-hide.js boots ChatGPT, DeepSeek, Claude and Notion and verifies hiding keeps the bar mounted (visibility only, never display:none), leaves every control, desktop Start/Stop/Enhance state and engine unchanged, and restores everything exactly; it fails on 1.19.36. A Chromium extension run on a Notion-style page confirmed the hidden bar is click-through and the show tab restores the same position.
+Bar size: a Chromium extension run on a Notion-style page measured the bar at 160 px high in a 680 px window on 1.19.36 (the narrow-viewport brand basis became a height) and 87 px at 680, 1000 and 1400 px on 1.19.37.
+Notion placement: test-notion-bar-seat.js reproduces 1.19.36 seating the temporary anchor at the viewport centre (bar 560 px wide, offset left and overlapping the chat box beside a sidebar) and verifies 1.19.37 seats it on the visible chat box and ignores response blocks.
+Blender on Intel Macs: uv resolution for x86_64-apple-darwin picks cryptography 50.0.2, which has no Intel Mac wheel (the reported maturin failure); refusing source builds selects 48.0.1, while arm64 macOS and Windows still resolve 50.0.2. Rust tests cover the uvx environment default and user overrides.
+macOS updater: Rust tests cover App Translocation paths, an app moved to /Applications and an invalid record; the Mac target was type-checked.
+Not exercised: live signed-in AI chats, Firefox or Edge on a tester machine, a real Intel Mac with Blender 3.6, Gatekeeper translocation on a real Mac, real Roblox Studio and a user installation.
+
 PlazCode 1.19.36 validation
 ChatGPT startup: a simulated ChatGPT page measured the fixed startup overhead at 6.5 s on 1.19.35 and about 2.4-3.4 s on 1.19.36 when ChatGPT shows its finished-turn action strip; without that strip the old timing is kept.
 Duplicate tool execution: test-bridge-no-replay.js reproduces 1.19.35 resending an in-flight command after a bridge socket loss and verifies 1.19.36 never resends it, while read-only requests and unsent commands still recover. Tool timeouts now give verify-first feedback.

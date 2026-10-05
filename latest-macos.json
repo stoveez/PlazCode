@@ -1,9 +1,26 @@
 {
-  "version": "1.19.36",
-  "desktop_version": "1.19.36",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.19.36.zip",
-  "sha256": "ab1d5319252c1442345872577af3bb0db2a633dfc190f98e96d107d244b85d46",
+  "version": "1.19.37",
+  "desktop_version": "1.19.37",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.19.37.zip",
+  "sha256": "a7453b0d18ca01623e12465989360d274979175d32a93cf18d97eabcdfbd3487",
   "release_notes": [
+    {
+      "version": "1.19.37",
+      "title": "Hide bar, steady bar size and Mac fixes",
+      "summary": "Add a Hide bar button that keeps PlazCode working, keep the bar a steady size and on top of the chat box, fix Blender MCP on Intel Macs and fix macOS updates that could not find the PlazCode folder.",
+      "added": [
+        "Hide bar button (\u203a) on the PlazCode bar. Hiding only makes the bar invisible and click-through so it never covers chat text; runs, Co-Work, tools, desktop Start/Stop and every setting keep working. A small PlazCode tab at the bar's right edge shows it again in the same position with every control as it was. The choice is remembered for that browser tab."
+      ],
+      "improved": [
+        "The bar keeps the same compact height in narrow or zoomed browser windows instead of growing to about twice its normal height below 720 pixels wide.",
+        "On Notion, while the chat box is still loading or not yet confirmed, the bar sits on top of the visible chat box instead of floating over chat text at the centre of the window.",
+        "macOS launch scripts clear the download quarantine flag and remember the PlazCode folder, so macOS runs PlazCode.app from its real folder."
+      ],
+      "fixed": [
+        "Fixed Blender MCP (and other uvx servers) failing to start on Intel Macs with \"maturin failed\" while building cryptography. cryptography 49 and newer have no Intel Mac package, so uv now uses the newest version that does (48.0.1) instead of compiling it; Apple Silicon, Windows and Linux are unchanged.",
+        "Fixed macOS updates failing with \"The application was moved outside its PlazCode installation folder\" when macOS ran PlazCode.app from a temporary read-only copy (App Translocation) or when only PlazCode.app was moved. PlazCode now finds its recorded folder, and explains the one-time fix if it cannot."
+      ]
+    },
     {
       "version": "1.19.36",
       "title": "Faster ChatGPT startup and reliable unattended runs",
@@ -709,20 +726,6 @@
       "fixed": [
         "Notion no longer retries a 33k+ text paste that the site converts into a Pasted text attachment. Existing draft attachments are preserved and receive a specific fresh-chat/remove-draft explanation. Stopped owned uploads are cleaned up.",
         "Short protocol messages retain the native composer path. Saved settings, MCP configuration, memory, templates, installation process scope, checksums and rollback behavior are preserved."
-      ]
-    },
-    {
-      "version": "1.18.103",
-      "title": "Notion controlled paste and persistent Co-work placeholders",
-      "summary": "Remove bulk native editing from Notion startup, keep its input mask on the editor, and display Follow up whenever Co-work is enabled and the composer is available.",
-      "added": [],
-      "improved": [
-        "Notion sends complete startup and tool-result text through one literal controlled paste transaction, verifies retention through two renders, and commits at most once. No prompt truncation or repeated tiny inserts.",
-        "Co-work uses Follow up in the native composer while enabled, including idle time and after Stop. Internal startup/tool injection retains its temporary input mask. Turning Co-work off restores the original placeholder."
-      ],
-      "fixed": [
-        "Notion no longer uses bulk execCommand or direct React-owned DOM replacement as the large-send fallback. Short native edits rely on Chromium input events instead of duplicate synthetic model events.",
-        "Notion input cover targets only the editable, preventing a growing ancestor from becoming the click-blocking mask. Start on a populated AI landing first opens a fresh chat."
       ]
     }
   ]
