@@ -20,7 +20,7 @@ jobs:
       - name: Assemble verified build source
         run: |
           cat appearance-source/appearance-source.zip.b64.part* | base64 --decode > appearance-source.zip
-          echo 'aae89295d484403f53a6ef265d949c6de1559f759d26dfec67e72f421d90ba86  appearance-source.zip' | sha256sum --check
+          echo 'b86c5a588e7accefa367c44c7b8a7c6f132f743f85152d9f152da18c734dcb0b  appearance-source.zip' | sha256sum --check
       - run: unzip -q appearance-source.zip -d build
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
@@ -78,7 +78,7 @@ jobs:
       - name: Assemble verified build source
         run: |
           cat appearance-source/appearance-source.zip.b64.part* | base64 --decode > appearance-source.zip
-          echo 'aae89295d484403f53a6ef265d949c6de1559f759d26dfec67e72f421d90ba86  appearance-source.zip' | sha256sum --check
+          echo 'b86c5a588e7accefa367c44c7b8a7c6f132f743f85152d9f152da18c734dcb0b  appearance-source.zip' | sha256sum --check
       - run: unzip -q appearance-source.zip -d build
       - uses: actions/setup-node@v4
         with:
@@ -113,7 +113,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Extract verified build source
         shell: bash
-        run: python -c "import base64,glob,hashlib,zipfile; data=base64.b64decode(''.join(open(p).read() for p in sorted(glob.glob('appearance-source/appearance-source.zip.b64.part*')))); assert hashlib.sha256(data).hexdigest()=='aae89295d484403f53a6ef265d949c6de1559f759d26dfec67e72f421d90ba86', 'Build source checksum mismatch'; open('appearance-source.zip','wb').write(data); zipfile.ZipFile('appearance-source.zip').extractall('build')"
+        run: python -c "import base64,glob,hashlib,zipfile; data=base64.b64decode(''.join(open(p).read() for p in sorted(glob.glob('appearance-source/appearance-source.zip.b64.part*')))); assert hashlib.sha256(data).hexdigest()=='b86c5a588e7accefa367c44c7b8a7c6f132f743f85152d9f152da18c734dcb0b', 'Build source checksum mismatch'; open('appearance-source.zip','wb').write(data); zipfile.ZipFile('appearance-source.zip').extractall('build')"
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
@@ -223,7 +223,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           for part in $(gh api "repos/$GITHUB_REPOSITORY/contents/appearance-source?ref=$GITHUB_SHA" --jq '.[].name' | sort); do curl --fail --location --silent --show-error "https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$GITHUB_SHA/appearance-source/$part"; done | base64 --decode > appearance-source.zip
-          echo 'aae89295d484403f53a6ef265d949c6de1559f759d26dfec67e72f421d90ba86  appearance-source.zip' | sha256sum --check
+          echo 'b86c5a588e7accefa367c44c7b8a7c6f132f743f85152d9f152da18c734dcb0b  appearance-source.zip' | sha256sum --check
           gh api "repos/$GITHUB_REPOSITORY/contents/package-appearance.py?ref=$GITHUB_SHA" --jq .content | base64 --decode > package-appearance.py
           gh api "repos/$GITHUB_REPOSITORY/contents/publisher-appearance.py?ref=$GITHUB_SHA" --jq .content | base64 --decode > publisher-appearance.py
           unzip -q appearance-source.zip -d build
