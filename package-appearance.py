@@ -1,9 +1,9 @@
 from pathlib import Path
 import json,zipfile,hashlib,io,plistlib,struct,urllib.request,tarfile,subprocess,shutil
-repo=Path.cwd();version='1.20.0';root=repo/'build/PlazCode'
+repo=Path.cwd();version='1.21.0';root=repo/'build/PlazCode'
 notes=json.loads((root/'release-notes.json').read_text());entry=notes[0];assert entry['version']==version
 intro='PlazCode '+version+' — '+entry['title']+'\n\n'+entry['summary']+'\n\n'+'\n'.join('- '+x for key in ['added','improved','fixed'] for x in entry[key])+'\n\n'
-validation='PlazCode 1.20.0 validation\nRegressions: test-1.20.0-regressions.js (fails on 1.19.39) covers cut-off commands no longer stopping a run after 3 failures, the split-the-edit hint, duplicate suppression of a delivered payload, no automatic retry for attachment/large sends, the Notion composer in Edge (innerHeight 0 and relaxed late acceptance), updater fallback on transport errors and 5xx, a ready update clearing a stale failure, and Studio detection tolerating empty status text and single misses.\nRust: cargo test passes (updater transport_fallback_tests, studio_detection_tests and the existing updater record-check tests).\nJS: test-notion-send-recovery.js and test-desktop-regression.js pass with updated baselines for the intentionally changed core/main.js and providers/notion.js.\n\n'
+validation='PlazCode 1.21.0 validation\nNew tests: test-1.21.0-busy-wait.js (DeepSeek busy/rate-limit wait, unlimited with 5 s to 120 s backoff, Stop honoured), test-1.21.0-vision.js (uncapped automatic Studio visual review, no pause after repeated failures), test-1.21.0-asset-upload.js and test-1.21.0-asset-upload-ai.js (toolkit upload list and AI upload tool), test-1.21.0-clarify.js, test-1.21.0-cooldown.js (default 0 = previous behaviour), test-1.21.0-memory.js (memory titles, Engram removed).\nUpdated: test-creator-ui.js, test-tool-result-send.js and test-desktop-regression.js baselines for the intentionally changed core/main.js, core/config.js and providers/deepseek.js.\nRust: cargo test 99 passed, 0 failed, 2 ignored.\nJS: full suite 95 passed; test-blender.js, test-bridges.js, test-design-visual.js and test-v115.js fail identically on 1.20.0 (missing local module / stale 1.18.7 version pins).\n\n'
 firefox_note='## Firefox page events (maintainers)\n\nFirefox hides DataTransfer data/files created by content scripts from page handlers and ignores clipboardData in the ClipboardEvent constructor. The Firefox package therefore adds core/firefox-events.js (first script in each isolated content-script group) and core/firefox-events-main.js (a MAIN-world entry with the same matches). Synthetic paste, drag/drop and input events that carry text or files are rebuilt in the page world; native events and events without data use the normal dispatch. release-tools/build-firefox.py inserts both entries; the Chromium manifest and scripts do not load them. firefox-transfer-check.js verifies Notion protocol upload, inline paste, Co-Work draft clearing and helper semantics in real Firefox (--without-shim reproduces the original failure).\n\n'
 for name in ['README.md','UPDATE.txt','MAINTENANCE.md']:
  body=(repo/name).read_text().replace('PlazCode-Firefox-1.19.39.zip','PlazCode-Firefox-'+version+'.zip')
@@ -31,9 +31,9 @@ with zipfile.ZipFile(repo/'artifacts/native-macOS/PlazCode-app.zip') as app:
 p=root/'macos/Info.plist';data=plistlib.loads(p.read_bytes());data['CFBundleShortVersionString']=data['CFBundleVersion']=version;p.write_bytes(plistlib.dumps(data))
 source={f'PlazCode/{p.relative_to(root)}':p.read_bytes() for p in root.rglob('*') if p.is_file() and not any(x in p.relative_to(root).parts for x in ['target','.git','node_modules','__pycache__','PlazCode.app','visual-checks'])}
 source['PlazCode/PlazCode.exe']=(repo/'artifacts/native-Windows/PlazCode.exe').read_bytes()
-original=repo/'PlazCode-1.19.39.zip';assert hashlib.sha256(original.read_bytes()).hexdigest()=='cba199ec62b1699e8264d971a440684b2b56484837ef59a049e5ec54965a23f1'
-with urllib.request.urlopen('https://raw.githubusercontent.com/stoveez/PlazCode/989dd742d1ad7d666bcff9f62a9e2598a5133bb4/PlazCode-source-1.19.39.zip', timeout=60) as response: baseline_source=response.read(8*1024*1024)
-assert hashlib.sha256(baseline_source).hexdigest()=='cd8af4c3e5018633d57200cf361645659d716d40a193dbf00062ebf76343955f'
+original=repo/'PlazCode-1.19.38.zip';assert hashlib.sha256(original.read_bytes()).hexdigest()=='ce4681272073bcb7c44157db43d81a6ffd3cf4cbce84463c4f87f87665447046'
+with urllib.request.urlopen('https://raw.githubusercontent.com/stoveez/PlazCode/55537a37f281fed75e0775c7903213b8a2d451f5/PlazCode-source-1.19.38.zip', timeout=60) as response: baseline_source=response.read(8*1024*1024)
+assert hashlib.sha256(baseline_source).hexdigest()=='6a9cb91556466e0a55d33816ae67beac9809ac833dcf30dbd1c31aa9dce996ba'
 with zipfile.ZipFile(io.BytesIO(baseline_source)) as old:
  for path in source:
   if '/providers/' in path and path in old.namelist() and not path.endswith(('/providers/notion.js',)):assert source[path]==old.read(path), 'Unrelated provider behavior source changed'
@@ -121,5 +121,5 @@ for feed in feeds.values():
 description='**PlazCode '+version+': '+entry['title']+'**\n\n- '+entry['summary']+'\n'
 for key,title in [('added','New additions'),('improved','Improvements'),('fixed','Bug fixes')]:
  description+='\n***'+title+'***\n\n'+('\n'.join('- '+x for x in entry[key]) or '- None.')+'\n'
-(repo/'release-description-1.20.0.txt').write_text(description)
+(repo/('release-description-'+version+'.txt')).write_text(description)
 print(json.dumps(metadata,indent=2))
