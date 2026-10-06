@@ -1,9 +1,27 @@
 {
-  "version": "1.19.37",
-  "desktop_version": "1.19.37",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.19.37.zip",
-  "sha256": "a7453b0d18ca01623e12465989360d274979175d32a93cf18d97eabcdfbd3487",
+  "version": "1.19.38",
+  "desktop_version": "1.19.38",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.19.38.zip",
+  "sha256": "f6759d74d77fcc0def3a93177baae793d9b3a9de2155a32919be13663bb581a9",
   "release_notes": [
+    {
+      "version": "1.19.38",
+      "title": "Faster Notion start, bar on the chat box and fewer tool errors",
+      "summary": "Start Notion agents in seconds instead of waiting up to a minute, keep the PlazCode bar on top of the Notion chat box, repair common tool-call formatting mistakes automatically, fix the Git MCP server and find updates sooner.",
+      "added": [
+        "Automatic tool-call repair. Before a command runs, PlazCode fixes common formatting mistakes from the AI: arguments sent as a JSON string, quoted numbers, true/false and lists, wrong capitalisation of allowed values, Luau code wrapped in code fences and stray spaces in tool names. Real mistakes are still reported to the AI."
+      ],
+      "improved": [
+        "Notion starts the agent as soon as its chat box and send button are visible. PlazCode no longer waits up to 60 seconds for Notion to confirm the editor, so Start and Restart finish in a few seconds.",
+        "Update checks retry once with separate time limits, and the background check allows 15 seconds instead of 8, so a slow response no longer hides a new version.",
+        "An update found while PlazCode is idle installs within 30 minutes. It still never interrupts a running task."
+      ],
+      "fixed": [
+        "Fixed the PlazCode bar on Notion floating away from the chat box. It now sits directly on top of the chat box, follows it when it moves and stays centred on the chat column.",
+        "Fixed the Git MCP server failing to start when Git was not on the PATH used by PlazCode. PlazCode now also checks the usual Git install folders and shows a clear message if Git is missing.",
+        "Fixed new versions sometimes not being detected until PlazCode was updated by hand."
+      ]
+    },
     {
       "version": "1.19.37",
       "title": "Hide bar, steady bar size and Mac fixes",
@@ -710,22 +728,6 @@
       ],
       "notes": [
         "Complete protocol contents, upload confirmation, single-send acknowledgement and Stop cleanup remain required. Live signed-in Notion AI startup still needs confirmation. Reload the extension AND refresh open AI tabs after installing."
-      ]
-    },
-    {
-      "version": "1.18.104",
-      "title": "Animated installer and explicit Notion protocol files",
-      "summary": "A redesigned installer window stays animated during file work, while Notion long startup/tool messages are staged as one exact named text file rather than repeated auto-converted pastes.",
-      "added": [
-        "A rounded dark installer window with PlazCode orange gradients, an animated shimmer and swirl, stage text and real file-copy progress."
-      ],
-      "improved": [
-        "The installer UI runs on its own STA message loop so download, verification, backup, extraction and process waits cannot freeze its animation. File replacement progress advances from actual completed file counts.",
-        "Notion long protocol messages use one named .txt file containing the complete original text, plus a short native composer instruction. Upload readiness and one confirmed send are required; text is not truncated."
-      ],
-      "fixed": [
-        "Notion no longer retries a 33k+ text paste that the site converts into a Pasted text attachment. Existing draft attachments are preserved and receive a specific fresh-chat/remove-draft explanation. Stopped owned uploads are cleaned up.",
-        "Short protocol messages retain the native composer path. Saved settings, MCP configuration, memory, templates, installation process scope, checksums and rollback behavior are preserved."
       ]
     }
   ]

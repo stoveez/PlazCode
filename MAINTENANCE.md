@@ -1,3 +1,15 @@
+PlazCode 1.19.38 — Faster Notion start, bar on the chat box and fewer tool errors
+
+Start Notion agents in seconds instead of waiting up to a minute, keep the PlazCode bar on top of the Notion chat box, repair common tool-call formatting mistakes automatically, fix the Git MCP server and find updates sooner.
+
+- Automatic tool-call repair. Before a command runs, PlazCode fixes common formatting mistakes from the AI: arguments sent as a JSON string, quoted numbers, true/false and lists, wrong capitalisation of allowed values, Luau code wrapped in code fences and stray spaces in tool names. Real mistakes are still reported to the AI.
+- Notion starts the agent as soon as its chat box and send button are visible. PlazCode no longer waits up to 60 seconds for Notion to confirm the editor, so Start and Restart finish in a few seconds.
+- Update checks retry once with separate time limits, and the background check allows 15 seconds instead of 8, so a slow response no longer hides a new version.
+- An update found while PlazCode is idle installs within 30 minutes. It still never interrupts a running task.
+- Fixed the PlazCode bar on Notion floating away from the chat box. It now sits directly on top of the chat box, follows it when it moves and stays centred on the chat column.
+- Fixed the Git MCP server failing to start when Git was not on the PATH used by PlazCode. PlazCode now also checks the usual Git install folders and shows a clear message if Git is missing.
+- Fixed new versions sometimes not being detected until PlazCode was updated by hand.
+
 PlazCode 1.19.37 — Hide bar, steady bar size and Mac fixes
 
 Add a Hide bar button that keeps PlazCode working, keep the bar a steady size and on top of the chat box, fix Blender MCP on Intel Macs and fix macOS updates that could not find the PlazCode folder.
@@ -61,7 +73,7 @@ PlazCode 1.19.33 — Firefox installation and authenticated bridge support
 
 Add a Firefox extension package and correct Firefox background startup and desktop pairing.
 
-- A dedicated PlazCode-Extension-Firefox folder in both desktop downloads and a standalone PlazCode-Firefox-1.19.37.zip with manifest.json at its root.
+- A dedicated PlazCode-Extension-Firefox folder in both desktop downloads and a standalone PlazCode-Firefox-1.19.38.zip with manifest.json at its root.
 - Firefox installation instructions explain selecting manifest.json or the Firefox ZIP in about:debugging, reloading after updates and the unsigned temporary-install limitation.
 - Firefox uses the same provider adapters, tools, bar, creators and settings as the Chromium extension, with a Firefox background script and stable addon identity.
 - Firefox requests use the installation-specific extension UUID for automatic pairing, while authenticated desktop HTTP and WebSocket routes recognize valid moz-extension origins.

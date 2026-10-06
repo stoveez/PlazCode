@@ -1,3 +1,12 @@
+PlazCode 1.19.38 validation
+Notion Start agent: the start handshake now adopts a provisional agent after 5 s instead of waiting indefinitely, and restarting from a chat with no agent no longer waits for the old run; the Notion startup, pending-start, startup-lock and protocol-retry tests pass.
+Bar placement: test-notion-bar-follow.js verifies the PlazCode bar stays directly above the Notion chat box and follows it when the chat box moves or resizes.
+ChatGPT tools: test-tool-guard-repair.js covers repairing malformed tool calls (stray characters, wrapped JSON, wrong argument shapes) before they reach the tool, so creation tools no longer fail on recoverable input.
+Git MCP: Rust tests cover the corrected Git MCP add-on launch.
+Auto updater: the Rust updater retries the feed and no longer defers installing a detected update indefinitely; Rust updater tests pass.
+Regression: all 86 JavaScript test files and the full cargo test suite (91 tests) pass locally on Windows.
+Not exercised: live signed-in AI chats, a real Mac, Firefox or Edge on a tester machine, real Roblox Studio and a user installation.
+
 PlazCode 1.19.37 validation
 Hide bar: test-bar-hide.js boots ChatGPT, DeepSeek, Claude and Notion and verifies hiding keeps the bar mounted (visibility only, never display:none), leaves every control, desktop Start/Stop/Enhance state and engine unchanged, and restores everything exactly; it fails on 1.19.36. A Chromium extension run on a Notion-style page confirmed the hidden bar is click-through and the show tab restores the same position.
 Bar size: a Chromium extension run on a Notion-style page measured the bar at 160 px high in a 680 px window on 1.19.36 (the narrow-viewport brand basis became a height) and 87 px at 680, 1000 and 1400 px on 1.19.37.
