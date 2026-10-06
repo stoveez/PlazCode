@@ -1,12 +1,12 @@
 from pathlib import Path
 import json,zipfile,hashlib,io,plistlib,struct,urllib.request,tarfile,subprocess,shutil
-repo=Path.cwd();version='1.19.39';root=repo/'build/PlazCode'
+repo=Path.cwd();version='1.20.0';root=repo/'build/PlazCode'
 notes=json.loads((root/'release-notes.json').read_text());entry=notes[0];assert entry['version']==version
 intro='PlazCode '+version+' — '+entry['title']+'\n\n'+entry['summary']+'\n\n'+'\n'.join('- '+x for key in ['added','improved','fixed'] for x in entry[key])+'\n\n'
-validation='PlazCode 1.19.39 validation\nHidden bar: test-bar-hide-space.js verifies that hiding the PlazCode bar removes the space it reserved, returns the chat box to its normal size on inline and anchored sites, and restores the reservation when the bar is shown again; test-bar-hide.js still passes.\nNotion results: test-notion-send-recovery.js covers fast, late (24 s) and missing send confirmations, kept drafts, Stop during the wait and explicit wait budgets; a send that is confirmed late is no longer treated as failed, and a send that provably never left is retried once instead of stopping the run.\nBar status: test-bar-status-text.js verifies the running bar shows the live phase (running a tool, sending the result, AI writing) and the clearer no-agent message that names the Restart Agent button.\nContinuation setting: test-continuation-offer-toggle.js and a Rust preference test cover the new on-by-default Offer to continue the previous chat setting in the extension bar and the desktop app.\nPackaging: the source ZIP is checked for duplicate entries before publishing.\nRegression: all 88 JavaScript test files and the full cargo test suite (94 passed, 2 ignored) pass locally.\nNot exercised: live signed-in AI chats (including Notion), a real Mac, Firefox or Edge on a tester machine, real Roblox Studio and a user installation.\n\n'
+validation='PlazCode 1.20.0 validation\nRegressions: test-1.20.0-regressions.js (fails on 1.19.39) covers cut-off commands no longer stopping a run after 3 failures, the split-the-edit hint, duplicate suppression of a delivered payload, no automatic retry for attachment/large sends, the Notion composer in Edge (innerHeight 0 and relaxed late acceptance), updater fallback on transport errors and 5xx, a ready update clearing a stale failure, and Studio detection tolerating empty status text and single misses.\nRust: cargo test passes (updater transport_fallback_tests, studio_detection_tests and the existing updater record-check tests).\nJS: test-notion-send-recovery.js and test-desktop-regression.js pass with updated baselines for the intentionally changed core/main.js and providers/notion.js.\n\n'
 firefox_note='## Firefox page events (maintainers)\n\nFirefox hides DataTransfer data/files created by content scripts from page handlers and ignores clipboardData in the ClipboardEvent constructor. The Firefox package therefore adds core/firefox-events.js (first script in each isolated content-script group) and core/firefox-events-main.js (a MAIN-world entry with the same matches). Synthetic paste, drag/drop and input events that carry text or files are rebuilt in the page world; native events and events without data use the normal dispatch. release-tools/build-firefox.py inserts both entries; the Chromium manifest and scripts do not load them. firefox-transfer-check.js verifies Notion protocol upload, inline paste, Co-Work draft clearing and helper semantics in real Firefox (--without-shim reproduces the original failure).\n\n'
 for name in ['README.md','UPDATE.txt','MAINTENANCE.md']:
- body=(repo/name).read_text().replace('PlazCode-Firefox-1.19.38.zip','PlazCode-Firefox-'+version+'.zip')
+ body=(repo/name).read_text().replace('PlazCode-Firefox-1.19.39.zip','PlazCode-Firefox-'+version+'.zip')
  (repo/name).write_text(intro+(firefox_note if name=='MAINTENANCE.md' and firefox_note not in body else '')+body);(root/name).write_bytes((repo/name).read_bytes())
 (repo/'VALIDATION.txt').write_text(validation+(repo/'VALIDATION.txt').read_text());(root/'VALIDATION.txt').write_bytes((repo/'VALIDATION.txt').read_bytes())
 (repo/'release-notes.json').write_bytes((root/'release-notes.json').read_bytes())
@@ -31,9 +31,9 @@ with zipfile.ZipFile(repo/'artifacts/native-macOS/PlazCode-app.zip') as app:
 p=root/'macos/Info.plist';data=plistlib.loads(p.read_bytes());data['CFBundleShortVersionString']=data['CFBundleVersion']=version;p.write_bytes(plistlib.dumps(data))
 source={f'PlazCode/{p.relative_to(root)}':p.read_bytes() for p in root.rglob('*') if p.is_file() and not any(x in p.relative_to(root).parts for x in ['target','.git','node_modules','__pycache__','PlazCode.app','visual-checks'])}
 source['PlazCode/PlazCode.exe']=(repo/'artifacts/native-Windows/PlazCode.exe').read_bytes()
-original=repo/'PlazCode-1.19.38.zip';assert hashlib.sha256(original.read_bytes()).hexdigest()=='ce4681272073bcb7c44157db43d81a6ffd3cf4cbce84463c4f87f87665447046'
-with urllib.request.urlopen('https://raw.githubusercontent.com/stoveez/PlazCode/55537a37f281fed75e0775c7903213b8a2d451f5/PlazCode-source-1.19.38.zip', timeout=60) as response: baseline_source=response.read(8*1024*1024)
-assert hashlib.sha256(baseline_source).hexdigest()=='6a9cb91556466e0a55d33816ae67beac9809ac833dcf30dbd1c31aa9dce996ba'
+original=repo/'PlazCode-1.19.39.zip';assert hashlib.sha256(original.read_bytes()).hexdigest()=='cba199ec62b1699e8264d971a440684b2b56484837ef59a049e5ec54965a23f1'
+with urllib.request.urlopen('https://raw.githubusercontent.com/stoveez/PlazCode/989dd742d1ad7d666bcff9f62a9e2598a5133bb4/PlazCode-source-1.19.39.zip', timeout=60) as response: baseline_source=response.read(8*1024*1024)
+assert hashlib.sha256(baseline_source).hexdigest()=='cd8af4c3e5018633d57200cf361645659d716d40a193dbf00062ebf76343955f'
 with zipfile.ZipFile(io.BytesIO(baseline_source)) as old:
  for path in source:
   if '/providers/' in path and path in old.namelist() and not path.endswith(('/providers/notion.js',)):assert source[path]==old.read(path), 'Unrelated provider behavior source changed'
@@ -121,5 +121,5 @@ for feed in feeds.values():
 description='**PlazCode '+version+': '+entry['title']+'**\n\n- '+entry['summary']+'\n'
 for key,title in [('added','New additions'),('improved','Improvements'),('fixed','Bug fixes')]:
  description+='\n***'+title+'***\n\n'+('\n'.join('- '+x for x in entry[key]) or '- None.')+'\n'
-(repo/'release-description-1.19.39.txt').write_text(description)
+(repo/'release-description-1.20.0.txt').write_text(description)
 print(json.dumps(metadata,indent=2))
