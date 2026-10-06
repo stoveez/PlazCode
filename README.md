@@ -1,3 +1,16 @@
+PlazCode 1.20.0 — Notion in Edge, fewer stalled runs, accurate Studio status and a sturdier updater
+
+Notion AI now loads in Microsoft Edge, cut-off commands no longer pause a run after three tries, a tool result is no longer sent to the AI more than once, the bar no longer reports MCP as off while Roblox Studio is connected, and the desktop updater keeps working when the GitHub API is unreachable.
+
+- When Notion AI is slow to load in Microsoft Edge, the Notion AI isn't ready message now includes an Edge-specific tip.
+- Cut-off (incomplete) commands no longer pause a run after three failures. Six attempts are allowed, and from the second one the AI is asked to split the edit into smaller parts.
+- The Studio connection check now tolerates a single missed status reading and an empty status line, so a connected Studio MCP stays shown as connected.
+- Notion AI could fail to load in Microsoft Edge with Notion did not load its AI editor at /ai after 60 seconds, because Edge can report a window height of 0 while the page loads. The chat box is now found in that case.
+- The same tool result (for example the list_commands output) could be sent to the AI several times. A result that was already delivered is not sent again within 45 seconds, and results with images or very long text are never retried automatically.
+- The bar could show Studio is open but MCP is off while Roblox Studio showed 1 client connected.
+- An update could fail with error sending request for url when api.github.com was unreachable or returned a server error. The updater now retries once and then downloads the fixed official release asset, still verified against the published SHA-256.
+- The update window could show Update could not finish next to Update ready. A ready update now clears the earlier error.
+
 PlazCode 1.19.39 — Hidden bar frees the chat box, steadier Notion runs and a continuation setting
 
 Hiding the PlazCode bar now returns the chat box to its normal size, Notion tool results are no longer lost when Notion confirms a message late, the bar says what the agent is doing while it works, and a new setting turns the continue-previous-chat prompt on or off.
@@ -81,7 +94,7 @@ PlazCode 1.19.33 — Firefox installation and authenticated bridge support
 
 Add a Firefox extension package and correct Firefox background startup and desktop pairing.
 
-- A dedicated PlazCode-Extension-Firefox folder in both desktop downloads and a standalone PlazCode-Firefox-1.19.39.zip with manifest.json at its root.
+- A dedicated PlazCode-Extension-Firefox folder in both desktop downloads and a standalone PlazCode-Firefox-1.20.0.zip with manifest.json at its root.
 - Firefox installation instructions explain selecting manifest.json or the Firefox ZIP in about:debugging, reloading after updates and the unsigned temporary-install limitation.
 - Firefox uses the same provider adapters, tools, bar, creators and settings as the Chromium extension, with a Firefox background script and stable addon identity.
 - Firefox requests use the installation-specific extension UUID for automatic pairing, while authenticated desktop HTTP and WebSocket routes recognize valid moz-extension origins.

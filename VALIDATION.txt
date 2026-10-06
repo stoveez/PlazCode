@@ -1,3 +1,8 @@
+PlazCode 1.20.0 validation
+Regressions: test-1.20.0-regressions.js (fails on 1.19.39) covers cut-off commands no longer stopping a run after 3 failures, the split-the-edit hint, duplicate suppression of a delivered payload, no automatic retry for attachment/large sends, the Notion composer in Edge (innerHeight 0 and relaxed late acceptance), updater fallback on transport errors and 5xx, a ready update clearing a stale failure, and Studio detection tolerating empty status text and single misses.
+Rust: cargo test passes (updater transport_fallback_tests, studio_detection_tests and the existing updater record-check tests).
+JS: test-notion-send-recovery.js and test-desktop-regression.js pass with updated baselines for the intentionally changed core/main.js and providers/notion.js.
+
 PlazCode 1.19.39 validation
 Hidden bar: test-bar-hide-space.js verifies that hiding the PlazCode bar removes the space it reserved, returns the chat box to its normal size on inline and anchored sites, and restores the reservation when the bar is shown again; test-bar-hide.js still passes.
 Notion results: test-notion-send-recovery.js covers fast, late (24 s) and missing send confirmations, kept drafts, Stop during the wait and explicit wait budgets; a send that is confirmed late is no longer treated as failed, and a send that provably never left is retried once instead of stopping the run.
