@@ -1,3 +1,12 @@
+PlazCode 1.19.39 validation
+Hidden bar: test-bar-hide-space.js verifies that hiding the PlazCode bar removes the space it reserved, returns the chat box to its normal size on inline and anchored sites, and restores the reservation when the bar is shown again; test-bar-hide.js still passes.
+Notion results: test-notion-send-recovery.js covers fast, late (24 s) and missing send confirmations, kept drafts, Stop during the wait and explicit wait budgets; a send that is confirmed late is no longer treated as failed, and a send that provably never left is retried once instead of stopping the run.
+Bar status: test-bar-status-text.js verifies the running bar shows the live phase (running a tool, sending the result, AI writing) and the clearer no-agent message that names the Restart Agent button.
+Continuation setting: test-continuation-offer-toggle.js and a Rust preference test cover the new on-by-default Offer to continue the previous chat setting in the extension bar and the desktop app.
+Packaging: the source ZIP is checked for duplicate entries before publishing.
+Regression: all 88 JavaScript test files and the full cargo test suite (94 passed, 2 ignored) pass locally.
+Not exercised: live signed-in AI chats (including Notion), a real Mac, Firefox or Edge on a tester machine, real Roblox Studio and a user installation.
+
 PlazCode 1.19.38 validation
 Notion Start agent: the start handshake now adopts a provisional agent after 5 s instead of waiting indefinitely, and restarting from a chat with no agent no longer waits for the old run; the Notion startup, pending-start, startup-lock and protocol-retry tests pass.
 Bar placement: test-notion-bar-follow.js verifies the PlazCode bar stays directly above the Notion chat box and follows it when the chat box moves or resizes.

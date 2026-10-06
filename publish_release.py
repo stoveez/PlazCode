@@ -28,6 +28,8 @@ def notes(feed):
 def validate_archive(data,version,platform="windows"):
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         if archive.testzip() is not None:raise ValueError('ZIP checksum failure')
+        names=archive.namelist()
+        if len(names)!=len(set(names)):raise ValueError('ZIP contains duplicate entries')
         for path in ['PlazCode/manifest.json','PlazCode/PlazCode-Extension/manifest.json']:
             manifest=json.loads(archive.read(path))
             if manifest['version']!=version:raise ValueError('ZIP version does not match feed: '+path)

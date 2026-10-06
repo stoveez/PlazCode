@@ -1,9 +1,27 @@
 {
-  "version": "1.19.38",
-  "desktop_version": "1.19.38",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.19.38.zip",
-  "sha256": "f6759d74d77fcc0def3a93177baae793d9b3a9de2155a32919be13663bb581a9",
+  "version": "1.19.39",
+  "desktop_version": "1.19.39",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.19.39.zip",
+  "sha256": "3805440fe57570e43b8d4dad25e66b175eae346693298cff0451eee5be559a65",
   "release_notes": [
+    {
+      "version": "1.19.39",
+      "title": "Hidden bar frees the chat box, steadier Notion runs and a continuation setting",
+      "summary": "Hiding the PlazCode bar now returns the chat box to its normal size, Notion tool results are no longer lost when Notion confirms a message late, the bar says what the agent is doing while it works, and a new setting turns the continue-previous-chat prompt on or off.",
+      "added": [
+        "Setting: Offer to continue previous chat (on by default). It is in the PlazCode bar settings and in the desktop app under Settings, and the two stay in sync. When it is off, a new chat never asks whether to continue the previous chat or start a new project. Saved chats and memory are not deleted."
+      ],
+      "improved": [
+        "While the agent works, the bar now says which step is happening: running a tool (with its name), sending the result to the AI, the AI writing, or waiting for the AI to finish. A working agent no longer looks stuck when the site's own Stop button has already turned back into Send.",
+        "The message for a chat without an agent is clearer: Not connected to this chat yet. Click Restart Agent to connect Roblox Studio (or AgentScript when AS is selected). The full status text also shows when you hover over it.",
+        "If PlazCode could not deliver a tool result before anything was sent (for example the chat box was not ready yet), it now waits 2 seconds and tries once more instead of stopping the task. A message that may already have been sent is never sent twice."
+      ],
+      "fixed": [
+        "Fixed hiding the PlazCode bar leaving the chat box enlarged. The hidden bar now gives back the space it reserved, so the chat box returns to its normal size and no longer covers chat text. Showing the bar again restores it exactly.",
+        "Fixed Notion runs stopping with Message was not confirmed when Notion accepted a tool result but showed it late. PlazCode now keeps watching for up to 30 more seconds (without clicking Send again), so the AI gets its result and the run continues.",
+        "Fixed duplicate files in the source download. The release tools folder of PlazCode-source-1.19.38.zip contained two copies of five files; the packager now writes each file once and checks every ZIP for duplicate entries."
+      ]
+    },
     {
       "version": "1.19.38",
       "title": "Faster Notion start, bar on the chat box and fewer tool errors",
@@ -693,41 +711,6 @@
         "Completed work still folds and can be reopened. ChatGPT remains exempt from custom work folding.",
         "The Notion startup provider confirmed working by the user is unchanged, along with all other providers.",
         "Reload the extension and refresh open AI tabs after updating."
-      ]
-    },
-    {
-      "version": "1.18.106",
-      "title": "Notion uploaded-file preview recognition",
-      "summary": "Recognizes uploaded protocol files that Notion displays outside the inner editor frame or with shortened filenames, instead of timing out while the file card is visibly present.",
-      "added": [],
-      "improved": [
-        "Attachment inspection includes the bounded local composer shell, while excluding transcript history and other editors.",
-        "Preview detection supports reserved PlazCode filenames split across spans, ellipsized names and file-title labels."
-      ],
-      "fixed": [
-        "Notion startup no longer rejects a visible protocol-file card merely because its label is shortened or outside the inner editor/send frame.",
-        "Upload readiness includes busy indicators on recognized file cards. Stop cleanup supports the owned card\u2019s Close or small unlabeled icon control."
-      ],
-      "notes": [
-        "Full protocol text, single-send acknowledgement, foreign draft preservation and exact-name delayed cleanup remain required. ChatGPT, Claude and DeepSeek providers are unchanged.",
-        "Reload the extension AND refresh open AI tabs. Remove any old failed-upload card before retrying. Live signed-in Notion startup still needs confirmation."
-      ]
-    },
-    {
-      "version": "1.18.105",
-      "title": "Notion upload and Claude command cards",
-      "summary": "Fixes the reported Notion native file-drop startup crash and removes empty Claude JSON frame remnants beneath tool cards.",
-      "added": [],
-      "improved": [
-        "Notion file drops now use browser-native DragEvent dataTransfer fields rather than isolated-world Event properties."
-      ],
-      "fixed": [
-        "Startup protocol and screenshot drop fallbacks no longer dispatch generic drag events that hide transfer data from Notion page handlers.",
-        "A native dragleave finishes the upload sequence so drag overlays and cursors can reset.",
-        "Claude command cards hide the surrounding code-only frame, including its JSON label and border, without hiding narration, thinking, normal code or response actions."
-      ],
-      "notes": [
-        "Complete protocol contents, upload confirmation, single-send acknowledgement and Stop cleanup remain required. Live signed-in Notion AI startup still needs confirmation. Reload the extension AND refresh open AI tabs after installing."
       ]
     }
   ]

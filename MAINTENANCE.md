@@ -1,3 +1,15 @@
+PlazCode 1.19.39 — Hidden bar frees the chat box, steadier Notion runs and a continuation setting
+
+Hiding the PlazCode bar now returns the chat box to its normal size, Notion tool results are no longer lost when Notion confirms a message late, the bar says what the agent is doing while it works, and a new setting turns the continue-previous-chat prompt on or off.
+
+- Setting: Offer to continue previous chat (on by default). It is in the PlazCode bar settings and in the desktop app under Settings, and the two stay in sync. When it is off, a new chat never asks whether to continue the previous chat or start a new project. Saved chats and memory are not deleted.
+- While the agent works, the bar now says which step is happening: running a tool (with its name), sending the result to the AI, the AI writing, or waiting for the AI to finish. A working agent no longer looks stuck when the site's own Stop button has already turned back into Send.
+- The message for a chat without an agent is clearer: Not connected to this chat yet. Click Restart Agent to connect Roblox Studio (or AgentScript when AS is selected). The full status text also shows when you hover over it.
+- If PlazCode could not deliver a tool result before anything was sent (for example the chat box was not ready yet), it now waits 2 seconds and tries once more instead of stopping the task. A message that may already have been sent is never sent twice.
+- Fixed hiding the PlazCode bar leaving the chat box enlarged. The hidden bar now gives back the space it reserved, so the chat box returns to its normal size and no longer covers chat text. Showing the bar again restores it exactly.
+- Fixed Notion runs stopping with Message was not confirmed when Notion accepted a tool result but showed it late. PlazCode now keeps watching for up to 30 more seconds (without clicking Send again), so the AI gets its result and the run continues.
+- Fixed duplicate files in the source download. The release tools folder of PlazCode-source-1.19.38.zip contained two copies of five files; the packager now writes each file once and checks every ZIP for duplicate entries.
+
 PlazCode 1.19.38 — Faster Notion start, bar on the chat box and fewer tool errors
 
 Start Notion agents in seconds instead of waiting up to a minute, keep the PlazCode bar on top of the Notion chat box, repair common tool-call formatting mistakes automatically, fix the Git MCP server and find updates sooner.
@@ -73,7 +85,7 @@ PlazCode 1.19.33 — Firefox installation and authenticated bridge support
 
 Add a Firefox extension package and correct Firefox background startup and desktop pairing.
 
-- A dedicated PlazCode-Extension-Firefox folder in both desktop downloads and a standalone PlazCode-Firefox-1.19.38.zip with manifest.json at its root.
+- A dedicated PlazCode-Extension-Firefox folder in both desktop downloads and a standalone PlazCode-Firefox-1.19.39.zip with manifest.json at its root.
 - Firefox installation instructions explain selecting manifest.json or the Firefox ZIP in about:debugging, reloading after updates and the unsigned temporary-install limitation.
 - Firefox uses the same provider adapters, tools, bar, creators and settings as the Chromium extension, with a Firefox background script and stable addon identity.
 - Firefox requests use the installation-specific extension UUID for automatic pairing, while authenticated desktop HTTP and WebSocket routes recognize valid moz-extension origins.
