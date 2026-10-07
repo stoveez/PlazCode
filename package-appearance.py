@@ -6,7 +6,7 @@ intro='PlazCode '+version+' — '+entry['title']+'\n\n'+entry['summary']+'\n\n'+
 validation='PlazCode 1.21.0 validation\nNew tests: test-1.21.0-busy-wait.js (DeepSeek busy/rate-limit wait, unlimited with 5 s to 120 s backoff, Stop honoured), test-1.21.0-vision.js (uncapped automatic Studio visual review, no pause after repeated failures), test-1.21.0-asset-upload.js and test-1.21.0-asset-upload-ai.js (toolkit upload list and AI upload tool), test-1.21.0-clarify.js, test-1.21.0-cooldown.js (default 0 = previous behaviour), test-1.21.0-memory.js (memory titles, Engram removed).\nUpdated: test-creator-ui.js, test-tool-result-send.js and test-desktop-regression.js baselines for the intentionally changed core/main.js, core/config.js and providers/deepseek.js.\nRust: cargo test 99 passed, 0 failed, 2 ignored.\nJS: full suite 95 passed; test-blender.js, test-bridges.js, test-design-visual.js and test-v115.js fail identically on 1.20.0 (missing local module / stale 1.18.7 version pins).\n\n'
 firefox_note='## Firefox page events (maintainers)\n\nFirefox hides DataTransfer data/files created by content scripts from page handlers and ignores clipboardData in the ClipboardEvent constructor. The Firefox package therefore adds core/firefox-events.js (first script in each isolated content-script group) and core/firefox-events-main.js (a MAIN-world entry with the same matches). Synthetic paste, drag/drop and input events that carry text or files are rebuilt in the page world; native events and events without data use the normal dispatch. release-tools/build-firefox.py inserts both entries; the Chromium manifest and scripts do not load them. firefox-transfer-check.js verifies Notion protocol upload, inline paste, Co-Work draft clearing and helper semantics in real Firefox (--without-shim reproduces the original failure).\n\n'
 for name in ['README.md','UPDATE.txt','MAINTENANCE.md']:
- body=(repo/name).read_text().replace('PlazCode-Firefox-1.19.39.zip','PlazCode-Firefox-'+version+'.zip')
+ body=(repo/name).read_text().replace('PlazCode-Firefox-1.20.0.zip','PlazCode-Firefox-'+version+'.zip')
  (repo/name).write_text(intro+(firefox_note if name=='MAINTENANCE.md' and firefox_note not in body else '')+body);(root/name).write_bytes((repo/name).read_bytes())
 (repo/'VALIDATION.txt').write_text(validation+(repo/'VALIDATION.txt').read_text());(root/'VALIDATION.txt').write_bytes((repo/'VALIDATION.txt').read_bytes())
 (repo/'release-notes.json').write_bytes((root/'release-notes.json').read_bytes())
@@ -31,9 +31,9 @@ with zipfile.ZipFile(repo/'artifacts/native-macOS/PlazCode-app.zip') as app:
 p=root/'macos/Info.plist';data=plistlib.loads(p.read_bytes());data['CFBundleShortVersionString']=data['CFBundleVersion']=version;p.write_bytes(plistlib.dumps(data))
 source={f'PlazCode/{p.relative_to(root)}':p.read_bytes() for p in root.rglob('*') if p.is_file() and not any(x in p.relative_to(root).parts for x in ['target','.git','node_modules','__pycache__','PlazCode.app','visual-checks'])}
 source['PlazCode/PlazCode.exe']=(repo/'artifacts/native-Windows/PlazCode.exe').read_bytes()
-original=repo/'PlazCode-1.19.38.zip';assert hashlib.sha256(original.read_bytes()).hexdigest()=='ce4681272073bcb7c44157db43d81a6ffd3cf4cbce84463c4f87f87665447046'
-with urllib.request.urlopen('https://raw.githubusercontent.com/stoveez/PlazCode/55537a37f281fed75e0775c7903213b8a2d451f5/PlazCode-source-1.19.38.zip', timeout=60) as response: baseline_source=response.read(8*1024*1024)
-assert hashlib.sha256(baseline_source).hexdigest()=='6a9cb91556466e0a55d33816ae67beac9809ac833dcf30dbd1c31aa9dce996ba'
+original=repo/'PlazCode-1.20.0.zip';assert hashlib.sha256(original.read_bytes()).hexdigest()=='03bee7d44980762f05e47f23397f7f762ab59588a766ce27a4ba78e8c0fd48d0'
+with urllib.request.urlopen('https://raw.githubusercontent.com/stoveez/PlazCode/757f56b61f208c1a5b8072bba4caca850a1da9ae/PlazCode-source-1.20.0.zip', timeout=60) as response: baseline_source=response.read(8*1024*1024)
+assert hashlib.sha256(baseline_source).hexdigest()=='b91c631c02c388666104c0b6f7b394c39a614dc55a47eaa773cc805593036cab'
 with zipfile.ZipFile(io.BytesIO(baseline_source)) as old:
  for path in source:
   if '/providers/' in path and path in old.namelist() and not path.endswith(('/providers/notion.js',)):assert source[path]==old.read(path), 'Unrelated provider behavior source changed'
@@ -45,7 +45,7 @@ if True:
  for name in ['package-appearance.py','publisher-appearance.py','.github/workflows/appearance-build.yml','appearance-visual.js','test-javascript.py']:
   p=repo/name
   if not p.exists():
-   with urllib.request.urlopen(f'https://raw.githubusercontent.com/{__import__("os").environ["GITHUB_REPOSITORY"]}/{__import__("os").environ["GITHUB_SHA"]}/{name}',timeout=30) as response: data=response.read()
+   with urllib.request.urlopen(f'{{https://raw.githubusercontent.com/{__import__(}}"os").environ["GITHUB_REPOSITORY"]}/{__import__("os").environ["GITHUB_SHA"]}/{name}',timeout=30) as response: data=response.read()
   else:data=p.read_bytes()
   source_entries['PlazCode/release-tools/'+name]=data
 with zipfile.ZipFile(repo/source_name,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
@@ -111,7 +111,7 @@ with zipfile.ZipFile(repo/firefox_name) as archive:
  assert archive.testzip() is None and 'manifest.json' in archive.namelist() and len(archive.namelist())==len(set(archive.namelist())),'Firefox ZIP is damaged or has duplicate entries'
  m=json.loads(archive.read('manifest.json'));assert m['version']==version and m['background']=={'scripts':['background.js']} and m['browser_specific_settings']['gecko']['id']=='plazcode@plazcode.local'
  for key in ['background.js','core/main.js','providers/notion.js','popup.js']:assert archive.read(key)==source['PlazCode/PlazCode-Extension/'+key]
-feeds={x['platform']:{'version':version,'desktop_version':version,'url':f"https://raw.githubusercontent.com/stoveez/PlazCode/main/{x['file']}",'sha256':x['sha256'],'release_notes':notes} for x in metadata}
+feeds={x['platform']:{'version':version,'desktop_version':version,'url':f"{{https://raw.githubusercontent.com/stoveez/PlazCode/main/{x['file'}}]}",'sha256':x['sha256'],'release_notes':notes} for x in metadata}
 feeds['windows']['platforms']={'macos':{k:feeds['macos'][k] for k in ['url','sha256']}}
 for feed in feeds.values():
  while len((json.dumps(feed,indent=2)+'\n').encode())>60000 and len(feed['release_notes'])>1:feed['release_notes']=feed['release_notes'][:-1]
