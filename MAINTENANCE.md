@@ -1,3 +1,11 @@
+PlazCode 1.22.0 — Copy debug report
+
+Settings in the desktop app now has a Copy debug report button at the bottom. It copies a report of recent PlazCode and AI-site errors, warnings and info, with the file and function involved and the likely cause, ready to paste into an AI chat for debugging.
+
+- Copy debug report at the bottom of Settings in the desktop app, with Show report to read it first. The report lists PlazCode errors and warnings, errors from the AI site itself, recent info, failed bridge requests, agent events and the desktop log.
+- Each problem in the report names where it happened, such as core/main.js > sendPrompt, and the report starts with the most likely causes.
+- Keys, tokens, cookies, user names, e-mail addresses and chat text are removed from the report, and the report stays on this computer until it is copied.
+
 PlazCode 1.21.1 — No more hang on Starting Up
 
 The agent no longer hangs on Starting Up when the PlazCode bridge stops answering, the extension always answers its own startup checks, and the Notion AI chat box is also found when its placeholder reads How can I help.
@@ -128,7 +136,7 @@ PlazCode 1.19.33 — Firefox installation and authenticated bridge support
 
 Add a Firefox extension package and correct Firefox background startup and desktop pairing.
 
-- A dedicated PlazCode-Extension-Firefox folder in both desktop downloads and a standalone PlazCode-Firefox-1.21.1.zip with manifest.json at its root.
+- A dedicated PlazCode-Extension-Firefox folder in both desktop downloads and a standalone PlazCode-Firefox-1.22.0.zip with manifest.json at its root.
 - Firefox installation instructions explain selecting manifest.json or the Firefox ZIP in about:debugging, reloading after updates and the unsigned temporary-install limitation.
 - Firefox uses the same provider adapters, tools, bar, creators and settings as the Chromium extension, with a Firefox background script and stable addon identity.
 - Firefox requests use the installation-specific extension UUID for automatic pairing, while authenticated desktop HTTP and WebSocket routes recognize valid moz-extension origins.

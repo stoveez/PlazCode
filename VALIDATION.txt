@@ -1,3 +1,10 @@
+PlazCode 1.22.0 validation
+New test: test-1.22.0-debug-capture.js (console output unchanged with the same this/arguments/return value; only PlazCode console.log lines kept; file > function from stacks; keys, tokens, hashes, user paths and e-mail addresses redacted; repeats folded; queue capped at 150; the AI page console, fetch and XMLHttpRequest untouched; MAIN helper reports site errors, failed resources and HTTP 4xx/5xx with a rate cap and skips extension URLs; diag text replaced by its length; both manifests load debug-capture first in every isolated group; 20k wrapped warnings under 3 s; Debug report is the last card in desktop Settings). Also run against the minified production modules.
+Updated: test-firefox-package.js (counts the new MAIN debug helper) and test-desktop-regression.js (1.22.0 versions).
+Rust: new debug_report module (redaction, caps, likely-cause heuristics, report rendering) with 3 unit tests; /api/debug/browser-log and /api/debug/report routes; debug uploads are not counted as user activity. cargo test --locked: 104 + 3 pass, 2 ignored.
+Performance: test-bridge-hang.js still peaks at 5 pending bridge requests; debug uploads run only after a successful bridge reply, one at a time, every 5 s at most, with a 5 s timeout.
+JS: full suite passes except test-bridges.js, test-design-visual.js and test-v115.js, which fail identically on 1.21.0 and are skipped by the runner.
+
 PlazCode 1.21.1 validation
 New test: test-bridge-hang.js (whole background.js on a virtual clock against a bridge that accepts but never answers: 60 s peak 5 pending bridge requests, under the 6-connection limit, 34 on 1.21.0; a throwing message still gets {ok:false,error}; rs-poll outlasts the 25 s bridge long poll). Also run against the minified production module.
 Updated: test-notion-localized-composer.js (How can I help placeholder; generic ask/message/chat words, transcript test ids and reply text never select the composer) and test-desktop-regression.js baseline for the intentionally changed providers/notion.js.

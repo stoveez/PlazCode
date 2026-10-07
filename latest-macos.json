@@ -1,9 +1,21 @@
 {
-  "version": "1.21.1",
-  "desktop_version": "1.21.1",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.21.1.zip",
-  "sha256": "f58d9b33f4d6322ab4f677cbf00353040a240f9e7d5af890772fe9fced17187d",
+  "version": "1.22.0",
+  "desktop_version": "1.22.0",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.22.0.zip",
+  "sha256": "400145ad066158c9b160d5caed365e1d5b4a37f15cd0353656dbc4e80fb285ba",
   "release_notes": [
+    {
+      "version": "1.22.0",
+      "title": "Copy debug report",
+      "summary": "Settings in the desktop app now has a Copy debug report button at the bottom. It copies a report of recent PlazCode and AI-site errors, warnings and info, with the file and function involved and the likely cause, ready to paste into an AI chat for debugging.",
+      "added": [
+        "Copy debug report at the bottom of Settings in the desktop app, with Show report to read it first. The report lists PlazCode errors and warnings, errors from the AI site itself, recent info, failed bridge requests, agent events and the desktop log.",
+        "Each problem in the report names where it happened, such as core/main.js > sendPrompt, and the report starts with the most likely causes.",
+        "Keys, tokens, cookies, user names, e-mail addresses and chat text are removed from the report, and the report stays on this computer until it is copied."
+      ],
+      "improved": [],
+      "fixed": []
+    },
     {
       "version": "1.21.1",
       "title": "No more hang on Starting Up",
