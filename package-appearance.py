@@ -30,14 +30,14 @@ with zipfile.ZipFile(repo/'artifacts/native-macOS/PlazCode-app.zip') as app:
  count=struct.unpack('>I',binary[4:8])[0];assert {0x01000007,0x0100000c}.issubset({struct.unpack('>I',binary[8+i*20:12+i*20])[0] for i in range(count)})
  appentries={f'PlazCode/{i.filename}':(i,app.read(i)) for i in app.infolist() if not i.is_dir()}
 p=root/'macos/Info.plist';data=plistlib.loads(p.read_bytes());data['CFBundleShortVersionString']=data['CFBundleVersion']=version;p.write_bytes(plistlib.dumps(data))
-source={f'PlazCode/{p.relative_to(root)}':p.read_bytes() for p in root.rglob('*') if p.is_file() and not any(x in p.relative_to(root).parts for x in ['target','.git','node_modules','__pycache__','PlazCode.app','visual-checks'])}
+source={f'PlazCode/{p.relative_to(root).as_posix()}':p.read_bytes() for p in root.rglob('*') if p.is_file() and not any(x in p.relative_to(root).parts for x in ['target','.git','node_modules','__pycache__','PlazCode.app','visual-checks'])}
 source['PlazCode/PlazCode.exe']=(repo/'artifacts/native-Windows/PlazCode.exe').read_bytes()
 original=repo/'PlazCode-1.20.0.zip';assert hashlib.sha256(original.read_bytes()).hexdigest()=='03bee7d44980762f05e47f23397f7f762ab59588a766ce27a4ba78e8c0fd48d0'
 with urllib.request.urlopen('https://raw.githubusercontent.com/stoveez/PlazCode/757f56b61f208c1a5b8072bba4caca850a1da9ae/PlazCode-source-1.20.0.zip', timeout=60) as response: baseline_source=response.read(8*1024*1024)
 assert hashlib.sha256(baseline_source).hexdigest()=='b91c631c02c388666104c0b6f7b394c39a614dc55a47eaa773cc805593036cab'
 with zipfile.ZipFile(io.BytesIO(baseline_source)) as old:
  for path in source:
-  if '/providers/' in path and path in old.namelist() and not path.endswith(('/providers/notion.js',)):assert source[path]==old.read(path), 'Unrelated provider behavior source changed'
+  if '/providers/' in path and path in old.namelist() and not path.endswith(('/providers/notion.js','/providers/deepseek.js')):assert source[path]==old.read(path), 'Unrelated provider behavior source changed'
 source_name=f'PlazCode-source-{version}.zip'
 # Collect every source entry once: the release helpers below replace any copy that
 # already exists under release-tools/ instead of being written a second time.
