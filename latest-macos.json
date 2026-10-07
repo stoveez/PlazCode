@@ -1,9 +1,29 @@
 {
-  "version": "1.22.0",
-  "desktop_version": "1.22.0",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.22.0.zip",
-  "sha256": "400145ad066158c9b160d5caed365e1d5b4a37f15cd0353656dbc4e80fb285ba",
+  "version": "1.22.1",
+  "desktop_version": "1.22.1",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.22.1.zip",
+  "sha256": "4de418cc61224227909cf575d020ed1ab737a1a5bdcdc6495e1f80807ac047c2",
   "release_notes": [
+    {
+      "version": "1.22.1",
+      "title": "Model Builder, Notion and add-on fixes",
+      "summary": "Model Builder and UI Builder Generate works again, Notion AI turns no longer stop with Message was not confirmed after an accepted message, Studio add-ons such as robloxstudio-mcp stay connected during long playtests, and Git, Ollama and Roblox requests no longer fail or wait forever.",
+      "added": [],
+      "improved": [
+        "Add-on tools get the time they ask for: a tool's own timeoutMs or timeout_seconds is honored (plus 30 seconds, up to 10.5 minutes), and Studio add-ons such as robloxstudio-mcp get 5.5 minutes by default.",
+        "Ollama chat waits up to 10 minutes for an answer, so large local models on a CPU still have time to reply. Past that, the Ollama page shows OLLAMA TIMED OUT. Listing models gives up after 5 seconds.",
+        "Each Roblox request (developer products, universe lookup) ends after 20 seconds with a message naming the address that did not answer."
+      ],
+      "fixed": [
+        "Generate in the desktop Model Builder and UI Builder no longer fails with Invalid desktop agent action.",
+        "creation_preview no longer fails with action_id must be a string when the AI leaves out the blueprint action_id; a preview ID is filled in.",
+        "When the AI wraps a tool such as creation_preview in a Studio MCP skill call, PlazCode runs that tool directly instead of returning Unknown skill.",
+        "Notion AI: the composer is found again when Notion renders it as a page-style block next to its own send button, so accepted messages are confirmed instead of stopping the turn with Message was not confirmed.",
+        "A slow add-on tool call no longer kills the add-on server. PlazCode cancels the call and keeps the server, so robloxstudio-mcp keeps its Studio plugin connection; the server restarts only after two timeouts in a row.",
+        "The Git add-on finds Git installed after PlazCode started (current user and system PATH), and Git from GitHub Desktop or Chocolatey.",
+        "The Ollama page no longer stays on the thinking indicator forever when Ollama accepts the connection but never replies."
+      ]
+    },
     {
       "version": "1.22.0",
       "title": "Copy debug report",
@@ -664,40 +684,6 @@
         "Updates already select the latest complete package directly, including when multiple versions behind; intermediate releases are not installed one by one.",
         "Native build and extension are both 1.19.12 in this package. Saved settings, memory, templates and MCP configuration remain preserved.",
         "Origin notices and SHA256 checks are not copy protection. Existing GPL and third-party licenses remain in effect. Reload the extension and refresh AI tabs after updating."
-      ]
-    },
-    {
-      "version": "1.19.11",
-      "title": "Urgent tool-result loop fix",
-      "summary": "Fix the internal toSend is not defined error that interrupted normal commands after execution.",
-      "added": [],
-      "improved": [],
-      "fixed": [
-        "Initialize the outgoing message directly from the completed tool feedback before adding changed memory context. Successful results, formatted errors and screenshots reach the AI without an undeclared-variable crash.",
-        "Periodic command-list reminders remain disabled; the three-consecutive-failure pause and existing cancellation behavior are preserved."
-      ],
-      "notes": [
-        "Extension-only hotfix. The native executable remains the unchanged 1.19.10 binary; no Rust/agent changes were needed.",
-        "Reload the extension and refresh open AI tabs after updating. Settings, memory, templates and MCP configuration retain their preservation rules."
-      ]
-    },
-    {
-      "version": "1.19.10",
-      "title": "Notion startup status and meaningful chat continuation",
-      "summary": "Retain the confirmed startup command status after Notion replaces its event anchor, distinguish result attachments, and skip continuation offers for startup-only chats.",
-      "added": [],
-      "improved": [
-        "Notion command-feedback files are named plazcode_tool_result_*.txt and instruct the AI to continue the existing handshake or task, rather than repeat startup.",
-        "Continuation records explicitly track whether a real user request was captured; startup-only legacy records are also filtered."
-      ],
-      "fixed": [
-        "Capture startup identity before card rendering. Restore the confirmed outcome when Notion settles under a replacement event anchor, matching the original conversation, assistant position, preceding user message and command text. Later identical commands stay separate.",
-        "The already-dispatched guard also recognizes restored startup outcomes so a remounted startup call is not replayed.",
-        "The new-chat continuation prompt does not appear for a chat containing only startup instructions, command feedback and readiness acknowledgement."
-      ],
-      "notes": [
-        "The console confirmed list_commands was executed; the second attachment carries its result, not a second full startup.",
-        "Reload the extension and refresh open AI tabs. Saved settings, memory, templates and enabled MCP servers remain preserved."
       ]
     }
   ]

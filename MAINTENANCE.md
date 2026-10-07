@@ -1,3 +1,18 @@
+PlazCode 1.22.1 — Model Builder, Notion and add-on fixes
+
+Model Builder and UI Builder Generate works again, Notion AI turns no longer stop with Message was not confirmed after an accepted message, Studio add-ons such as robloxstudio-mcp stay connected during long playtests, and Git, Ollama and Roblox requests no longer fail or wait forever.
+
+- Add-on tools get the time they ask for: a tool's own timeoutMs or timeout_seconds is honored (plus 30 seconds, up to 10.5 minutes), and Studio add-ons such as robloxstudio-mcp get 5.5 minutes by default.
+- Ollama chat waits up to 10 minutes for an answer, so large local models on a CPU still have time to reply. Past that, the Ollama page shows OLLAMA TIMED OUT. Listing models gives up after 5 seconds.
+- Each Roblox request (developer products, universe lookup) ends after 20 seconds with a message naming the address that did not answer.
+- Generate in the desktop Model Builder and UI Builder no longer fails with Invalid desktop agent action.
+- creation_preview no longer fails with action_id must be a string when the AI leaves out the blueprint action_id; a preview ID is filled in.
+- When the AI wraps a tool such as creation_preview in a Studio MCP skill call, PlazCode runs that tool directly instead of returning Unknown skill.
+- Notion AI: the composer is found again when Notion renders it as a page-style block next to its own send button, so accepted messages are confirmed instead of stopping the turn with Message was not confirmed.
+- A slow add-on tool call no longer kills the add-on server. PlazCode cancels the call and keeps the server, so robloxstudio-mcp keeps its Studio plugin connection; the server restarts only after two timeouts in a row.
+- The Git add-on finds Git installed after PlazCode started (current user and system PATH), and Git from GitHub Desktop or Chocolatey.
+- The Ollama page no longer stays on the thinking indicator forever when Ollama accepts the connection but never replies.
+
 PlazCode 1.22.0 — Copy debug report
 
 Settings in the desktop app now has a Copy debug report button at the bottom. It copies a report of recent PlazCode and AI-site errors, warnings and info, with the file and function involved and the likely cause, ready to paste into an AI chat for debugging.
@@ -136,7 +151,7 @@ PlazCode 1.19.33 — Firefox installation and authenticated bridge support
 
 Add a Firefox extension package and correct Firefox background startup and desktop pairing.
 
-- A dedicated PlazCode-Extension-Firefox folder in both desktop downloads and a standalone PlazCode-Firefox-1.22.0.zip with manifest.json at its root.
+- A dedicated PlazCode-Extension-Firefox folder in both desktop downloads and a standalone PlazCode-Firefox-1.22.1.zip with manifest.json at its root.
 - Firefox installation instructions explain selecting manifest.json or the Firefox ZIP in about:debugging, reloading after updates and the unsigned temporary-install limitation.
 - Firefox uses the same provider adapters, tools, bar, creators and settings as the Chromium extension, with a Firefox background script and stable addon identity.
 - Firefox requests use the installation-specific extension UUID for automatic pairing, while authenticated desktop HTTP and WebSocket routes recognize valid moz-extension origins.
