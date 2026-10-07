@@ -1,6 +1,7 @@
 from pathlib import Path
 import json,zipfile,hashlib,io,plistlib,struct,urllib.request,tarfile,subprocess,shutil
 repo=Path.cwd();version='1.21.0';root=repo/'build/PlazCode'
+RAW_BASE='https://raw.githubusercontent.com/'
 notes=json.loads((root/'release-notes.json').read_text());entry=notes[0];assert entry['version']==version
 intro='PlazCode '+version+' — '+entry['title']+'\n\n'+entry['summary']+'\n\n'+'\n'.join('- '+x for key in ['added','improved','fixed'] for x in entry[key])+'\n\n'
 validation='PlazCode 1.21.0 validation\nNew tests: test-1.21.0-busy-wait.js (DeepSeek busy/rate-limit wait, unlimited with 5 s to 120 s backoff, Stop honoured), test-1.21.0-vision.js (uncapped automatic Studio visual review, no pause after repeated failures), test-1.21.0-asset-upload.js and test-1.21.0-asset-upload-ai.js (toolkit upload list and AI upload tool), test-1.21.0-clarify.js, test-1.21.0-cooldown.js (default 0 = previous behaviour), test-1.21.0-memory.js (memory titles, Engram removed).\nUpdated: test-creator-ui.js, test-tool-result-send.js and test-desktop-regression.js baselines for the intentionally changed core/main.js, core/config.js and providers/deepseek.js.\nRust: cargo test 99 passed, 0 failed, 2 ignored.\nJS: full suite 95 passed; test-blender.js, test-bridges.js, test-design-visual.js and test-v115.js fail identically on 1.20.0 (missing local module / stale 1.18.7 version pins).\n\n'
@@ -45,7 +46,7 @@ if True:
  for name in ['package-appearance.py','publisher-appearance.py','.github/workflows/appearance-build.yml','appearance-visual.js','test-javascript.py']:
   p=repo/name
   if not p.exists():
-   with urllib.request.urlopen(f'{{https://raw.githubusercontent.com/{__import__(}}"os").environ["GITHUB_REPOSITORY"]}/{__import__("os").environ["GITHUB_SHA"]}/{name}',timeout=30) as response: data=response.read()
+   with urllib.request.urlopen(RAW_BASE+__import__('os').environ['GITHUB_REPOSITORY']+'/'+__import__('os').environ['GITHUB_SHA']+'/'+name,timeout=30) as response: data=response.read()
   else:data=p.read_bytes()
   source_entries['PlazCode/release-tools/'+name]=data
 with zipfile.ZipFile(repo/source_name,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
@@ -111,7 +112,7 @@ with zipfile.ZipFile(repo/firefox_name) as archive:
  assert archive.testzip() is None and 'manifest.json' in archive.namelist() and len(archive.namelist())==len(set(archive.namelist())),'Firefox ZIP is damaged or has duplicate entries'
  m=json.loads(archive.read('manifest.json'));assert m['version']==version and m['background']=={'scripts':['background.js']} and m['browser_specific_settings']['gecko']['id']=='plazcode@plazcode.local'
  for key in ['background.js','core/main.js','providers/notion.js','popup.js']:assert archive.read(key)==source['PlazCode/PlazCode-Extension/'+key]
-feeds={x['platform']:{'version':version,'desktop_version':version,'url':f"{{https://raw.githubusercontent.com/stoveez/PlazCode/main/{x['file'}}]}",'sha256':x['sha256'],'release_notes':notes} for x in metadata}
+feeds={x['platform']:{'version':version,'desktop_version':version,'url':RAW_BASE+'stoveez/PlazCode/main/'+x['file'],'sha256':x['sha256'],'release_notes':notes} for x in metadata}
 feeds['windows']['platforms']={'macos':{k:feeds['macos'][k] for k in ['url','sha256']}}
 for feed in feeds.values():
  while len((json.dumps(feed,indent=2)+'\n').encode())>60000 and len(feed['release_notes'])>1:feed['release_notes']=feed['release_notes'][:-1]
