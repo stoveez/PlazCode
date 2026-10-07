@@ -1,13 +1,13 @@
 from pathlib import Path
 import json,zipfile,hashlib,io,plistlib,struct,urllib.request,tarfile,subprocess,shutil
-repo=Path.cwd();version='1.21.1';root=repo/'build/PlazCode'
+repo=Path.cwd();version='1.22.0';root=repo/'build/PlazCode'
 RAW_BASE='https://raw.githubusercontent.com/'
 notes=json.loads((root/'release-notes.json').read_text());entry=notes[0];assert entry['version']==version
 intro='PlazCode '+version+' — '+entry['title']+'\n\n'+entry['summary']+'\n\n'+'\n'.join('- '+x for key in ['added','improved','fixed'] for x in entry[key])+'\n\n'
-validation='PlazCode 1.21.1 validation\nNew test: test-bridge-hang.js (whole background.js on a virtual clock against a bridge that accepts but never answers: 60 s peak 5 pending bridge requests, under the 6-connection limit, 34 on 1.21.0; a throwing message still gets {ok:false,error}; rs-poll outlasts the 25 s bridge long poll). Also run against the minified production module.\nUpdated: test-notion-localized-composer.js (How can I help placeholder; generic ask/message/chat words, transcript test ids and reply text never select the composer) and test-desktop-regression.js baseline for the intentionally changed providers/notion.js.\nRust: no Rust source change (version bump only).\nJS: full suite passes except test-bridges.js, test-design-visual.js and test-v115.js, which fail identically on 1.21.0 and are skipped by the runner.\n\n'
+validation='PlazCode 1.22.0 validation\nNew test: test-1.22.0-debug-capture.js (console output unchanged with the same this/arguments/return value; only PlazCode console.log lines kept; file > function from stacks; keys, tokens, hashes, user paths and e-mail addresses redacted; repeats folded; queue capped at 150; the AI page console, fetch and XMLHttpRequest untouched; MAIN helper reports site errors, failed resources and HTTP 4xx/5xx with a rate cap and skips extension URLs; diag text replaced by its length; both manifests load debug-capture first in every isolated group; 20k wrapped warnings under 3 s; Debug report is the last card in desktop Settings). Also run against the minified production modules.\nUpdated: test-firefox-package.js (counts the new MAIN debug helper) and test-desktop-regression.js (1.22.0 versions).\nRust: new debug_report module (redaction, caps, likely-cause heuristics, report rendering) with 3 unit tests; /api/debug/browser-log and /api/debug/report routes; debug uploads are not counted as user activity. cargo test --locked: 104 + 3 pass, 2 ignored.\nPerformance: test-bridge-hang.js still peaks at 5 pending bridge requests; debug uploads run only after a successful bridge reply, one at a time, every 5 s at most, with a 5 s timeout.\nJS: full suite passes except test-bridges.js, test-design-visual.js and test-v115.js, which fail identically on 1.21.0 and are skipped by the runner.\n\n'
 firefox_note='## Firefox page events (maintainers)\n\nFirefox hides DataTransfer data/files created by content scripts from page handlers and ignores clipboardData in the ClipboardEvent constructor. The Firefox package therefore adds core/firefox-events.js (first script in each isolated content-script group) and core/firefox-events-main.js (a MAIN-world entry with the same matches). Synthetic paste, drag/drop and input events that carry text or files are rebuilt in the page world; native events and events without data use the normal dispatch. release-tools/build-firefox.py inserts both entries; the Chromium manifest and scripts do not load them. firefox-transfer-check.js verifies Notion protocol upload, inline paste, Co-Work draft clearing and helper semantics in real Firefox (--without-shim reproduces the original failure).\n\n'
 for name in ['README.md','UPDATE.txt','MAINTENANCE.md']:
- body=(repo/name).read_text().replace('PlazCode-Firefox-1.21.0.zip','PlazCode-Firefox-'+version+'.zip')
+ body=(repo/name).read_text().replace('PlazCode-Firefox-1.21.1.zip','PlazCode-Firefox-'+version+'.zip')
  (repo/name).write_text(intro+(firefox_note if name=='MAINTENANCE.md' and firefox_note not in body else '')+body);(root/name).write_bytes((repo/name).read_bytes())
 (repo/'VALIDATION.txt').write_text(validation+(repo/'VALIDATION.txt').read_text());(root/'VALIDATION.txt').write_bytes((repo/'VALIDATION.txt').read_bytes())
 (repo/'release-notes.json').write_bytes((root/'release-notes.json').read_bytes())
@@ -32,12 +32,12 @@ with zipfile.ZipFile(repo/'artifacts/native-macOS/PlazCode-app.zip') as app:
 p=root/'macos/Info.plist';data=plistlib.loads(p.read_bytes());data['CFBundleShortVersionString']=data['CFBundleVersion']=version;p.write_bytes(plistlib.dumps(data))
 source={f'PlazCode/{p.relative_to(root).as_posix()}':p.read_bytes() for p in root.rglob('*') if p.is_file() and not any(x in p.relative_to(root).parts for x in ['target','.git','node_modules','__pycache__','PlazCode.app','visual-checks'])}
 source['PlazCode/PlazCode.exe']=(repo/'artifacts/native-Windows/PlazCode.exe').read_bytes()
-original=repo/'PlazCode-1.21.0.zip';assert hashlib.sha256(original.read_bytes()).hexdigest()=='f9f333180d27215d261974818c96d52bd5e8ab2ede2037465aaeb68b927efa8b'
-with urllib.request.urlopen('https://raw.githubusercontent.com/stoveez/PlazCode/32401d20e723c13d6e113734ae025e70f694efdf/PlazCode-source-1.21.0.zip', timeout=60) as response: baseline_source=response.read(8*1024*1024)
-assert hashlib.sha256(baseline_source).hexdigest()=='d9d8138d0967be8d83f15235077158dbc382f1280c72711637782f07c3a7de9f'
+original=repo/'PlazCode-1.21.1.zip';assert hashlib.sha256(original.read_bytes()).hexdigest()=='c58f74527b882e39303954b6f13732136c7d7a4a15a55b1ad6a55e21e1745a5a'
+with urllib.request.urlopen('https://raw.githubusercontent.com/stoveez/PlazCode/333059616b6d555e4e0d3811da000d92929c1b1b/PlazCode-source-1.21.1.zip', timeout=60) as response: baseline_source=response.read(8*1024*1024)
+assert hashlib.sha256(baseline_source).hexdigest()=='fb9c56b4bc3f6e12e9ecc56c651a1991f3615b8efdf32f8353a0503214bf21ae'
 with zipfile.ZipFile(io.BytesIO(baseline_source)) as old:
  for path in source:
-  if '/providers/' in path and path in old.namelist() and not path.endswith(('/providers/notion.js',)):assert source[path]==old.read(path), 'Unrelated provider behavior source changed'
+  if '/providers/' in path and path in old.namelist() and not path.endswith(()):assert source[path]==old.read(path), 'Unrelated provider behavior source changed'
 source_name=f'PlazCode-source-{version}.zip'
 # Collect every source entry once: the release helpers below replace any copy that
 # already exists under release-tools/ instead of being written a second time.
@@ -65,7 +65,7 @@ for path in (root/'PlazCode-Extension-Firefox').rglob('*'):
  if path.is_file():source['PlazCode/'+path.relative_to(root).as_posix()]=path.read_bytes()
 
 # Run pure behavioral tests against the actual generated modules.
-for name in ['test-version.js','test-cowork.js','test-page-startup.js','test-cowork-injection-composer.js','test-cowork-notion-plain-text.js','test-notion-tool-status.js','test-notion-localized-composer.js','test-bridge-hang.js','test-notion-send-receipts.js','test-studio-status.js','test-clarification.js','test-blender-command-results.js','test-firefox-package.js','test-parser-key-order.js','test-bar-hide.js','test-notion-bar-seat.js','test-notion-bar-follow.js','test-tool-guard-repair.js','test-bar-hide-space.js','test-bar-status-text.js','test-continuation-offer-toggle.js','test-notion-send-recovery.js']:
+for name in ['test-version.js','test-cowork.js','test-page-startup.js','test-cowork-injection-composer.js','test-cowork-notion-plain-text.js','test-notion-tool-status.js','test-notion-localized-composer.js','test-bridge-hang.js','test-notion-send-receipts.js','test-studio-status.js','test-clarification.js','test-blender-command-results.js','test-firefox-package.js','test-parser-key-order.js','test-bar-hide.js','test-notion-bar-seat.js','test-notion-bar-follow.js','test-tool-guard-repair.js','test-bar-hide-space.js','test-bar-status-text.js','test-continuation-offer-toggle.js','test-notion-send-recovery.js','test-1.22.0-debug-capture.js']:
  subprocess.run(['node',name],cwd=root,check=True)
 def development(path):
  relative=path.removeprefix('PlazCode/');parts=Path(relative).parts

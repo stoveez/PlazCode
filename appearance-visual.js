@@ -2,7 +2,7 @@ const fs=require('fs');const {chromium}=require('playwright');
 (async()=>{
  const original=fs.readFileSync('agent/src/desktop.html','utf8');
  const themeScript='function Byid(id){return document.getElementById(id)};'+original.slice(original.indexOf('  var Desktopthemes ='),original.indexOf('  function Saveappearance()'));
- const html=original.replaceAll('__PLAZCODE_VERSION__','1.21.1').replace(/<script>[\s\S]*?<\/script>/g,'');
+ const html=original.replaceAll('__PLAZCODE_VERSION__','1.22.0').replace(/<script>[\s\S]*?<\/script>/g,'');
  const mcpScript='var State={servers:[{id:"blender",alive:true,tools:30}],mcp_alive:true};var PendingMcp={};function Escape(s){return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll(String.fromCharCode(34),"&quot;")};function Toarray(n){return [...n]};function Refresh(){return Promise.resolve()};function Showerror(e){throw e};function Api(path){return Promise.resolve(path==="/api/mcp/catalog"?{servers:[{id:"blender",name:"Blender",enabled:true,command:"uvx",args:["blender-mcp"],description:"Install and enable the Blender MCP addon inside Blender. Keep Blender open, press N, open MCP for Blender, and click Start MCP Server. Enabling here starts the MCP process only; Test Blender connection checks the actual scene response."}]}:{ok:false,error:"Blender did not answer get_scene_info within 8 seconds. Keep Blender open and responsive, close blocking dialogs, then stop and start the MCP server in Blender."})};'+original.slice(original.indexOf('  var Blendercheck ='),original.indexOf('  function Renderlogs()'));
  const browser=await chromium.launch({headless:true});const page=await browser.newPage();
  await page.setContent(html);
