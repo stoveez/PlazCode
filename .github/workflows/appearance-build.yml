@@ -235,7 +235,7 @@ jobs:
         env:
           NODE_PATH: ${{ github.workspace }}/build/PlazCode/release-tools/node_modules
         run: |
-          python -c "import json; assert json.load(open('latest.json'))['version']=='1.19.38', 'Main release changed; manual rebase required'"
+          python -c "import json; assert json.load(open('latest.json'))['version']=='1.20.0', 'Main release changed; manual rebase required'"
           python package-appearance.py
           python -c "import publish_release,json,pathlib; f=json.load(open('latest.json')); publish_release.validate_archive(pathlib.Path('PlazCode-1.21.0.zip').read_bytes(),'1.21.0','windows'); publish_release.validate_archive(pathlib.Path('PlazCode-macOS-1.21.0.zip').read_bytes(),'1.21.0','macos')"
       - uses: actions/attest@v4
@@ -261,7 +261,7 @@ jobs:
         run: |
           git config user.name 'PlazCode release automation'
           git config user.email 'actions@users.noreply.github.com'
-          git rm PlazCode-1.19.39.zip PlazCode-macOS-1.19.39.zip
+          git rm PlazCode-1.20.0.zip PlazCode-macOS-1.20.0.zip
           git add PlazCode-Firefox-1.21.0.zip publish_release.py Update-PlazCode.ps1 PlazCode-1.21.0.zip PlazCode-macOS-1.21.0.zip PlazCode-source-1.21.0.zip PlazCode-1.21.0.sigstore.json latest.json latest-macos.json SHA256SUMS.txt release-metadata.json release-notes.json README.md UPDATE.txt MAINTENANCE.md VALIDATION.txt release-description-1.21.0.txt
           git commit -m 'Release PlazCode 1.21.0: working Model Builder and UI Builder, Studio vision, asset upload, DeepSeek rate-limit waits'
           git push origin HEAD:main
