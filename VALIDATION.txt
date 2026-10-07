@@ -1,3 +1,9 @@
+PlazCode 1.21.0 validation
+New tests: test-1.21.0-busy-wait.js (DeepSeek busy/rate-limit wait, unlimited with 5 s to 120 s backoff, Stop honoured), test-1.21.0-vision.js (uncapped automatic Studio visual review, no pause after repeated failures), test-1.21.0-asset-upload.js and test-1.21.0-asset-upload-ai.js (toolkit upload list and AI upload tool), test-1.21.0-clarify.js, test-1.21.0-cooldown.js (default 0 = previous behaviour), test-1.21.0-memory.js (memory titles, Engram removed).
+Updated: test-creator-ui.js, test-tool-result-send.js and test-desktop-regression.js baselines for the intentionally changed core/main.js, core/config.js and providers/deepseek.js.
+Rust: cargo test 99 passed, 0 failed, 2 ignored.
+JS: full suite 95 passed; test-blender.js, test-bridges.js, test-design-visual.js and test-v115.js fail identically on 1.20.0 (missing local module / stale 1.18.7 version pins).
+
 PlazCode 1.20.0 validation
 Regressions: test-1.20.0-regressions.js (fails on 1.19.39) covers cut-off commands no longer stopping a run after 3 failures, the split-the-edit hint, duplicate suppression of a delivered payload, no automatic retry for attachment/large sends, the Notion composer in Edge (innerHeight 0 and relaxed late acceptance), updater fallback on transport errors and 5xx, a ready update clearing a stale failure, and Studio detection tolerating empty status text and single misses.
 Rust: cargo test passes (updater transport_fallback_tests, studio_detection_tests and the existing updater record-check tests).

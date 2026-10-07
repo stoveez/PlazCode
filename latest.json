@@ -1,9 +1,36 @@
 {
-  "version": "1.20.0",
-  "desktop_version": "1.20.0",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.20.0.zip",
-  "sha256": "03bee7d44980762f05e47f23397f7f762ab59588a766ce27a4ba78e8c0fd48d0",
+  "version": "1.21.0",
+  "desktop_version": "1.21.0",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.21.0.zip",
+  "sha256": "f9f333180d27215d261974818c96d52bd5e8ab2ede2037465aaeb68b927efa8b",
   "release_notes": [
+    {
+      "version": "1.21.0",
+      "title": "Working Model Builder and UI Builder, Studio vision, asset upload and DeepSeek rate-limit handling",
+      "summary": "The Model Builder and UI Builder now generate with the AI selected in PlazCode and insert into Roblox Studio 1:1 in front of the camera, PlazCode reviews Studio screenshots after visual changes and fixes problems on its own, assets can be uploaded to Studio from the toolkit or by asking the AI, and DeepSeek rate limits are waited out instead of stopping a run.",
+      "added": [
+        "Model Builder and UI Builder have a simplified layout: prompt, detail and style options, reference image, presets, a live preview, recolour and size controls, revise-by-request and saved creations.",
+        "The UI Builder preview switches between phone, tablet and PC sizes.",
+        "Upload to Studio in the toolkit lists every uploadable asset (models, animations, sounds, images and more) with search. The AI can also upload an asset when asked.",
+        "Automatic Studio vision: after a visual change, a Studio screenshot is reviewed and problems such as misplaced parts, VFX or weapon grips are fixed without being asked.",
+        "Seconds between commands setting (0 = no pause, the previous behaviour) to stay under provider rate limits.",
+        "Saved memories now have a title describing what each memory is about."
+      ],
+      "improved": [
+        "Builders use the AI currently selected in PlazCode instead of a separate model.",
+        "Insert into Studio builds one Model in front of the camera, snapped to the ground, as a single undo step (Ctrl+Z).",
+        "DeepSeek busy or rate-limit replies are waited out automatically with growing pauses (5 s to 120 s) and the last message is resent, with no retry limit. Stop still works during the wait.",
+        "Repeated failed commands no longer pause a run; the AI is told to change approach instead.",
+        "The memory settings page is simplified and the separate Engram section is removed.",
+        "Image-to-model keeps refining until the result matches the reference instead of stopping after two rounds.",
+        "When the PlazCode bridge is running in Roblox mode, other bridges or AI tools holding the Studio MCP connection are closed so the agent can start."
+      ],
+      "fixed": [
+        "Model Builder and UI Builder did not produce or insert anything.",
+        "The clarify tool failed with Recommend one option and explain why, which could trigger the repeated tool failures pause.",
+        "Test windows no longer pop up on screen while tests run."
+      ]
+    },
     {
       "version": "1.20.0",
       "title": "Notion in Edge, fewer stalled runs, accurate Studio status and a sturdier updater",
@@ -668,32 +695,12 @@
         "Settings, memory, templates and enabled MCP servers retain their update preservation rules.",
         "Reload the extension and refresh open AI tabs after updating."
       ]
-    },
-    {
-      "version": "1.18.109",
-      "title": "Stable startup and session reminders",
-      "summary": "Keep active chats running without repeating startup, and retain confirmed startup command results across message remounts.",
-      "added": [],
-      "improved": [
-        "Context reminders preserve the current task and pending follow-ups instead of reissuing the startup handshake. Both engines and both reminder delivery paths use the continuation instructions."
-      ],
-      "fixed": [
-        "Confirmed startup list_commands calls retain their completed/error status when the site replaces the message node. They are marked dispatched before awaiting execution so the watchdog cannot replay them.",
-        "Notion command identity follows its stable transcript row across inner editor/code-block replacements.",
-        "Duplicate Start requests on an already-started populated chat no longer inject startup again. Explicit Restart and new-chat Start remain available.",
-        "Notion clears pending navigation-start intent when its composer is prepared or a session is active, and rechecks activity before a delayed resume."
-      ],
-      "notes": [
-        "The plan-based progress ring remains on collapsible Working/Worked headings for supported sites. Custom work groups remain disabled on Notion and ChatGPT.",
-        "Settings, memory, templates and MCP server configuration retain their existing update preservation rules.",
-        "Reload the extension and refresh open AI tabs after updating."
-      ]
     }
   ],
   "platforms": {
     "macos": {
-      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.20.0.zip",
-      "sha256": "5f7a22ebaec0e33b375aabbe3e2eb55647ffb64e1008fbb90df958ead0d9c4c4"
+      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.21.0.zip",
+      "sha256": "09296314caafe6053ea7590750a455965fff83383a4da197a8a38e06349da532"
     }
   }
 }

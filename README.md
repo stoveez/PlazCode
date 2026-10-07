@@ -1,3 +1,24 @@
+PlazCode 1.21.0 — Working Model Builder and UI Builder, Studio vision, asset upload and DeepSeek rate-limit handling
+
+The Model Builder and UI Builder now generate with the AI selected in PlazCode and insert into Roblox Studio 1:1 in front of the camera, PlazCode reviews Studio screenshots after visual changes and fixes problems on its own, assets can be uploaded to Studio from the toolkit or by asking the AI, and DeepSeek rate limits are waited out instead of stopping a run.
+
+- Model Builder and UI Builder have a simplified layout: prompt, detail and style options, reference image, presets, a live preview, recolour and size controls, revise-by-request and saved creations.
+- The UI Builder preview switches between phone, tablet and PC sizes.
+- Upload to Studio in the toolkit lists every uploadable asset (models, animations, sounds, images and more) with search. The AI can also upload an asset when asked.
+- Automatic Studio vision: after a visual change, a Studio screenshot is reviewed and problems such as misplaced parts, VFX or weapon grips are fixed without being asked.
+- Seconds between commands setting (0 = no pause, the previous behaviour) to stay under provider rate limits.
+- Saved memories now have a title describing what each memory is about.
+- Builders use the AI currently selected in PlazCode instead of a separate model.
+- Insert into Studio builds one Model in front of the camera, snapped to the ground, as a single undo step (Ctrl+Z).
+- DeepSeek busy or rate-limit replies are waited out automatically with growing pauses (5 s to 120 s) and the last message is resent, with no retry limit. Stop still works during the wait.
+- Repeated failed commands no longer pause a run; the AI is told to change approach instead.
+- The memory settings page is simplified and the separate Engram section is removed.
+- Image-to-model keeps refining until the result matches the reference instead of stopping after two rounds.
+- When the PlazCode bridge is running in Roblox mode, other bridges or AI tools holding the Studio MCP connection are closed so the agent can start.
+- Model Builder and UI Builder did not produce or insert anything.
+- The clarify tool failed with Recommend one option and explain why, which could trigger the repeated tool failures pause.
+- Test windows no longer pop up on screen while tests run.
+
 PlazCode 1.20.0 — Notion in Edge, fewer stalled runs, accurate Studio status and a sturdier updater
 
 Notion AI now loads in Microsoft Edge, cut-off commands no longer pause a run after three tries, a tool result is no longer sent to the AI more than once, the bar no longer reports MCP as off while Roblox Studio is connected, and the desktop updater keeps working when the GitHub API is unreachable.
@@ -94,7 +115,7 @@ PlazCode 1.19.33 — Firefox installation and authenticated bridge support
 
 Add a Firefox extension package and correct Firefox background startup and desktop pairing.
 
-- A dedicated PlazCode-Extension-Firefox folder in both desktop downloads and a standalone PlazCode-Firefox-1.20.0.zip with manifest.json at its root.
+- A dedicated PlazCode-Extension-Firefox folder in both desktop downloads and a standalone PlazCode-Firefox-1.21.0.zip with manifest.json at its root.
 - Firefox installation instructions explain selecting manifest.json or the Firefox ZIP in about:debugging, reloading after updates and the unsigned temporary-install limitation.
 - Firefox uses the same provider adapters, tools, bar, creators and settings as the Chromium extension, with a Firefox background script and stable addon identity.
 - Firefox requests use the installation-specific extension UUID for automatic pairing, while authenticated desktop HTTP and WebSocket routes recognize valid moz-extension origins.
