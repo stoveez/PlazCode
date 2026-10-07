@@ -1,0 +1,13 @@
+**PlazCode 1.21.1: No more hang on Starting Up**
+
+- The agent no longer hangs on Starting Up when the PlazCode bridge stops answering, the extension always answers its own startup checks, and the Notion AI chat box is also found when its placeholder reads How can I help.
+
+***Improvements***
+
+- Every request to the PlazCode bridge now gives up after a time limit, and background checks for memory, status and updates never run twice at the same time.
+
+***Bug fixes***
+
+- Starting an agent could hang on Starting Up when the bridge accepted a connection but never replied, because waiting background requests filled the browser's connection limit.
+- An unexpected error while handling an extension message could leave the bar waiting forever. An error reply is now always sent.
+- The Notion AI chat box was not found when its placeholder read How can I help instead of the known wording.

@@ -1,5 +1,19 @@
 [
   {
+    "version": "1.21.1",
+    "title": "No more hang on Starting Up",
+    "summary": "The agent no longer hangs on Starting Up when the PlazCode bridge stops answering, the extension always answers its own startup checks, and the Notion AI chat box is also found when its placeholder reads How can I help.",
+    "added": [],
+    "improved": [
+      "Every request to the PlazCode bridge now gives up after a time limit, and background checks for memory, status and updates never run twice at the same time."
+    ],
+    "fixed": [
+      "Starting an agent could hang on Starting Up when the bridge accepted a connection but never replied, because waiting background requests filled the browser's connection limit.",
+      "An unexpected error while handling an extension message could leave the bar waiting forever. An error reply is now always sent.",
+      "The Notion AI chat box was not found when its placeholder read How can I help instead of the known wording."
+    ]
+  },
+  {
     "version": "1.21.0",
     "title": "Working Model Builder and UI Builder, Studio vision, asset upload and DeepSeek rate-limit handling",
     "summary": "The Model Builder and UI Builder now generate with the AI selected in PlazCode and insert into Roblox Studio 1:1 in front of the camera, PlazCode reviews Studio screenshots after visual changes and fixes problems on its own, assets can be uploaded to Studio from the toolkit or by asking the AI, and DeepSeek rate limits are waited out instead of stopping a run.",

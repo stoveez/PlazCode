@@ -1,9 +1,23 @@
 {
-  "version": "1.21.0",
-  "desktop_version": "1.21.0",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.21.0.zip",
-  "sha256": "09296314caafe6053ea7590750a455965fff83383a4da197a8a38e06349da532",
+  "version": "1.21.1",
+  "desktop_version": "1.21.1",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.21.1.zip",
+  "sha256": "f58d9b33f4d6322ab4f677cbf00353040a240f9e7d5af890772fe9fced17187d",
   "release_notes": [
+    {
+      "version": "1.21.1",
+      "title": "No more hang on Starting Up",
+      "summary": "The agent no longer hangs on Starting Up when the PlazCode bridge stops answering, the extension always answers its own startup checks, and the Notion AI chat box is also found when its placeholder reads How can I help.",
+      "added": [],
+      "improved": [
+        "Every request to the PlazCode bridge now gives up after a time limit, and background checks for memory, status and updates never run twice at the same time."
+      ],
+      "fixed": [
+        "Starting an agent could hang on Starting Up when the bridge accepted a connection but never replied, because waiting background requests filled the browser's connection limit.",
+        "An unexpected error while handling an extension message could leave the bar waiting forever. An error reply is now always sent.",
+        "The Notion AI chat box was not found when its placeholder read How can I help instead of the known wording."
+      ]
+    },
     {
       "version": "1.21.0",
       "title": "Working Model Builder and UI Builder, Studio vision, asset upload and DeepSeek rate-limit handling",
@@ -672,28 +686,6 @@
       "notes": [
         "The console confirmed list_commands was executed; the second attachment carries its result, not a second full startup.",
         "Reload the extension and refresh open AI tabs. Saved settings, memory, templates and enabled MCP servers remain preserved."
-      ]
-    },
-    {
-      "version": "1.19.09",
-      "title": "Normal chat flow and targeted command recovery",
-      "summary": "Release completed replies promptly, preserve native idle Co-work messages, and recover command access only when the AI explicitly loses it.",
-      "added": [
-        "User-facing versions now use two patch digits: 1.19.09 through 1.19.99, then 1.20.00. Chrome and native package versions stay numeric without leading zeroes."
-      ],
-      "improved": [
-        "Idle Co-work sends use the same native composer and send path as normal messages. Active follow-ups remain accepted through the existing queue and safe-boundary delivery.",
-        "Normal replies release the composer before asynchronous checkpoint bookkeeping. Superseded or stopped send callbacks cannot start another loop."
-      ],
-      "fixed": [
-        "Notion pre-send response identity is preserved instead of capturing its newly mounted assistant shell, preventing waiting for an already-visible response.",
-        "Removed periodic command-list reminders, periodic full-prompt riders and idle reminder sends. Memory context changes remain distinct from reminders.",
-        "An explicit command-access refusal triggers a live-engine check and one same-chat startup handshake. Successful recovery resumes the unfinished request; repeated refusals stop without a restart loop. Disconnected engines, changed chats, Stop and unsent drafts prevent recovery.",
-        "Delayed injection cleanup is tied to the send that owns it, and an idle composer cannot be covered by a stale working request."
-      ],
-      "notes": [
-        "Settings, memory, templates and enabled MCP servers retain their update preservation rules.",
-        "Reload the extension and refresh open AI tabs after updating."
       ]
     }
   ]

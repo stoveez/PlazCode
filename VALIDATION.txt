@@ -1,3 +1,9 @@
+PlazCode 1.21.1 validation
+New test: test-bridge-hang.js (whole background.js on a virtual clock against a bridge that accepts but never answers: 60 s peak 5 pending bridge requests, under the 6-connection limit, 34 on 1.21.0; a throwing message still gets {ok:false,error}; rs-poll outlasts the 25 s bridge long poll). Also run against the minified production module.
+Updated: test-notion-localized-composer.js (How can I help placeholder; generic ask/message/chat words, transcript test ids and reply text never select the composer) and test-desktop-regression.js baseline for the intentionally changed providers/notion.js.
+Rust: no Rust source change (version bump only).
+JS: full suite passes except test-bridges.js, test-design-visual.js and test-v115.js, which fail identically on 1.21.0 and are skipped by the runner.
+
 PlazCode 1.21.0 validation
 New tests: test-1.21.0-busy-wait.js (DeepSeek busy/rate-limit wait, unlimited with 5 s to 120 s backoff, Stop honoured), test-1.21.0-vision.js (uncapped automatic Studio visual review, no pause after repeated failures), test-1.21.0-asset-upload.js and test-1.21.0-asset-upload-ai.js (toolkit upload list and AI upload tool), test-1.21.0-clarify.js, test-1.21.0-cooldown.js (default 0 = previous behaviour), test-1.21.0-memory.js (memory titles, Engram removed).
 Updated: test-creator-ui.js, test-tool-result-send.js and test-desktop-regression.js baselines for the intentionally changed core/main.js, core/config.js and providers/deepseek.js.
