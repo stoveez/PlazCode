@@ -1,3 +1,18 @@
+PlazCode 1.23.0 — Saved skills, Studio Explorer and provider resilience
+
+Save project-aware skills and completed-task methods, edit your game from a Studio-synced Explorer, collapse the sidebar to icons, and recover Model Builder responses that previously appeared as raw JSON. All provider adapters now handle failed DOM reads and bounded waits more safely.
+
+- Skills page: save reusable methods, turn completed tasks into editable candidates, add verification checks and mark successful methods ready for reuse. Skills instruct the AI to inspect and adapt to the current project.
+- Optional shared learning: download approved community skills and submit reviewed methods to the shared GitHub repository. Sharing is off by default and never uploads raw chats or project files. These lessons improve task context, not AI model weights.
+- Studio Explorer with a game tree, script editor and supported object-property controls. Auto-sync is on by default and can be disabled; local drafts, manual push, Studio comparison, conflict protection and undo recording are included.
+- A saved hamburger toggle collapses the desktop sidebar to page icons.
+- All 13 active providers and two retained legacy adapters guard DOM reads and selectors, use bounded asynchronous waits, and avoid treating a failed read as send confirmation.
+- Notion uses semantic ancestor resolution and finally-protected input cleanup so failures do not leave the composer locked.
+- Fresh Windows and universal Intel/Apple Silicon macOS native builds; Windows executables include consistent version metadata.
+- Valid bare Model/UI Builder save JSON is recovered only within the active creator task and goes through the existing blueprint validation and preview flow. Creator context survives prompt enhancement and resets for unrelated tasks.
+- Windows app and file launch no longer route executable paths through cmd start. Background helpers suppress console windows and command execution disables CMD AutoRun, addressing paths that could cause unexpected command windows.
+- Updater invocation no longer explicitly bypasses PowerShell execution policy.
+
 PlazCode 1.22.1 — Model Builder, Notion and add-on fixes
 
 Model Builder and UI Builder Generate works again, Notion AI turns no longer stop with Message was not confirmed after an accepted message, Studio add-ons such as robloxstudio-mcp stay connected during long playtests, and Git, Ollama and Roblox requests no longer fail or wait forever.

@@ -1,9 +1,35 @@
 {
-  "version": "1.22.1",
-  "desktop_version": "1.22.1",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.22.1.zip",
-  "sha256": "3e27c88305ea26a7001e01220f7cf97cfac49aaf0a453a67adac9ed96d8e0f30",
+  "version": "1.23.0",
+  "desktop_version": "1.23.0",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.23.0.zip",
+  "sha256": "09b0db8e85ef969bd7e1eb60eb26a219bd80ed60e5d221970e1b3af6750e510b",
   "release_notes": [
+    {
+      "version": "1.23.0",
+      "title": "Saved skills, Studio Explorer and provider resilience",
+      "summary": "Save project-aware skills and completed-task methods, edit your game from a Studio-synced Explorer, collapse the sidebar to icons, and recover Model Builder responses that previously appeared as raw JSON. All provider adapters now handle failed DOM reads and bounded waits more safely.",
+      "added": [
+        "Skills page: save reusable methods, turn completed tasks into editable candidates, add verification checks and mark successful methods ready for reuse. Skills instruct the AI to inspect and adapt to the current project.",
+        "Optional shared learning: download approved community skills and submit reviewed methods to the shared GitHub repository. Sharing is off by default and never uploads raw chats or project files. These lessons improve task context, not AI model weights.",
+        "Studio Explorer with a game tree, script editor and supported object-property controls. Auto-sync is on by default and can be disabled; local drafts, manual push, Studio comparison, conflict protection and undo recording are included.",
+        "A saved hamburger toggle collapses the desktop sidebar to page icons."
+      ],
+      "improved": [
+        "All 13 active providers and two retained legacy adapters guard DOM reads and selectors, use bounded asynchronous waits, and avoid treating a failed read as send confirmation.",
+        "Notion uses semantic ancestor resolution and finally-protected input cleanup so failures do not leave the composer locked.",
+        "Fresh Windows and universal Intel/Apple Silicon macOS native builds; Windows executables include consistent version metadata."
+      ],
+      "fixed": [
+        "Valid bare Model/UI Builder save JSON is recovered only within the active creator task and goes through the existing blueprint validation and preview flow. Creator context survives prompt enhancement and resets for unrelated tasks.",
+        "Windows app and file launch no longer route executable paths through cmd start. Background helpers suppress console windows and command execution disables CMD AutoRun, addressing paths that could cause unexpected command windows.",
+        "Updater invocation no longer explicitly bypasses PowerShell execution policy."
+      ],
+      "notes": [
+        "Automated provider, Explorer, skills, native HTTP, Luau and platform regressions are included. Signed-in provider sites and real Studio/Blender end-to-end tests were not performed.",
+        "Antivirus-related launch and metadata changes are candidate improvements, not a guarantee against future Microsoft Defender detections. The executable remains unsigned; GitHub provenance is not an Authenticode publisher signature.",
+        "Existing settings, memory, templates and enabled MCP servers retain their existing data locations. Reload the browser extension and refresh AI tabs after updating."
+      ]
+    },
     {
       "version": "1.22.1",
       "title": "Model Builder, Notion and add-on fixes",
@@ -137,7 +163,7 @@
       "title": "Hide bar, steady bar size and Mac fixes",
       "summary": "Add a Hide bar button that keeps PlazCode working, keep the bar a steady size and on top of the chat box, fix Blender MCP on Intel Macs and fix macOS updates that could not find the PlazCode folder.",
       "added": [
-        "Hide bar button (\u203a) on the PlazCode bar. Hiding only makes the bar invisible and click-through so it never covers chat text; runs, Co-Work, tools, desktop Start/Stop and every setting keep working. A small PlazCode tab at the bar's right edge shows it again in the same position with every control as it was. The choice is remembered for that browser tab."
+        "Hide bar button (›) on the PlazCode bar. Hiding only makes the bar invisible and click-through so it never covers chat text; runs, Co-Work, tools, desktop Start/Stop and every setting keep working. A small PlazCode tab at the bar's right edge shows it again in the same position with every control as it was. The choice is remembered for that browser tab."
       ],
       "improved": [
         "The bar keeps the same compact height in narrow or zoomed browser windows instead of growing to about twice its normal height below 720 pixels wide.",
@@ -234,7 +260,7 @@
       "title": "Clarify unclear tasks and fix Blender command results",
       "summary": "Add an AI clarification panel with scoped options and explicit answers, and correct Blender command result handling.",
       "added": [
-        "A clarification panel displays the active AI name followed by is asking you\u2026, with 2\u20133 options, the scope of each, a recommended approach and 1\u20133 clarifying questions.",
+        "A clarification panel displays the active AI name followed by is asking you…, with 2–3 options, the scope of each, a recommended approach and 1–3 clarifying questions.",
         "Answers support selecting an option, adding details or proposing a different approach. Submitted answers return to the same AI session."
       ],
       "improved": [
@@ -374,13 +400,13 @@
       "fixed": [
         "Quick Access Tools, MCP Servers, Terminal and Settings icons now use the exact SVG artwork from the sidebar.",
         "The supported-AI list expands in normal page flow, keeping Task checkpoints & workflows and following content from overlapping.",
-        "The browser bar now reads the desktop\u2019s confirmed Studio connection status instead of ignoring it.",
+        "The browser bar now reads the desktop’s confirmed Studio connection status instead of ignoring it.",
         "A missed process scan or a disconnected browser tab no longer clears a verified Studio MCP connection. Unknown probe timeouts retain the last confirmed result; explicit connection failures still disable the agent."
       ],
       "notes": [
         "Native launch routing and provider coverage are checked without opening live AI sites.",
         "Reload the extension after the desktop update and refresh open AI tabs.",
-        "Connection regressions cover confirmed-editor/missed-process cases, explicit disconnections and timed-out probes. The tester\u2019s actual machine was not available for direct reproduction."
+        "Connection regressions cover confirmed-editor/missed-process cases, explicit disconnections and timed-out probes. The tester’s actual machine was not available for direct reproduction."
       ]
     },
     {
@@ -412,7 +438,7 @@
       "added": [
         "Beginner-friendly execution help explains engines, command/time limits, visual review, stop modes, permissions, continuation exports and resuming paused tasks.",
         "An Engram guide explains project notes, searching, fact IDs, topic keys and the difference between memory, saved logs and continuation files.",
-        "Creators now follow Describe \u2192 Review preview \u2192 Insert in Studio, with labeled inputs, simpler edit buttons, an AI readiness explanation and optional file/feedback controls grouped separately."
+        "Creators now follow Describe → Review preview → Insert in Studio, with labeled inputs, simpler edit buttons, an AI readiness explanation and optional file/feedback controls grouped separately."
       ],
       "improved": [
         "Desktop and extension numeric/select controls use themed backgrounds, clear borders, focus states and consistent spacing. Saved-chat controls and creator edit actions have explicit gaps.",
@@ -422,7 +448,7 @@
       "fixed": [
         "Desktop refresh no longer resets command/time values while a field is focused or its change is being saved. Empty or invalid numeric changes are not saved as limits.",
         "Ordinary assistant prose followed by a tool result is no longer replaced by a tool-only chip.",
-        "DeepSeek no longer interprets \u201cStopped\u201d inside generated code or prose as a site stop notice; message IDs take priority over recycled virtual-list keys.",
+        "DeepSeek no longer interprets “Stopped” inside generated code or prose as a site stop notice; message IDs take priority over recycled virtual-list keys.",
         "An unfinished DeepSeek command block no longer masks every following paragraph."
       ],
       "notes": [
@@ -469,7 +495,7 @@
       "title": "Branded Windows application and tray icons",
       "summary": "Add the missing PlazCode application icon to the Windows executable and background tray.",
       "added": [
-        "Embedded multi-resolution PlazCode icon includes 16\u2013256 pixel sizes for Windows application files and display scaling."
+        "Embedded multi-resolution PlazCode icon includes 16–256 pixel sizes for Windows application files and display scaling."
       ],
       "improved": [
         "The application window, taskbar and background tray share the existing orange PlazCode brand mark.",
@@ -685,12 +711,457 @@
         "Native build and extension are both 1.19.12 in this package. Saved settings, memory, templates and MCP configuration remain preserved.",
         "Origin notices and SHA256 checks are not copy protection. Existing GPL and third-party licenses remain in effect. Reload the extension and refresh AI tabs after updating."
       ]
+    },
+    {
+      "version": "1.19.11",
+      "title": "Urgent tool-result loop fix",
+      "summary": "Fix the internal toSend is not defined error that interrupted normal commands after execution.",
+      "added": [],
+      "improved": [],
+      "fixed": [
+        "Initialize the outgoing message directly from the completed tool feedback before adding changed memory context. Successful results, formatted errors and screenshots reach the AI without an undeclared-variable crash.",
+        "Periodic command-list reminders remain disabled; the three-consecutive-failure pause and existing cancellation behavior are preserved."
+      ],
+      "notes": [
+        "Extension-only hotfix. The native executable remains the unchanged 1.19.10 binary; no Rust/agent changes were needed.",
+        "Reload the extension and refresh open AI tabs after updating. Settings, memory, templates and MCP configuration retain their preservation rules."
+      ]
+    },
+    {
+      "version": "1.19.10",
+      "title": "Notion startup status and meaningful chat continuation",
+      "summary": "Retain the confirmed startup command status after Notion replaces its event anchor, distinguish result attachments, and skip continuation offers for startup-only chats.",
+      "added": [],
+      "improved": [
+        "Notion command-feedback files are named plazcode_tool_result_*.txt and instruct the AI to continue the existing handshake or task, rather than repeat startup.",
+        "Continuation records explicitly track whether a real user request was captured; startup-only legacy records are also filtered."
+      ],
+      "fixed": [
+        "Capture startup identity before card rendering. Restore the confirmed outcome when Notion settles under a replacement event anchor, matching the original conversation, assistant position, preceding user message and command text. Later identical commands stay separate.",
+        "The already-dispatched guard also recognizes restored startup outcomes so a remounted startup call is not replayed.",
+        "The new-chat continuation prompt does not appear for a chat containing only startup instructions, command feedback and readiness acknowledgement."
+      ],
+      "notes": [
+        "The console confirmed list_commands was executed; the second attachment carries its result, not a second full startup.",
+        "Reload the extension and refresh open AI tabs. Saved settings, memory, templates and enabled MCP servers remain preserved."
+      ]
+    },
+    {
+      "version": "1.19.09",
+      "title": "Normal chat flow and targeted command recovery",
+      "summary": "Release completed replies promptly, preserve native idle Co-work messages, and recover command access only when the AI explicitly loses it.",
+      "added": [
+        "User-facing versions now use two patch digits: 1.19.09 through 1.19.99, then 1.20.00. Chrome and native package versions stay numeric without leading zeroes."
+      ],
+      "improved": [
+        "Idle Co-work sends use the same native composer and send path as normal messages. Active follow-ups remain accepted through the existing queue and safe-boundary delivery.",
+        "Normal replies release the composer before asynchronous checkpoint bookkeeping. Superseded or stopped send callbacks cannot start another loop."
+      ],
+      "fixed": [
+        "Notion pre-send response identity is preserved instead of capturing its newly mounted assistant shell, preventing waiting for an already-visible response.",
+        "Removed periodic command-list reminders, periodic full-prompt riders and idle reminder sends. Memory context changes remain distinct from reminders.",
+        "An explicit command-access refusal triggers a live-engine check and one same-chat startup handshake. Successful recovery resumes the unfinished request; repeated refusals stop without a restart loop. Disconnected engines, changed chats, Stop and unsent drafts prevent recovery.",
+        "Delayed injection cleanup is tied to the send that owns it, and an idle composer cannot be covered by a stale working request."
+      ],
+      "notes": [
+        "Settings, memory, templates and enabled MCP servers retain their update preservation rules.",
+        "Reload the extension and refresh open AI tabs after updating."
+      ]
+    },
+    {
+      "version": "1.18.109",
+      "title": "Stable startup and session reminders",
+      "summary": "Keep active chats running without repeating startup, and retain confirmed startup command results across message remounts.",
+      "added": [],
+      "improved": [
+        "Context reminders preserve the current task and pending follow-ups instead of reissuing the startup handshake. Both engines and both reminder delivery paths use the continuation instructions."
+      ],
+      "fixed": [
+        "Confirmed startup list_commands calls retain their completed/error status when the site replaces the message node. They are marked dispatched before awaiting execution so the watchdog cannot replay them.",
+        "Notion command identity follows its stable transcript row across inner editor/code-block replacements.",
+        "Duplicate Start requests on an already-started populated chat no longer inject startup again. Explicit Restart and new-chat Start remain available.",
+        "Notion clears pending navigation-start intent when its composer is prepared or a session is active, and rechecks activity before a delayed resume."
+      ],
+      "notes": [
+        "The plan-based progress ring remains on collapsible Working/Worked headings for supported sites. Custom work groups remain disabled on Notion and ChatGPT.",
+        "Settings, memory, templates and MCP server configuration retain their existing update preservation rules.",
+        "Reload the extension and refresh open AI tabs after updating."
+      ]
+    },
+    {
+      "version": "1.18.108",
+      "title": "Work indicators and Notion startup controls",
+      "summary": "Cleans up work details, disables custom foldouts on Notion and ChatGPT, adds plan-based progress rings, and protects Notion startup input.",
+      "added": [
+        "The Working circle fills according to explicitly checked-off assistant plan steps. Unknown totals use an animated indicator; successful completion fills the ring."
+      ],
+      "improved": [
+        "Custom chat foldouts remain enabled on other supported sites. Notion and ChatGPT use their normal transcript presentation.",
+        "Notion blocks input before composer preparation and covers a bounded composer card, including its send area."
+      ],
+      "fixed": [
+        "Expanded prose-only work no longer displays an empty activity detail box.",
+        "Collapsed work cannot populate an invisible waiting placeholder.",
+        "Notion protocol startup no longer opens the general plus menu while searching for an upload input. Existing file-input/direct-drop upload and single-send checks remain intact.",
+        "Notion input guards block trusted typing, paste, drop and Send during startup, including editor remounts, while allowing internal writes, copy, navigation and Stop."
+      ],
+      "notes": [
+        "Progress reflects explicit assistant Plan/Checklist checkboxes, not an invented percentage based on time or tool budgets. Without a known total the circle stays animated. Interrupted work does not become completed.",
+        "Stop and startup failure release the input lock. Custom work indicators in the browser bar are also hidden for Notion and ChatGPT.",
+        "Reload the extension and refresh open AI tabs after updating."
+      ]
+    },
+    {
+      "version": "1.18.107",
+      "title": "Visible paused work and accurate Co-work state",
+      "summary": "Keeps interrupted work visible and removes the empty Paused queue shown while Co-work is off.",
+      "added": [],
+      "improved": [
+        "Messages only fold when their expandable work heading is available; missing or failed headings leave replies visible.",
+        "Collapsed headings still update their placement, and temporary mount failures can retry."
+      ],
+      "fixed": [
+        "Stopped, interrupted and budget-paused work stays expanded instead of silently collapsing the transcript.",
+        "Stopping with Co-work off and no queued requests no longer pauses an empty queue.",
+        "An empty off-mode Co-work panel and stale Paused/Resume buttons are hidden; real pending requests stay saved and reviewable."
+      ],
+      "notes": [
+        "Completed work still folds and can be reopened. ChatGPT remains exempt from custom work folding.",
+        "The Notion startup provider confirmed working by the user is unchanged, along with all other providers.",
+        "Reload the extension and refresh open AI tabs after updating."
+      ]
+    },
+    {
+      "version": "1.18.106",
+      "title": "Notion uploaded-file preview recognition",
+      "summary": "Recognizes uploaded protocol files that Notion displays outside the inner editor frame or with shortened filenames, instead of timing out while the file card is visibly present.",
+      "added": [],
+      "improved": [
+        "Attachment inspection includes the bounded local composer shell, while excluding transcript history and other editors.",
+        "Preview detection supports reserved PlazCode filenames split across spans, ellipsized names and file-title labels."
+      ],
+      "fixed": [
+        "Notion startup no longer rejects a visible protocol-file card merely because its label is shortened or outside the inner editor/send frame.",
+        "Upload readiness includes busy indicators on recognized file cards. Stop cleanup supports the owned card’s Close or small unlabeled icon control."
+      ],
+      "notes": [
+        "Full protocol text, single-send acknowledgement, foreign draft preservation and exact-name delayed cleanup remain required. ChatGPT, Claude and DeepSeek providers are unchanged.",
+        "Reload the extension AND refresh open AI tabs. Remove any old failed-upload card before retrying. Live signed-in Notion startup still needs confirmation."
+      ]
+    },
+    {
+      "version": "1.18.105",
+      "title": "Notion upload and Claude command cards",
+      "summary": "Fixes the reported Notion native file-drop startup crash and removes empty Claude JSON frame remnants beneath tool cards.",
+      "added": [],
+      "improved": [
+        "Notion file drops now use browser-native DragEvent dataTransfer fields rather than isolated-world Event properties."
+      ],
+      "fixed": [
+        "Startup protocol and screenshot drop fallbacks no longer dispatch generic drag events that hide transfer data from Notion page handlers.",
+        "A native dragleave finishes the upload sequence so drag overlays and cursors can reset.",
+        "Claude command cards hide the surrounding code-only frame, including its JSON label and border, without hiding narration, thinking, normal code or response actions."
+      ],
+      "notes": [
+        "Complete protocol contents, upload confirmation, single-send acknowledgement and Stop cleanup remain required. Live signed-in Notion AI startup still needs confirmation. Reload the extension AND refresh open AI tabs after installing."
+      ]
+    },
+    {
+      "version": "1.18.104",
+      "title": "Animated installer and explicit Notion protocol files",
+      "summary": "A redesigned installer window stays animated during file work, while Notion long startup/tool messages are staged as one exact named text file rather than repeated auto-converted pastes.",
+      "added": [
+        "A rounded dark installer window with PlazCode orange gradients, an animated shimmer and swirl, stage text and real file-copy progress."
+      ],
+      "improved": [
+        "The installer UI runs on its own STA message loop so download, verification, backup, extraction and process waits cannot freeze its animation. File replacement progress advances from actual completed file counts.",
+        "Notion long protocol messages use one named .txt file containing the complete original text, plus a short native composer instruction. Upload readiness and one confirmed send are required; text is not truncated."
+      ],
+      "fixed": [
+        "Notion no longer retries a 33k+ text paste that the site converts into a Pasted text attachment. Existing draft attachments are preserved and receive a specific fresh-chat/remove-draft explanation. Stopped owned uploads are cleaned up.",
+        "Short protocol messages retain the native composer path. Saved settings, MCP configuration, memory, templates, installation process scope, checksums and rollback behavior are preserved."
+      ]
+    },
+    {
+      "version": "1.18.103",
+      "title": "Notion controlled paste and persistent Co-work placeholders",
+      "summary": "Remove bulk native editing from Notion startup, keep its input mask on the editor, and display Follow up whenever Co-work is enabled and the composer is available.",
+      "added": [],
+      "improved": [
+        "Notion sends complete startup and tool-result text through one literal controlled paste transaction, verifies retention through two renders, and commits at most once. No prompt truncation or repeated tiny inserts.",
+        "Co-work uses Follow up in the native composer while enabled, including idle time and after Stop. Internal startup/tool injection retains its temporary input mask. Turning Co-work off restores the original placeholder."
+      ],
+      "fixed": [
+        "Notion no longer uses bulk execCommand or direct React-owned DOM replacement as the large-send fallback. Short native edits rely on Chromium input events instead of duplicate synthetic model events.",
+        "Notion input cover targets only the editable, preventing a growing ancestor from becoming the click-blocking mask. Start on a populated AI landing first opens a fresh chat."
+      ]
+    },
+    {
+      "version": "1.18.102",
+      "title": "Responsive updates, unlocked Stop and native Notion drafts",
+      "summary": "Read release metadata from the current published commit, release the composer on Stop, keep PlazCode work folding off ChatGPT, and use controlled editor events for Notion startup.",
+      "added": [],
+      "improved": [
+        "The default GitHub updater checks the current repository revision every two seconds and fetches metadata by immutable commit. Unchanged metadata is reused; quiet automatic checks and the eight-second request budget remain. Custom feeds retain their configured path. Network delays and browser suspension still apply; this is not guaranteed instant push.",
+        "Notion large startup drafts use one complete native beforeinput/insertText/input write instead of chunked clipboard pastes. Editable/readonly attributes are temporarily restored during the write, focus is acquired after unlocking, and the complete draft must survive two renders before Send.",
+        "Co-work tracks placeholder nodes introduced by composer remounts, and ChatGPT Work literal placeholder labels display Follow up without changing user text or replacing the native input."
+      ],
+      "fixed": [
+        "Stop releases the composer immediately and prevents late work from restoring the Agent is working cover until a new user action resumes work. Tool cancellation and Safe/Immediate semantics remain unchanged.",
+        "PlazCode Working/Worked transcript summaries and bar disclosure are disabled on ChatGPT. Activity records remain available to desktop; other providers retain their collapsible groups.",
+        "Default update checks avoid the cached mutable branch feed when current revision discovery succeeds. Older cached metadata cannot replace a newer known release."
+      ]
+    },
+    {
+      "version": "1.18.101",
+      "title": "Notion literal startup and smoother engine switching",
+      "summary": "Prevent repeated clearing/refilling after a rejected large Notion prompt and distinguish an intentional engine reconnection from a bridge failure.",
+      "added": [],
+      "improved": [
+        "All Notion literal pastes, including startup chunks, use escaped code HTML to avoid rich-text Markdown conversion. Complete normalized text must be retained before Send; sampled near-match acceptance is removed.",
+        "The browser bar shows Switching while AgentScript/RobloxScript reconnects, disables Start, ignores old-engine status and restores actual health on completion or after an eight-second bound."
+      ],
+      "fixed": [
+        "A rejected retained large paste no longer falls into repeated tiny inserts and full rewrites. One initial empty hydration rejection may retry; partial failures stop without sending.",
+        "Intentional engine reconnection does not flash a bridge-down banner. A genuine failure remains visible after the transition timeout."
+      ],
+      "validation": [
+        "Rich-text importer fixtures retain 33k+ prompts with Markdown, paths and Unicode; corruption and Stop abort. Shared startup, native Co-work and Stop checks pass. Notion remains experimental: live-site startup needs confirmation."
+      ]
+    },
+    {
+      "version": "1.18.100",
+      "title": "Restore browser bar startup and placement",
+      "summary": "Fix the 1.18.99 shared UI initialization regression that could leave the bar absent or unpositioned when the chat composer was already loaded.",
+      "added": [],
+      "improved": [
+        "Desktop browser status now distinguishes a visible page bar from a hidden or unmounted page, instead of treating a worker connection as proof of visibility.",
+        "ChatGPT anchors to a bounded visible composer card, including Work layouts and generic class names; page-sized forms and inner text-only scrollers are rejected."
+      ],
+      "fixed": [
+        "Initialize Co-work placeholder state before the first UI render. The shared fix covers ChatGPT, DeepSeek, Claude, Notion and other providers using the same bar.",
+        "Full content-script boot tests exercise composers already present on ChatGPT, DeepSeek, Claude and Notion; placement and native Co-work/Stop regression checks are retained."
+      ]
+    },
+    {
+      "version": "1.18.99",
+      "title": "Native Co-work, continuation and reliability",
+      "summary": "Use the site's own composer for Co-work, preserve chat context across sites, and bound long-running work. Notion long prompts use verified small pastes.",
+      "added": [
+        "New-chat continuation choices: Yes, continue. / No, I wanna start a new project. Context is loaded only after successful startup; captured chat history and continuation excerpts have explicit retention limits.",
+        "Shared command and task-time budgets, continuation export and explicit paused-task resume; zero disables a budget.",
+        "Selective restoration of captured local files and direct Studio script edits, with current-content conflict checks and Edit-mode/session guards.",
+        "Optional bounded, deduplicated Studio screenshots for visual review. Screenshots do not verify runtime behavior.",
+        "Versioned GitHub Releases with fresh-install and compatibility ZIP assets and matching change notes."
+      ],
+      "improved": [
+        "Co-work uses the original ChatGPT, Claude, DeepSeek and Notion composer and native Send control. Follow up is placeholder text only while work is active. Requests are accepted immediately and reach the AI at a safe message boundary; native Stop keeps its role.",
+        "Unsent native composer drafts are guarded and protected during internal tool-result sends. Existing settings, memory and MCP preferences retain their data locations.",
+        "The extension toolbar popup follows shared palette, glow and gradient settings from desktop/bar."
+      ],
+      "fixed": [
+        "Notion 33k+ startup prompts are split into bounded, retained paste chunks, avoiding repeated long-paste attachment conversion. Rejection, cancellation and timeouts do not authorize startup.",
+        "Budget pauses resist automatic watchdog restart; continuation requires a positively confirmed startup in the intended chat.",
+        "Automatic visual checks participate in Immediate Stop and cancellation settling."
+      ]
+    },
+    {
+      "version": "1.18.98",
+      "title": "Keep Immediate Stop latched until cancellation settles",
+      "summary": "Includes all 1.18.97 improvements, with an additional guard against dispatching tools while an interrupted operation is still settling.",
+      "added": [],
+      "improved": [
+        "Immediate Stop remains the default; Safe Stop continues to wait for the current tool step."
+      ],
+      "fixed": [
+        "Keep the browser stop latch while an abandoned tool remains active and block tool dispatch until it settles. New task startup remains guarded."
+      ]
+    },
+    {
+      "version": "1.18.97",
+      "title": "Tray access, shared stop modes and cleaner work sessions",
+      "summary": "Reopen the desktop app from its Windows tray icon, choose Immediate or Safe Stop, send media from desktop, and keep task activity together.",
+      "added": [
+        "Windows tray icon with Open and Quit actions; registration failures keep the app accessible in the taskbar.",
+        "Shared Immediate Stop / Safe Stop settings. Immediate is the default.",
+        "Desktop image/video sender with caption, native upload when supported, sampled-frame fallback and optional installed FFmpeg conversion."
+      ],
+      "improved": [
+        "Co-work treats unfinished requests as active goals and allows independent work to interleave at safe message boundaries. The browser still executes one command per reply.",
+        "Work groups stay expanded during work and collapse after completion, including new messages and ChatGPT action controls.",
+        "Media uploads retain filenames and MIME types, use bounded decoding, and avoid automatic resend after uncertain delivery."
+      ],
+      "fixed": [
+        "Removed empty no-tools-used filler from work summaries.",
+        "Verify the live engine before correcting an inaccurate offline response; a connected bridge alone does not imply Studio is connected.",
+        "Desktop, browser-bar and supported native AI Stop controls share a stop latch. Immediate cancellation is scoped to the active checkpoint and owned command/helper processes; external tools may not honor interruption. Safe Stop waits for the current tool step. Neither mode guarantees rollback."
+      ]
+    },
+    {
+      "version": "1.18.96",
+      "title": "Faster automatic release checks",
+      "summary": "Automatic checks reuse HTTP connections and stop waiting after eight seconds when the release feed stalls.",
+      "added": [],
+      "improved": [
+        "Keep the update HTTP connection pool alive between checks to avoid repeated connection setup. Automatic checks remain quiet and retry in the background."
+      ],
+      "fixed": [
+        "A stalled automatic feed request no longer holds the checker for up to 30 seconds; it has a eight-second timeout. Manual checks retain 30 seconds and downloads retain their existing timeout."
+      ]
+    },
+    {
+      "version": "1.18.95",
+      "title": "Separate app and browser extension folders",
+      "summary": "The main installation folder is PlazCode. Only its browser extension subfolder is named PlazCode-Extension.",
+      "added": [],
+      "improved": [
+        "Fresh downloads place the desktop executable, launcher and updater in PlazCode, with Chrome files in PlazCode/PlazCode-Extension.",
+        "Version detection and the installer support both nested and older flat extension layouts. Older installers receive a compatibility ZIP."
+      ],
+      "fixed": [
+        "Corrected the previous release, which renamed the entire installation folder instead of only the Chrome extension folder.",
+        "Removed Tasks from the browser bar; task checkpoints and workflows remain available in the desktop app. Their disclosure header shows a hand cursor on hover. The Templates subtitle is vertically centered beside its title."
+      ]
+    },
+    {
+      "version": "1.18.94",
+      "title": "Studio MCP compatibility and clearer extension folder",
+      "summary": "PlazCode discovers Studio IDs for the updated Roblox MCP tools, while keeping local bridge startup independent of Studio readiness. Fresh-install ZIPs use PlazCode-Extension.",
+      "added": [],
+      "improved": [
+        "Automatically supply studio_id for targeted Studio tools when one instance is connected. Cache discovery briefly, preserve explicit caller IDs, and require a deliberate selection when multiple instances are open. Older schemas are forwarded unchanged.",
+        "Fresh installations extract into PlazCode-Extension. Update packages preserve the layout older updaters accept, and the updated installer accepts either single-root layout without changing the installed folder."
+      ],
+      "fixed": [
+        "The internal get_studio_state connection probe now receives studio_id when required. Missing IDs no longer prevent automatic Studio connection after the new MCP update.",
+        "Studio auto-connect attempts have an eight-second bound and retry in the background; local bridge endpoints are bound before the desktop opens. Timed-out discovery never dispatches the requested Studio command."
+      ]
+    },
+    {
+      "version": "1.18.93",
+      "title": "Shared themes, larger memory and quieter updates",
+      "summary": "Desktop themes sync to the browser bar and panels, saved memory supports 150K characters, and automatic update checks stay quiet. Notion tool-result delivery has bounded retries and literal code paste.",
+      "added": [
+        "Desktop palette, glow and gradient settings sync through shared preferences to the browser bar, menus, controls and activity panels. Selections persist across restarts and updates; legacy browser themes map back to desktop palettes. Existing unsynced appearance is migrated without forcing a reset.",
+        "Saved memory supports 150,000 characters total, with a capacity display, larger note fields and transactional storage limits. Long notes have previews and paged AI reads instead of being omitted or flooding startup prompts. Memory-only backups can load saved notes without sending an old conversation to the AI."
+      ],
+      "improved": [
+        "Updated the DeepSeek shortcut description; its Open in browser action is unchanged.",
+        "Release checks run every two seconds, and desktop/browser status reads every second. The default GitHub cache key uses two-second buckets; network and publication delays still apply. This is polling, not guaranteed instant push."
+      ],
+      "fixed": [
+        "Automatic checks do not show Checking for updates… or disable the manual check/install buttons. Manual requests wait for an ongoing background read instead of racing it.",
+        "Notion tool results paste as literal HTML code instead of Markdown-like rich text. Failed writes have wall-clock retry limits, preventing hundreds of timer-throttled chunk attempts. A failed draft is cleared only when it still matches the locked composer content captured by that send attempt."
+      ]
+    },
+    {
+      "version": "1.18.92",
+      "title": "Tasks close button and live Co-work follow-ups",
+      "summary": "Close Tasks reliably and send follow-ups during agent work without waiting for the entire task to finish.",
+      "added": [],
+      "improved": [
+        "Co-work delivers new requests alongside the next tool result or continuation, preserving the current task and the order of follow-ups. Streaming responses and running commands are not interrupted.",
+        "Follow-up status confirms receipt and explains delivery at the next safe message boundary. Unconfirmed sends remain paused for review rather than being blindly retried."
+      ],
+      "fixed": [
+        "Tasks has a dedicated sticky header and accessible close button, separated from content, with explicit button type and click handling."
+      ]
+    },
+    {
+      "version": "1.18.91",
+      "title": "Desktop work details and responsive status",
+      "summary": "Expanded desktop work details now show AI replies and commands, with cleaner Home spacing, accurate icons and faster automatic update detection.",
+      "added": [
+        "Desktop Working/Worked details show AI replies, command text and results from the selected browser chat, loaded only while the panel is open."
+      ],
+      "improved": [
+        "Automatic release checks run every five seconds, with desktop/browser status propagation every two seconds. The default GitHub feed uses a five-second cache key; network/cache delays can still apply. Checks do not overlap.",
+        "DeepSeek and Claude shortcuts use vector logos from the supplied references. Tools uses the supplied icon, and Settings has a symmetric centered gear.",
+        "Templates now use Choose a Roblox file and Add template, with short numbered directions. Advanced script search is optional and collapsed.",
+        "Desktop template imports support Roblox files up to 128 MB using direct binary uploads, avoiding base64 copies. Browser imports remain limited to 32 MB; script-index bounds still apply.",
+        "Memory transfer separates Save to a file from Load into another chat, explains saved notes versus messages, and uses clear create/download/load buttons."
+      ],
+      "fixed": [
+        "Task checkpoints & workflows has a clear gap below the Home cards; the Working panel also has consistent spacing.",
+        "Expanded work details preserve unchanged content and scrolling across refreshes, collapse once on completion and remain reopenable. Retention is bounded; oversized/older omitted details receive an explicit notice.",
+        "The updater swirl rotates normally and uses a slower continuous rotation when reduced motion is enabled, instead of freezing."
+      ]
+    },
+    {
+      "version": "1.18.90",
+      "title": "Grouped replies and extension status",
+      "summary": "Task replies and commands collapse together, with extension status under the bar name and a corrected ChatGPT shortcut logo.",
+      "added": [
+        "The browser bar shows its installed extension version below PlazCode, with green (Up to date), red (Outdated - New update available), or a neutral unavailable/unchecked status.",
+        "ChatGPT: Highly intelligent in all aspects. DeepSeek: Recommended for free users. Claude: Expert at scripting and game development. Each description appears below its name and above Open in browser."
+      ],
+      "improved": [
+        "The desktop ChatGPT shortcut uses a vector logo traced from the supplied reference instead of a circle character. Its existing browser-opening action is preserved."
+      ],
+      "fixed": [
+        "Working/Worked now includes task prose, final responses, command cards and injected results. Completed groups collapse together and reopen on click. Startup, list_commands/list_tools and PlazCode is ready. remain outside; user requests remain visible.",
+        "Activity identity survives streaming text changes and transcript remounts, and remains scoped to the chat.",
+        "The updater explicitly preserves native settings, MCP configuration/enabled servers, memory, pairing, templates, update source and WebView user data, even if a package contains saved-data files.",
+        "The Tools page includes both engine skill libraries, imported Studio helpers, asset_bridge_import and developer-product tools with descriptions.",
+        "Working/Worked uses a centered vector chevron that points right when collapsed and rotates down when expanded."
+      ]
+    },
+    {
+      "version": "1.18.89",
+      "title": "Home engine switch",
+      "summary": "Switch between RobloxScript and AgentScript directly above Start Agent on the desktop Home page.",
+      "added": [
+        "A themed, keyboard-accessible RobloxScript / AgentScript button group under the active AI status and above Start Agent. The selected engine is highlighted."
+      ],
+      "improved": [
+        "The Home buttons use the existing saved engine preference and browser synchronization, and stay synchronized with the Settings engine selector. Repeated clicks are disabled while saving."
+      ],
+      "fixed": [
+        "Start Agent is temporarily disabled while the engine change is saving or the selected browser chat still reports a different engine, preventing a start on the previous engine."
+      ]
+    },
+    {
+      "version": "1.18.88",
+      "title": "Automatic template references",
+      "summary": "Import Roblox place/model files and let PlazCode find relevant reference systems automatically before a task’s first tool call.",
+      "added": [
+        "Templates tab in the desktop app and a Template library inside browser Tasks. Import .rbxl, .rbxlx, .rbxm and .rbxmx files up to 32 MB, add a systems description, browse/read scripts and remove saved references.",
+        "Automatic matching uses cached script paths, identifiers and template descriptions. Up to three bounded excerpts are supplied before the first agent tool executes; no explicit “reference this template” request is required.",
+        "Read-only plazcode_templates tools support explicit matching, script lists and paged source reading. Duplicate script paths have separate IDs.",
+        "Open in Studio explicitly opens the retained original through the Windows Roblox file association; select the desired Studio session in PlazCode afterwards."
+      ],
+      "improved": [
+        "Template code is reference data, not executable instructions. Existing project conventions take priority. Matching is a relevance hint rather than guaranteed semantic understanding.",
+        "Template files/indexes persist in your private app data, survive updates and are excluded from distribution ZIPs. Source indexes and excerpts have explicit size limits to avoid flooding long chats."
+      ],
+      "fixed": [
+        "Malformed, unsupported and source-free files report clear import errors. Missing scripts in copied/decompiled games are not fabricated or recovered. Binary and XML imports preserve the original file bytes."
+      ]
+    },
+    {
+      "version": "1.18.87",
+      "title": "Task checkpoints, project memory & reliable tools",
+      "summary": "Review and recover agent tasks, keep project facts separate, and reduce repeated tool errors and long-chat overhead.",
+      "added": [
+        "Tasks panel in the desktop Home page and browser bar: bounded task history, file before/after previews, conflict-checked Revert and resume in the original chat.",
+        "AgentScript file checkpoints persist across app restarts. Studio Revert is offered only when exact undo records are confirmed in the current bridge/Studio session. Unsupported operations disable whole-task automatic restore.",
+        "Protected paths with explicit task approval; project memory scopes shared by named projects; reusable built-in and custom workflows."
+      ],
+      "improved": [
+        "Long-chat activity retains at most 60 groups, builds collapsed details only when expanded, ignores its own UI mutations and caches unchanged export text. Retention overflow produces an explicit export error.",
+        "Automatic release checks run on launch and every minute; returning to an AI tab or desktop window triggers a throttled check. Update labels refresh without pressing Check now. Network/cache delays can still apply."
+      ],
+      "fixed": [
+        "Tool preflight checks JSON argument shapes against available schemas, detects incomplete Luau strings/delimiters and preserves datamodel defaults. Three consecutive malformed replies or execution failures pause the agent.",
+        "Studio mutation commands are not blindly replayed after a dropped helper connection; uncertain results require inspecting Studio before retrying.",
+        "Unchanged memory and release snapshots no longer generate repeated storage broadcasts. Workflow delivery acknowledgements are deduplicated."
+      ]
     }
   ],
   "platforms": {
     "macos": {
-      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.22.1.zip",
-      "sha256": "4de418cc61224227909cf575d020ed1ab737a1a5bdcdc6495e1f80807ac047c2"
+      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.23.0.zip",
+      "sha256": "fc004c0416c9be1d84fca9a026f62ca939eec15d294b89ec465f0986641ab21c"
     }
   }
 }

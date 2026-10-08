@@ -1,0 +1,39 @@
+**PlazCode 1.23.0: Saved skills, Studio Explorer and provider resilience**
+
+- Save project-aware skills and completed-task methods, edit your game from a Studio-synced Explorer, collapse the sidebar to icons, and recover Model Builder responses that previously appeared as raw JSON. All provider adapters now handle failed DOM reads and bounded waits more safely.
+
+***New additions***
+
+- Skills page: save reusable methods, turn completed tasks into editable candidates, add verification checks and mark successful methods ready for reuse. Skills instruct the AI to inspect and adapt to the current project.
+- Optional shared learning: download approved community skills and submit reviewed methods to the shared GitHub repository. Sharing is off by default and never uploads raw chats or project files. These lessons improve task context, not AI model weights.
+- Studio Explorer with a game tree, script editor and supported object-property controls. Auto-sync is on by default and can be disabled; local drafts, manual push, Studio comparison, conflict protection and undo recording are included.
+- A saved hamburger toggle collapses the desktop sidebar to page icons.
+
+***Improvements***
+
+- All 13 active providers and two retained legacy adapters guard DOM reads and selectors, use bounded asynchronous waits, and avoid treating a failed read as send confirmation.
+- Notion uses semantic ancestor resolution and finally-protected input cleanup so failures do not leave the composer locked.
+- Fresh Windows and universal Intel/Apple Silicon macOS native builds; Windows executables include consistent version metadata.
+
+***Bug fixes***
+
+- Valid bare Model/UI Builder save JSON is recovered only within the active creator task and goes through the existing blueprint validation and preview flow. Creator context survives prompt enhancement and resets for unrelated tasks.
+- Windows app and file launch no longer route executable paths through cmd start. Background helpers suppress console windows and command execution disables CMD AutoRun, addressing paths that could cause unexpected command windows.
+- Updater invocation no longer explicitly bypasses PowerShell execution policy.
+
+***Validation and limitations***
+
+- Automated provider, Explorer, skills, native HTTP, Luau and platform regressions are included. Signed-in provider sites and real Studio/Blender end-to-end tests were not performed.
+- Antivirus-related launch and metadata changes are candidate improvements, not a guarantee against future Microsoft Defender detections. The executable remains unsigned; GitHub provenance is not an Authenticode publisher signature.
+- Existing settings, memory, templates and enabled MCP servers retain their existing data locations. Reload the browser extension and refresh AI tabs after updating.
+
+## Update
+
+- Desktop launch automatically checks and updates to the newest release when outdated. Manual update: choose **Updates → Update now**.
+- Windows: run **Update-PlazCode.bat** for a manual update. macOS: launch **PlazCode.app** from the extracted folder; use **MacOS_Setup.command** for setup.
+- Chromium: reload at chrome://extensions, edge://extensions or brave://extensions and refresh AI tabs. Firefox: open about:debugging, Load Temporary Add-on and select manifest.json inside PlazCode-Extension-Firefox or the standalone Firefox ZIP. Unsigned temporary addons are removed when Firefox restarts; permanent installation needs Mozilla signing.
+- Windows: download **PlazCode-1.23.0.zip**. macOS: download **PlazCode-macOS-1.23.0.zip**. The normal ZIP retains Mac compatibility for older installed updaters.
+- Firefox: download **PlazCode-Firefox-1.23.0.zip** or use **PlazCode-Extension-Firefox** inside either desktop package. Requires Firefox 140 or newer.
+- Existing settings, memory and enabled MCP servers keep their data locations.
+
+See VALIDATION.txt inside the ZIP for checks and live-test limitations.

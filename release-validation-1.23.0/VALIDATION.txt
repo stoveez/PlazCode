@@ -1,0 +1,15 @@
+PlazCode 1.23.0
+Source: a93610aa8411e8b3e7aaa4d45172eed18f53b4bc
+CI: https://github.com/stoveez/PlazCode/actions/runs/37707590040
+Chromium/Firefox fixtures, JavaScript and all native-platform regressions passed.
+Original Mac packaging failed on lipo argument order after both architectures compiled.
+Corrected packaging reused the exact compiled artifact and passed codesign/architecture verification.
+Windows release rebuilt from identical reviewed source; PE/updater/icon checks passed using Windows PowerShell for the .NET Framework icon fixture.
+Live signed-in providers and real Studio/Blender were not tested. Windows binaries remain unsigned.
+Skills improve retrieved task context, not underlying AI model weights. Sharing is opt-in.
+Microsoft Defender runner result (before final cross-platform assembly):
+Scan starting...
+Scan finished.
+Scanning D:\a\PlazCode\PlazCode\build-src\PlazCode/defender-scan found no threats.
+
+See release-validation-1.23.0/ for the CI scan result and original scanned package checksum.

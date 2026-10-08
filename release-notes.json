@@ -1,5 +1,31 @@
 [
   {
+    "version": "1.23.0",
+    "title": "Saved skills, Studio Explorer and provider resilience",
+    "summary": "Save project-aware skills and completed-task methods, edit your game from a Studio-synced Explorer, collapse the sidebar to icons, and recover Model Builder responses that previously appeared as raw JSON. All provider adapters now handle failed DOM reads and bounded waits more safely.",
+    "added": [
+      "Skills page: save reusable methods, turn completed tasks into editable candidates, add verification checks and mark successful methods ready for reuse. Skills instruct the AI to inspect and adapt to the current project.",
+      "Optional shared learning: download approved community skills and submit reviewed methods to the shared GitHub repository. Sharing is off by default and never uploads raw chats or project files. These lessons improve task context, not AI model weights.",
+      "Studio Explorer with a game tree, script editor and supported object-property controls. Auto-sync is on by default and can be disabled; local drafts, manual push, Studio comparison, conflict protection and undo recording are included.",
+      "A saved hamburger toggle collapses the desktop sidebar to page icons."
+    ],
+    "improved": [
+      "All 13 active providers and two retained legacy adapters guard DOM reads and selectors, use bounded asynchronous waits, and avoid treating a failed read as send confirmation.",
+      "Notion uses semantic ancestor resolution and finally-protected input cleanup so failures do not leave the composer locked.",
+      "Fresh Windows and universal Intel/Apple Silicon macOS native builds; Windows executables include consistent version metadata."
+    ],
+    "fixed": [
+      "Valid bare Model/UI Builder save JSON is recovered only within the active creator task and goes through the existing blueprint validation and preview flow. Creator context survives prompt enhancement and resets for unrelated tasks.",
+      "Windows app and file launch no longer route executable paths through cmd start. Background helpers suppress console windows and command execution disables CMD AutoRun, addressing paths that could cause unexpected command windows.",
+      "Updater invocation no longer explicitly bypasses PowerShell execution policy."
+    ],
+    "notes": [
+      "Automated provider, Explorer, skills, native HTTP, Luau and platform regressions are included. Signed-in provider sites and real Studio/Blender end-to-end tests were not performed.",
+      "Antivirus-related launch and metadata changes are candidate improvements, not a guarantee against future Microsoft Defender detections. The executable remains unsigned; GitHub provenance is not an Authenticode publisher signature.",
+      "Existing settings, memory, templates and enabled MCP servers retain their existing data locations. Reload the browser extension and refresh AI tabs after updating."
+    ]
+  },
+  {
     "version": "1.22.1",
     "title": "Model Builder, Notion and add-on fixes",
     "summary": "Model Builder and UI Builder Generate works again, Notion AI turns no longer stop with Message was not confirmed after an accepted message, Studio add-ons such as robloxstudio-mcp stay connected during long playtests, and Git, Ollama and Roblox requests no longer fail or wait forever.",
@@ -229,7 +255,7 @@
     "title": "Clarify unclear tasks and fix Blender command results",
     "summary": "Add an AI clarification panel with scoped options and explicit answers, and correct Blender command result handling.",
     "added": [
-      "A clarification panel displays the active AI name followed by is asking you\u2026, with 2\u20133 options, the scope of each, a recommended approach and 1\u20133 clarifying questions.",
+      "A clarification panel displays the active AI name followed by is asking you…, with 2–3 options, the scope of each, a recommended approach and 1–3 clarifying questions.",
       "Answers support selecting an option, adding details or proposing a different approach. Submitted answers return to the same AI session."
     ],
     "improved": [
@@ -369,13 +395,13 @@
     "fixed": [
       "Quick Access Tools, MCP Servers, Terminal and Settings icons now use the exact SVG artwork from the sidebar.",
       "The supported-AI list expands in normal page flow, keeping Task checkpoints & workflows and following content from overlapping.",
-      "The browser bar now reads the desktop\u2019s confirmed Studio connection status instead of ignoring it.",
+      "The browser bar now reads the desktop’s confirmed Studio connection status instead of ignoring it.",
       "A missed process scan or a disconnected browser tab no longer clears a verified Studio MCP connection. Unknown probe timeouts retain the last confirmed result; explicit connection failures still disable the agent."
     ],
     "notes": [
       "Native launch routing and provider coverage are checked without opening live AI sites.",
       "Reload the extension after the desktop update and refresh open AI tabs.",
-      "Connection regressions cover confirmed-editor/missed-process cases, explicit disconnections and timed-out probes. The tester\u2019s actual machine was not available for direct reproduction."
+      "Connection regressions cover confirmed-editor/missed-process cases, explicit disconnections and timed-out probes. The tester’s actual machine was not available for direct reproduction."
     ]
   },
   {
@@ -407,7 +433,7 @@
     "added": [
       "Beginner-friendly execution help explains engines, command/time limits, visual review, stop modes, permissions, continuation exports and resuming paused tasks.",
       "An Engram guide explains project notes, searching, fact IDs, topic keys and the difference between memory, saved logs and continuation files.",
-      "Creators now follow Describe \u2192 Review preview \u2192 Insert in Studio, with labeled inputs, simpler edit buttons, an AI readiness explanation and optional file/feedback controls grouped separately."
+      "Creators now follow Describe → Review preview → Insert in Studio, with labeled inputs, simpler edit buttons, an AI readiness explanation and optional file/feedback controls grouped separately."
     ],
     "improved": [
       "Desktop and extension numeric/select controls use themed backgrounds, clear borders, focus states and consistent spacing. Saved-chat controls and creator edit actions have explicit gaps.",
@@ -417,7 +443,7 @@
     "fixed": [
       "Desktop refresh no longer resets command/time values while a field is focused or its change is being saved. Empty or invalid numeric changes are not saved as limits.",
       "Ordinary assistant prose followed by a tool result is no longer replaced by a tool-only chip.",
-      "DeepSeek no longer interprets \u201cStopped\u201d inside generated code or prose as a site stop notice; message IDs take priority over recycled virtual-list keys.",
+      "DeepSeek no longer interprets “Stopped” inside generated code or prose as a site stop notice; message IDs take priority over recycled virtual-list keys.",
       "An unfinished DeepSeek command block no longer masks every following paragraph."
     ],
     "notes": [
@@ -464,7 +490,7 @@
     "title": "Branded Windows application and tray icons",
     "summary": "Add the missing PlazCode application icon to the Windows executable and background tray.",
     "added": [
-      "Embedded multi-resolution PlazCode icon includes 16\u2013256 pixel sizes for Windows application files and display scaling."
+      "Embedded multi-resolution PlazCode icon includes 16–256 pixel sizes for Windows application files and display scaling."
     ],
     "improved": [
       "The application window, taskbar and background tray share the existing orange PlazCode brand mark.",
@@ -811,7 +837,7 @@
     ],
     "fixed": [
       "Notion startup no longer rejects a visible protocol-file card merely because its label is shortened or outside the inner editor/send frame.",
-      "Upload readiness includes busy indicators on recognized file cards. Stop cleanup supports the owned card\u2019s Close or small unlabeled icon control."
+      "Upload readiness includes busy indicators on recognized file cards. Stop cleanup supports the owned card’s Close or small unlabeled icon control."
     ],
     "notes": [
       "Full protocol text, single-send acknowledgement, foreign draft preservation and exact-name delayed cleanup remain required. ChatGPT, Claude and DeepSeek providers are unchanged.",
@@ -1019,7 +1045,7 @@
       "Release checks run every two seconds, and desktop/browser status reads every second. The default GitHub cache key uses two-second buckets; network and publication delays still apply. This is polling, not guaranteed instant push."
     ],
     "fixed": [
-      "Automatic checks do not show Checking for updates\u2026 or disable the manual check/install buttons. Manual requests wait for an ongoing background read instead of racing it.",
+      "Automatic checks do not show Checking for updates… or disable the manual check/install buttons. Manual requests wait for an ongoing background read instead of racing it.",
       "Notion tool results paste as literal HTML code instead of Markdown-like rich text. Failed writes have wall-clock retry limits, preventing hundreds of timer-throttled chunk attempts. A failed draft is cleared only when it still matches the locked composer content captured by that send attempt."
     ]
   },
@@ -1092,10 +1118,10 @@
   {
     "version": "1.18.88",
     "title": "Automatic template references",
-    "summary": "Import Roblox place/model files and let PlazCode find relevant reference systems automatically before a task\u2019s first tool call.",
+    "summary": "Import Roblox place/model files and let PlazCode find relevant reference systems automatically before a task’s first tool call.",
     "added": [
       "Templates tab in the desktop app and a Template library inside browser Tasks. Import .rbxl, .rbxlx, .rbxm and .rbxmx files up to 32 MB, add a systems description, browse/read scripts and remove saved references.",
-      "Automatic matching uses cached script paths, identifiers and template descriptions. Up to three bounded excerpts are supplied before the first agent tool executes; no explicit \u201creference this template\u201d request is required.",
+      "Automatic matching uses cached script paths, identifiers and template descriptions. Up to three bounded excerpts are supplied before the first agent tool executes; no explicit “reference this template” request is required.",
       "Read-only plazcode_templates tools support explicit matching, script lists and paged source reading. Duplicate script paths have separate IDs.",
       "Open in Studio explicitly opens the retained original through the Windows Roblox file association; select the desired Studio session in PlazCode afterwards."
     ],
