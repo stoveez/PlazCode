@@ -124,7 +124,7 @@ const RSProvider = (() => {
   const COMPOSER_TEXT_RE = /(do anything with|anything with ai|ask notion ai|ask ai|ask anything|what would you like|message.*(?:ai|notion)|start typing|reply to|your message|frag(?:e)? notion[-\s]?(?:ki|ai)|frage.*(?:ki|notion)|demande[rz]? .*notion|pregunta.*notion|pergunte.*notion)/i;
   // Placeholder wording that is only trusted as an attribute on (or labelling)
   // the composer: as free text, AI replies also say "How can I help...".
-  const COMPOSER_PLACEHOLDER_RE = /how can i help/i;
+  const COMPOSER_PLACEHOLDER_RE = /how can i help|wie kann ich (?:dir|ihnen) helfen|was m[öo]chtest du|frag(?:e)? (?:die )?ki|ki etwas fragen|comment puis-je|comment (?:puis|peux).*aider|c[óo]mo puedo ayudar|como posso ajudar/i;
   const isTextControl = (el) => !!el && /^(INPUT|TEXTAREA)$/.test(safeRead(() => el.tagName, "") || "");
 
   function resetEditorCacheForRoute() {
@@ -1440,6 +1440,7 @@ const RSProvider = (() => {
 
   // ── input lock (same semantics as Arena) ─────────────────────────────────
   let _lockWanted = false, _lockTimer = null, _selfWrite = false;
+  const _lockedEditors = new Set();
   const LOCK_PLACEHOLDER = "⏳ Agent working… please wait";
   const MISSING_ATTR = "__zs_missing__";
   function saveAttrOnce(ed, attr, store) {
@@ -1455,6 +1456,7 @@ const RSProvider = (() => {
   function applyLockAttrs(ed) {
     if (!ed) return;
     if (isTextControl(ed)) {
+      _lockedEditors.add(ed);
       saveAttrOnce(ed, "aria-disabled", "data-zs-lock-ad");
       if (!safeRead(() => ed.hasAttribute("data-zs-lock-ro"), false)) ed.setAttribute("data-zs-lock-ro", safeRead(() => ed.readOnly, true) ? "1" : "0");
       saveAttrOnce(ed, "placeholder", "data-zs-lock-ph");
@@ -1507,19 +1509,26 @@ const RSProvider = (() => {
       return;
     }
     if (_lockTimer) { clearInterval(_lockTimer); _lockTimer = null; }
-    if (!ed) return;
-    if (isTextControl(ed)) {
-      const ro = safeRead(() => ed.getAttribute("data-zs-lock-ro"), null);
-      if (ro != null) ed.readOnly = ro === "1";
-      ed.removeAttribute("data-zs-lock-ro");
-      restoreAttr(ed, "placeholder", "data-zs-lock-ph");
-    } else {
-      restoreAttr(ed, "contenteditable", "data-zs-lock-ce");
-      restoreAttr(ed, "data-placeholder", "data-zs-lock-dp");
-      restoreAttr(ed, "aria-readonly", "data-zs-lock-ar");
+    // Restore every editor we touched, including hidden/detached React nodes.
+    // A reused node must not inherit a lock from a failed or cancelled startup.
+    if (ed) _lockedEditors.add(ed);
+    for (const locked of _lockedEditors) {
+      try {
+        if (isTextControl(locked)) {
+          const ro = safeRead(() => locked.getAttribute("data-zs-lock-ro"), null);
+          if (ro != null) locked.readOnly = ro === "1";
+          locked.removeAttribute("data-zs-lock-ro");
+          restoreAttr(locked, "placeholder", "data-zs-lock-ph");
+        } else {
+          restoreAttr(locked, "contenteditable", "data-zs-lock-ce");
+          restoreAttr(locked, "data-placeholder", "data-zs-lock-dp");
+          restoreAttr(locked, "aria-readonly", "data-zs-lock-ar");
+        }
+        restoreAttr(locked, "aria-disabled", "data-zs-lock-ad");
+        locked.classList.remove("zs-typing");
+      } catch {}
     }
-    restoreAttr(ed, "aria-disabled", "data-zs-lock-ad");
-    try { ed.classList.remove("zs-typing"); } catch {}
+    _lockedEditors.clear();
   }
 
   // ── typing + sending ─────────────────────────────────────────────────────
@@ -2843,8 +2852,8 @@ const RSProvider = (() => {
       // Edge (enhanced security without JIT, efficiency mode, a restored
       // sleeping tab) can take far longer than Chrome to hydrate Notion's
       // editor after the page shell paints. 20s failed those cold starts.
-      while (!ed && isAiSurface() && Date.now() - t0 < COMPOSER_WAIT_MS) {
-        await waitFor(() => !!findEditorRaw() || !isAiSurface(), 1000);
+      while (!ed && !isStopped() && isAiSurface() && Date.now() - t0 < COMPOSER_WAIT_MS) {
+        await waitFor(() => isStopped() || !!findEditorRaw() || !isAiSurface(), 1000);
         ed = findEditorRaw();
         if (!ed && Date.now() - t0 >= (typeof PROVISIONAL_AFTER_MS === "number" ? PROVISIONAL_AFTER_MS : 5000) &&
             typeof adoptProvisionalEditor === "function") ed = adoptProvisionalEditor(reason);
@@ -2852,7 +2861,7 @@ const RSProvider = (() => {
       _composerWaitStart = 0;
       diag("notion.composer.waited", { found: !!ed, ms: Date.now() - t0, reason, path: location.pathname });
     }
-    return { ready: !!ed, editor: !!ed,
+    return { ready: !!ed && !isStopped(), editor: !!ed,
       error: ed ? "" : "Notion did not load its AI editor at /ai after 60 seconds. Open New chat with AI in Notion, then retry; if /ai itself fails to load, reload Notion. On Microsoft Edge, also turn off Efficiency mode / sleeping tabs for notion.so." };
   }
 

@@ -18,7 +18,8 @@
     "Saved previews insert and export without extra errors.",
     "Editing saved creations no longer causes repeated errors.",
     "Failed updates show the actual error and log location.",
-    "Updates handle missing or incomplete saved update settings."
+    "Updates handle missing or incomplete saved update settings.",
+    "Notion startup handles slow responses and localized editors, and restores typing after cancellation."
   ],
   "notes": [
     "Platform checks passed. Live AI chats remain untested; no performance gain is claimed."
@@ -50,7 +51,7 @@
         "title": "🛠️ Fewer interruptions",
         "items": [
           "**Creation tools:** saved previews, edits and exports work with fewer errors.",
-          "**Notion:** skips unnecessary setup-file uploads when its editor can accept the text.",
+          "**Notion:** better startup recovery, localized chat boxes and typing unlocked after failed starts; fewer unnecessary setup uploads.",
           "**Updates:** handles incomplete update settings and shows the actual reason if installation fails."
         ]
       },
