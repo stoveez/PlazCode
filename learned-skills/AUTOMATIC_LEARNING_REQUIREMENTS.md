@@ -36,3 +36,12 @@ Measure first-attempt correctness, successful completion rate, tool errors/retri
 - Tests cover invalid lessons, poisoning, retries, duplicate submissions, service outages, retractions and project adaptation.
 - End-to-end testing verifies one installation's safe validated lesson becomes usable on another installation.
 - Existing regressions pass and future release descriptions retain the existing format with fewer than 2,000 characters.
+
+
+## First automatic implementation (1.24.0)
+
+The desktop now automatically retrieves and reports three predefined local edit/test workflows. It submits only canonical recipe IDs and a pass/fail enum after actual process results. Completion alone, unsupported tools/commands, failed mutations, uncertain checkpoint verification, missing reads and missing post-edit tests do not qualify. Offline reports queue locally; global sharing cannot be disabled through preferences.
+
+The public service validates a closed schema, uses expiring one-use proof-of-work tickets, atomically deduplicates reports, bounds daily capacity, versions aggregate methods and supports server-authorized retractions. Service source and tests are in learning-service. Runtime administration credentials are server-only and absent from clients. Returned IDs expand to built-in methods; no external instructions are accepted.
+
+This is a deliberately bounded first implementation: it shares workflow evidence, not arbitrary problem-specific answers or provider model weights. Anonymous reports do not prove independent users or correctness. Roblox/Blender and unsupported local tasks remain local. No benchmark improvement is claimed, and no benchmark answers are collected. Extending solution coverage requires adding reviewed typed schemas and authoritative checks, rather than uploading redacted free text.
