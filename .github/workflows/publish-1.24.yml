@@ -17,8 +17,8 @@ jobs:
     timeout-minutes: 50
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: ea2939f8da02529accbb465582f3a95b07e5fd5d
-      VALIDATION_RUN: '37720035685'
+      VALIDATED_SHA: e5cb8f35e3a85a2de628fb0ad29288fcc0a77404
+      VALIDATION_RUN: '37722075245'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -55,8 +55,8 @@ jobs:
     timeout-minutes: 55
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: ea2939f8da02529accbb465582f3a95b07e5fd5d
-      VALIDATION_RUN: '37720035685'
+      VALIDATED_SHA: e5cb8f35e3a85a2de628fb0ad29288fcc0a77404
+      VALIDATION_RUN: '37722075245'
     steps:
       - uses: actions/checkout@v4
         with:

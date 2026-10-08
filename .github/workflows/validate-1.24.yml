@@ -48,6 +48,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     env:
+      PYTHONUTF8: '1'
       CARGO_INCREMENTAL: '0'
       CARGO_PROFILE_DEV_CODEGEN_UNITS: '1'
       CARGO_PROFILE_TEST_CODEGEN_UNITS: '1'
@@ -63,10 +64,12 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: build-src/PlazCode/agent
+          cache-on-failure: true
       - name: Shared service protocol and database regressions
         run: |
           node --experimental-strip-types learning-service/test-protocol.mjs
           python learning-service/test-sql.py
+          python development/1.24.0/test-starter-pack.py
           python test-release-feed.py
           python test-release-notes.py
       - run: rustup update stable --no-self-update

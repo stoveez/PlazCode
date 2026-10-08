@@ -72,6 +72,7 @@ mod creations;
 mod explorer;
 mod skills;
 mod shared_learning;
+mod starter_skills;
 mod creation_export;
 mod updater;
 mod toolkit;
