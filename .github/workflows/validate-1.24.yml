@@ -103,6 +103,14 @@ jobs:
           $signature | Format-List | Out-File windows-signature.txt
           # This development workflow does not possess a publisher certificate.
           # Never represent an unsigned development build as a signed release.
+      - name: Verify Windows automatic launch and later update handoff
+        if: runner.os == 'Windows'
+        working-directory: build-src/PlazCode
+        run: |
+          python test-auto-update-launch.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python test-auto-update-after-launch.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Package fresh Windows artifacts
         if: runner.os == 'Windows'
         run: python development/1.24.0/package.py
@@ -117,6 +125,9 @@ jobs:
           if (-not $scanner) { throw 'Defender enabled but scanner unavailable.' }
           $zip=Resolve-Path '../../artifacts/PlazCode-1.24.0-development.zip'
           Get-FileHash $zip -Algorithm SHA256 | Format-List | Out-File defender-package-sha256.txt
+          Update-MpSignature -ErrorAction Stop
+          $status=Get-MpComputerStatus -ErrorAction Stop
+          Get-FileHash PlazCode.exe -Algorithm SHA256 | Format-List | Out-File defender-executable-sha256.txt
           $status | Select-Object AMProductVersion,AMEngineVersion,AntivirusSignatureVersion,AntivirusSignatureLastUpdated | ConvertTo-Json | Out-File defender-engine.json
           Expand-Archive $zip -DestinationPath defender-scan
           & $scanner.FullName -Scan -ScanType 3 -File "$PWD/defender-scan" -DisableRemediation 2>&1 | Tee-Object defender-result.txt
@@ -129,6 +140,12 @@ jobs:
           cargo +stable build --release --locked --manifest-path agent/Cargo.toml --target x86_64-apple-darwin
           cargo +stable build --release --locked --manifest-path agent/Cargo.toml --target aarch64-apple-darwin
           lipo -create agent/target/x86_64-apple-darwin/release/PlazCode agent/target/aarch64-apple-darwin/release/PlazCode -output agent/target/release/PlazCode
+      - name: Verify automatic launch and later update handoff
+        if: runner.os == 'macOS'
+        working-directory: build-src/PlazCode
+        run: |
+          python test-auto-update-launch.py
+          python test-auto-update-after-launch.py
       - name: Package fresh native artifacts
         if: runner.os == 'macOS'
         run: python development/1.24.0/package.py
@@ -142,4 +159,5 @@ jobs:
             build-src/PlazCode/defender-result.txt
             build-src/PlazCode/defender-package-sha256.txt
             build-src/PlazCode/defender-engine.json
+            build-src/PlazCode/defender-executable-sha256.txt
           if-no-files-found: warn
