@@ -13,12 +13,12 @@ def find(name,platform):
 
 def unpack_package(path):
     files=a.unpack(path)
-    # Only our added text notices differ due to Windows checkout/write_text.
+    # Added text notices and the shell helper use canonical LF line endings.
     # Preserve all 217 supplied files, fonts and validated executable bytes.
     notices=('starter-skills/syphodev/PLAZCODE-ADAPTER.md',
              'starter-skills/syphodev/skills/roblox-ui/references/fonts/OFL.txt')
     for name,(raw,mode) in files.items():
-        if name.endswith(notices):
+        if name.endswith(notices) or name == 'PlazCode/Update-PlazCode.command':
             files[name]=(raw.replace(b'\r\n',b'\n'),mode)
     return files
 
