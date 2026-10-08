@@ -29,6 +29,7 @@ def main():
     assert {n:v[0] for n,v in source.items()}=={n:v[0] for n,v in other.items()}
     desktop=a.load(ROOT/'ci-artifacts/mac-desktop/mac-desktop-result.json');assert {d['mode'] for d in desktop}=={'foreground','background','restore'} and all(d['desktop_ready'] and d['version']==VERSION and d['alive_seconds']>=15 for d in desktop)
     assert next(d for d in desktop if d['mode']=='foreground')['alive_seconds']>=210
+    assert all(d['window_visible']==(d['mode']!='background') for d in desktop)
     entry=a.load(Path(__file__).with_name('release-entry.json'));notes=[entry]+[n for n in a.load(ROOT/'release-notes.json') if n['version']!=VERSION]
     a.write_json(ROOT/'release-notes.json',notes)
     defender=find('defender-result.txt','Windows').read_text(encoding='utf-8-sig').strip();assert defender

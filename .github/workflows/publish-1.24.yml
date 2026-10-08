@@ -10,7 +10,7 @@ permissions:
   id-token: write
 concurrency:
   group: plazcode-final-1.24
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   mac-desktop:
     runs-on: macos-latest
