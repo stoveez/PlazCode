@@ -89,6 +89,8 @@ with tempfile.TemporaryDirectory(prefix='plazcode-macos-desktop-') as temporary:
             results.append({'mode': mode, 'version': version, 'alive_seconds': duration, 'desktop_ready': True, 'window_visible': expected_visible})
             print('PASS macOS desktop readiness, updater relaunch and process lifetime:', results[-1], flush=True)
         finally:
+            Path("mac-desktop-result.json").write_text(json.dumps(results, indent=2) + "\n")
             stop(pid)
+            subprocess.run(['/usr/bin/codesign','--verify','--deep','--strict',str(install/'PlazCode.app')],check=True)
 
 Path('mac-desktop-result.json').write_text(json.dumps(results, indent=2) + '\n')

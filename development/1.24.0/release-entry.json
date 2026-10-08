@@ -10,7 +10,8 @@
     "Shared learning is always active; local free-text candidates remain private and separate manual contributions still require review."
   ],
   "fixed": [
-    "Fixed “Release feed is too large” for existing installations. Feeds retain five recent entries with a byte budget; the full changelog remains separate."
+    "Fixed “Release feed is too large” for existing installations. Feeds retain five recent entries with a byte budget; the full changelog remains separate.",
+    "macOS background launches apply window state after desktop startup; agent and updater logs stay outside the signed app bundle."
   ],
   "notes": [
     "Workflow reports do not train provider model weights or prove benchmark gains. Unsupported workflows remain local. Live signed-in providers and Studio/Blender are untested; Windows remains unsigned."
@@ -25,7 +26,8 @@
       "Private prompts, code, paths and identifiers stay local."
     ],
     "fixed": [
-      "Oversized update feeds blocked older installations; compact feeds now have a release gate."
+      "Oversized update feeds blocked older installations; compact feeds now have a release gate.",
+      "macOS background window state and logs outside the signed app bundle."
     ],
     "notes": [
       "Workflow reuse does not train model weights. No benchmark gain claimed. See ZIP validation."

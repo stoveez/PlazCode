@@ -20,7 +20,7 @@ use std::os::windows::process::CommandExt;
 const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
 /// Append-only file logger so the GUI-subsystem release build keeps visible
-/// diagnostics in `<exe dir>/logs/agent.log` (stdout is invisible there).
+/// diagnostics outside the signed macOS bundle (stdout is invisible there).
 #[derive(Clone)]
 struct FileLog {
     file: Arc<std::sync::Mutex<File>>,
@@ -43,6 +43,9 @@ impl std::io::Write for FileLog {
 }
 
 fn init_file_logger(ui: Option<Arc<gui::UiShared>>) {
+    #[cfg(target_os = "macos")]
+    let dir = platform::configuration_root().join("logs");
+    #[cfg(not(target_os = "macos"))]
     let dir = std::env::current_exe().ok()
         .and_then(|p| p.parent().map(|d| d.join("logs")))
         .unwrap_or_else(|| PathBuf::from("logs"));

@@ -17,8 +17,8 @@ jobs:
     timeout-minutes: 50
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: e5cb8f35e3a85a2de628fb0ad29288fcc0a77404
-      VALIDATION_RUN: '37722075245'
+      VALIDATED_SHA: 1514eff25429d4c59a16a6c2b83636150c53b875
+      VALIDATION_RUN: '37724180832'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -47,7 +47,8 @@ jobs:
           name: plazcode-1.24-mac-desktop-validation
           path: |
             mac-desktop-result.json
-            mac-desktop-install/PlazCode/logs/agent.log
+            ~/Library/Application Support/PlazCode/logs/agent.log
+            ~/Library/Application Support/PlazCode/logs/updater.log
           if-no-files-found: warn
   publish:
     needs: mac-desktop
@@ -55,8 +56,8 @@ jobs:
     timeout-minutes: 55
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: e5cb8f35e3a85a2de628fb0ad29288fcc0a77404
-      VALIDATION_RUN: '37722075245'
+      VALIDATED_SHA: 1514eff25429d4c59a16a6c2b83636150c53b875
+      VALIDATION_RUN: '37724180832'
     steps:
       - uses: actions/checkout@v4
         with:

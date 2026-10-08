@@ -22,6 +22,7 @@ for name in ['manifest.json','background.js','launch_studio_mcp.py','Update-Plaz
 if osname=='Windows':
  shutil.copy2(source/'agent/target/release/PlazCode.exe',package/'PlazCode.exe')
 else:
+ shutil.copy2(source/'Update-PlazCode.command',package/'Update-PlazCode.command')
  app=package/'PlazCode.app';shutil.copy2(source/'agent/target/release/PlazCode',app/'Contents/MacOS/PlazCode');(app/'Contents/MacOS/PlazCode').chmod(0o755)
  plist=app/'Contents/Info.plist';value=plistlib.loads(plist.read_bytes());value['CFBundleShortVersionString']=value['CFBundleVersion']='1.24.0';plist.write_bytes(plistlib.dumps(value))
  subprocess.run(['codesign','--force','--deep','--sign','-',str(app)],check=True)
