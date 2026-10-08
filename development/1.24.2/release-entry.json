@@ -5,7 +5,7 @@
   "added": [
     "Ultracode (Beta) after Max: deeper planning, review and verification when selected.",
     "Show approach summary: an optional paragraph before each command; off by default.",
-    "Pinned task checklist with plan progress, green completion checks and a hide button."
+    "Pinned task checklist with progress and green checks; hide the bar to drag the checklist anywhere."
   ],
   "improved": [
     "Shorter, simpler release and update descriptions.",
@@ -35,7 +35,7 @@
       {
         "title": "✅ Follow the task",
         "items": [
-          "**Pinned checklist:** task steps, a progress circle and a percentage above the bar. Finished steps turn green with a check. Hide it whenever you want.",
+          "**Pinned checklist:** task steps, a progress circle and a percentage above the bar. Finished steps turn green with a check. Hide the bar to turn it into a box you can drag anywhere; hide the checklist separately.",
           "**Show approach summary:** turn on a short explanation before each command. Off by default. This explains the approach; it does not reveal hidden thoughts."
         ]
       },

@@ -5749,5 +5749,9 @@ html[data-rs-thinking=ultracode] :is(#rs-task-checklist:not([data-done=true]) .r
 html[data-rs-thinking=ultracode] #rs-checklist-show{border-color:#b08aff8a;box-shadow:0 8px 24px #0005,0 0 15px #995cff22}
 html[data-rs-gradients=off] #rs-task-checklist::before{background:#c5a1f9}
 html[data-rs-glow=off] :is(#rs-task-checklist,#rs-checklist-show){box-shadow:none}
-html[data-rs-bar-collapsed] :is(#rs-task-checklist,#rs-checklist-show){visibility:hidden!important;pointer-events:none!important}
+#rs-task-checklist[data-detached=true]::after{display:none}
+#rs-task-checklist[data-detached=true]{cursor:grab}
+#rs-task-checklist[data-detached=true] header{touch-action:none}
+#rs-task-checklist[data-dragging=true]{cursor:grabbing;user-select:none}
+#rs-task-checklist header:focus-visible{outline:2px solid var(--pc-accent,#e9ba53);outline-offset:3px;border-radius:6px}
 @media(prefers-reduced-motion:reduce){#rs-task-checklist,#rs-checklist-show,#rs-task-checklist::before,.rs-checklist-fill{transition:none!important}}
