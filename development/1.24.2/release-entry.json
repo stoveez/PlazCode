@@ -4,7 +4,8 @@
   "summary": "Fewer creation errors and clearer updates.",
   "added": [
     "Ultracode (Beta) after Max: deeper planning, review and verification when selected.",
-    "Show approach summary: an optional paragraph before each command; off by default."
+    "Show approach summary: an optional paragraph before each command; off by default.",
+    "Pinned task checklist with plan progress, green completion checks and a hide button."
   ],
   "improved": [
     "Shorter, simpler release and update descriptions.",

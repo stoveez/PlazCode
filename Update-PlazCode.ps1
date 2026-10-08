@@ -11,6 +11,14 @@ $written = New-Object 'System.Collections.Generic.List[string]'
 $stopped = $false
 $installed = $false
 $uiReady = $false
+function Get-PlazCodeSha256([string]$Path) {
+    # Use the built-in .NET implementation even when a parent PowerShell 7
+    # process supplies a module path that hides Windows PowerShell cmdlets.
+    $stream = [IO.File]::OpenRead($Path)
+    $algorithm = [Security.Cryptography.SHA256]::Create()
+    try { return [BitConverter]::ToString($algorithm.ComputeHash($stream)).Replace('-', '').ToLowerInvariant() }
+    finally { $algorithm.Dispose(); $stream.Dispose() }
+}
 function Set-UpdaterProgress([int]$Percent, [string]$Title, [string]$Detail) {
     if ($uiReady) { [PlazCode.UpdateProgress]::Set($Percent, $Title, $Detail) }
 }
@@ -158,7 +166,7 @@ try {
         Set-UpdaterProgress -1 'Downloading update' 'Downloading the release package. This step depends on your connection.'
         Write-Host "Downloading $latest..."
         Invoke-WebRequest -UseBasicParsing -Uri $release.url -OutFile $ZipPath -TimeoutSec 180
-        if ((Get-FileHash $ZipPath -Algorithm SHA256).Hash -ne $release.sha256) { throw 'Download checksum mismatch. No installed files were changed.' }
+        if ((Get-PlazCodeSha256 $ZipPath) -ne $release.sha256) { throw 'Download checksum mismatch. No installed files were changed.' }
     }
     if (!$ZipPath) {
         Write-Host 'No release feed configured. Select a downloaded PlazCode release ZIP.'
@@ -171,7 +179,7 @@ try {
     $ZipPath = (Resolve-Path -LiteralPath $ZipPath).Path
     Set-UpdaterProgress 15 'Verifying package' 'Checking the download before any installed files are changed.'
     if ($ExpectedSha256) {
-        if ($ExpectedSha256 -notmatch '^[a-fA-F0-9]{64}$' -or (Get-FileHash -LiteralPath $ZipPath -Algorithm SHA256).Hash -ne $ExpectedSha256) { throw 'Package checksum mismatch. Installed files were not changed.' }
+        if ($ExpectedSha256 -notmatch '^[a-fA-F0-9]{64}$' -or (Get-PlazCodeSha256 $ZipPath) -ne $ExpectedSha256) { throw 'Package checksum mismatch. Installed files were not changed.' }
     }
     Set-UpdaterProgress 25 'Inspecting package' 'Validating the release contents and installation layout.'
     Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -220,7 +228,7 @@ try {
         $old = Join-Path $install $relative
         !(Test-Path -LiteralPath $old -PathType Leaf) -or
             (Get-Item -LiteralPath $old).Length -ne $_.Length -or
-            (Get-FileHash -LiteralPath $old -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash
+            (Get-PlazCodeSha256 $old) -ne (Get-PlazCodeSha256 $_.FullName)
     })
     Set-UpdaterProgress 45 'Saving recovery copies' 'Backing up installed files. Your preferences and templates are preserved.'
     $backedUp = 0

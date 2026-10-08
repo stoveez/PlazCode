@@ -5713,3 +5713,41 @@ html[data-rs-palette][data-rs-theme][data-rs-thinking=ultracode] :is(#rs-action[
 html[data-rs-palette][data-rs-theme][data-rs-gradients=off] :is(#rs-action,.rs-lvl-btn)::before,html[data-rs-palette][data-rs-theme][data-rs-gradients=off] #rs-bar::after{background:#c5a1f9}
 html[data-rs-palette][data-rs-theme][data-rs-thinking=ultracode][data-rs-glow=off] :is(#rs-bar,#rs-menu){box-shadow:none!important}
 @media(prefers-reduced-motion:reduce){html[data-rs-palette][data-rs-theme] :is(#rs-bar,#rs-menu,#rs-action,.rs-lvl-btn),html[data-rs-palette][data-rs-theme] :is(#rs-action,.rs-lvl-btn)::before,html[data-rs-palette][data-rs-theme] #rs-bar::after{transition:none!important}}
+
+/* Pinned task plan: a compact card attached to the bar's right edge. */
+#rs-task-checklist[hidden],#rs-checklist-show[hidden]{display:none!important}
+#rs-task-checklist,#rs-checklist-show{position:fixed;box-sizing:border-box;z-index:2147483602;color:var(--pc-ink,#f5f0e7);background:color-mix(in srgb,var(--pc-bg,#18140d) 96%,var(--pc-accent,#e9ba53));border:1px solid rgb(var(--pc-rgb,233 186 83) / .3);border-radius:14px;font:12px/1.5 system-ui;box-shadow:0 8px 24px #0005;pointer-events:auto}
+#rs-task-checklist{padding:13px;overflow:visible}
+#rs-task-checklist,#rs-checklist-show{transition:border-color .42s ease,box-shadow .42s ease,background-color .42s ease}
+#rs-task-checklist::before{content:'';position:absolute;inset:0 12px auto;height:2px;background:linear-gradient(90deg,transparent,#9762df,#d2b5ff,transparent);pointer-events:none;opacity:0;transition:opacity .42s ease}
+#rs-task-checklist::after{content:'';position:absolute;right:22px;bottom:-9px;height:8px;width:1px;background:rgb(var(--pc-rgb,233 186 83) / .45);pointer-events:none}
+#rs-task-checklist header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+#rs-task-checklist .rs-checklist-heading{flex:1;min-width:0}
+#rs-task-checklist strong{display:block;font-size:13px;font-weight:600;color:inherit}
+#rs-task-checklist small{display:block;font-size:10px;opacity:.7}
+#rs-task-checklist button,#rs-checklist-show{cursor:pointer;color:inherit;font:inherit}
+#rs-task-checklist button{border:0;background:transparent;border-radius:6px;padding:2px 6px;font-size:18px}
+#rs-task-checklist button:hover{background:#ffffff12}
+#rs-task-checklist button:focus-visible,#rs-checklist-show:focus-visible{outline:2px solid var(--pc-accent,#e9ba53);outline-offset:2px}
+#rs-checklist-show{padding:7px 10px;white-space:nowrap}
+.rs-checklist-ring{position:relative;display:inline-grid;place-items:center;flex:none;width:38px;height:38px}
+.rs-checklist-ring svg{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke-width:2}
+.rs-checklist-track{stroke:#ffffff20}.rs-checklist-fill{stroke:var(--pc-accent,#e9ba53);transition:stroke-dashoffset .3s ease,stroke .42s ease}
+.rs-checklist-percent{font-size:9px;font-weight:600}
+#rs-task-checklist ol{list-style:none;padding:0;margin:0;overflow:auto;max-height:220px;max-height:min(220px,calc(var(--rs-checklist-space,330px) - 88px));overscroll-behavior:contain}
+#rs-task-checklist li{display:flex;align-items:flex-start;gap:8px;padding:5px 0;overflow-wrap:anywhere}
+.rs-checklist-mark{flex:none;width:16px;text-align:center;opacity:.65}
+#rs-task-checklist li[data-status=in_progress] .rs-checklist-mark{color:var(--pc-accent,#e9ba53);opacity:1}
+#rs-task-checklist li[data-status=completed],#rs-task-checklist[data-done=true] .rs-checklist-percent{color:#72d69b}
+#rs-task-checklist li[data-status=completed] .rs-checklist-mark{opacity:1;font-weight:700}
+#rs-task-checklist[data-done=true] .rs-checklist-fill{stroke:#72d69b}
+html[data-rs-thinking=ultracode] #rs-task-checklist{border-color:#b08aff8a;box-shadow:0 8px 24px #0005,0 0 15px #995cff22}
+html[data-rs-glow=off] #rs-task-checklist{box-shadow:0 8px 24px #0005}
+@media(prefers-reduced-motion:reduce){#rs-task-checklist,.rs-checklist-fill{transition:none!important}}
+html[data-rs-thinking=ultracode] #rs-task-checklist::before{opacity:1}
+html[data-rs-thinking=ultracode] :is(#rs-task-checklist:not([data-done=true]) .rs-checklist-fill,#rs-task-checklist li[data-status=in_progress] .rs-checklist-mark){stroke:#c5a1f9;color:#c5a1f9}
+html[data-rs-thinking=ultracode] #rs-checklist-show{border-color:#b08aff8a;box-shadow:0 8px 24px #0005,0 0 15px #995cff22}
+html[data-rs-gradients=off] #rs-task-checklist::before{background:#c5a1f9}
+html[data-rs-glow=off] :is(#rs-task-checklist,#rs-checklist-show){box-shadow:none}
+html[data-rs-bar-collapsed] :is(#rs-task-checklist,#rs-checklist-show){visibility:hidden!important;pointer-events:none!important}
+@media(prefers-reduced-motion:reduce){#rs-task-checklist,#rs-checklist-show,#rs-task-checklist::before,.rs-checklist-fill{transition:none!important}}

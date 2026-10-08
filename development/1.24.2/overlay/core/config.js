@@ -229,7 +229,7 @@ Site: ${siteName}. Use ONLY listed commands with required params. Do NOT use ${s
     const creatorPolicy = opts.engine === "local" || typeof PlazCodeChatCreators === "undefined" ? "" : "\n\n" + PlazCodeChatCreators.policy;
     const ultra = typeof PlazCodeUltracode !== "undefined" && typeof window !== "undefined" && window.__rsThinkingLevel?.() === "ultracode" ? "\n\n" + PlazCodeUltracode.build(opts.engine) : "";
     const approach = typeof window !== "undefined" && window.__rsShowApproach?.() === true ? "\n\n" + approachSummaryPolicy(true) : "";
-    return buildBaseSystemPrompt(opts) + "\n\n" + mcpUsagePolicy() + creatorPolicy + ultra + approach;
+    return buildBaseSystemPrompt(opts) + "\n\n" + mcpUsagePolicy() + creatorPolicy + ultra + approach + "\n\nTASK CHECKLIST: For a multi-step task, call plazcode_checklist with a short concrete plan before editing. Update its full step list at meaningful milestones; use completed only after observing success. Keep unfinished or failed steps pending/in_progress. Do not invent percentages, mark a task done because a command merely ran, or add work outside the user request. Simple tasks can keep the single request row. This is a tool command, not private reasoning; normal reply formatting still applies.";
   }
   function approachSummaryPolicy(enabled) {
     if (!enabled) return "SHOW_APPROACH=OFF. Use normal PlazCode reply formatting; no approach paragraph is required.";

@@ -2268,6 +2268,10 @@
       try { return "Output of 'plazcode_clarify':\n" + JSON.stringify(await clarification.request(args)); }
       catch (error) { if (error.name === 'AbortError') throw new SendAbortedError(error.message); throw error; }
     }
+    if (name === "plazcode_checklist") {
+      try { return "Output of 'plazcode_checklist':\n" + JSON.stringify(activity.checklist(args.steps)); }
+      catch(error) { return "ERROR: " + error.message; }
+    }
     const preflight = PlazCodeToolGuard.check(call, A.toolList);
     if (preflight.length) return "ERROR: command was not executed. Fix these arguments before retrying:\n" + preflight.join("\n");
     if(name==="plazcode_templates"){
@@ -2678,7 +2682,7 @@
       const animLines = requested === "roblox" ? RSAnim.describeCommands() : [];
       const skillLines = (requested === "roblox" && typeof RobloxScriptSkills !== "undefined") ? RobloxScriptSkills.describeCommands() : [];
       const agentLines = (requested === "local" && typeof AgentScriptSkills !== "undefined") ? AgentScriptSkills.describeCommands() : [];
-      const webLines = [`— PlazCode Status: plazcode_status {} — live engine, work mode, extra thinking, bridge, blender. Call this if you are unsure which mode you are in.`, `— Web Tools (bridge-level, no Studio needed): web_fetch {url?, query?, max_chars?} — fetch a URL, PlazCode pass query to search the web then fetch the top result; web_search {query, limit?} — DuckDuckGo titles+URLs`, `— Screenshot: plazcode_screenshot {target?: auto|studio|tab|blender} — take a screenshot of Studio, this chat tab, or Blender and attach it to your next message so you can see it. Aliases: screenshot, take_screenshot, send_screenshot.`, `— Attach images: attach_feedback {index?, path?, source?, copy?, paste?, send?} — re-send the most recent screenshot (or any workspace file via path) as an attachment on this message and copy it to the clipboard so the user can paste it. Aliases: attach_image, attach_file, attach_screenshot, attach_last_screenshot, attach_recent_image, copy_screenshot, paste_screenshot.`, `— Browser tab control (no Studio needed): tab_read {tabId?, url_contains?} — read the target tab's URL, title, page text and a numbered list of clickable elements; tab_click {selector?|text?|tabId?|url_contains?} — click an element by CSS selector or visible text; tab_type {text, selector?, submit?, tabId?, url_contains?} — type into a field (optionally press Enter); tab_scroll {amount?, tabId?, url_contains?} — scroll the page. By default they act on the active tab that is NOT this chat; pass url_contains to pick a specific site, or tabId for an exact tab.`
+      const webLines = [`— Task checklist: plazcode_checklist {steps:[{label,status:pending|in_progress|completed}]} — replace the visible plan with 1–20 concrete task steps; mark completed only after verified success. Update the full list at meaningful milestones. Never treat tool-call counts or time as completion.`, `— PlazCode Status: plazcode_status {} — live engine, work mode, extra thinking, bridge, blender. Call this if you are unsure which mode you are in.`, `— Web Tools (bridge-level, no Studio needed): web_fetch {url?, query?, max_chars?} — fetch a URL, PlazCode pass query to search the web then fetch the top result; web_search {query, limit?} — DuckDuckGo titles+URLs`, `— Screenshot: plazcode_screenshot {target?: auto|studio|tab|blender} — take a screenshot of Studio, this chat tab, or Blender and attach it to your next message so you can see it. Aliases: screenshot, take_screenshot, send_screenshot.`, `— Attach images: attach_feedback {index?, path?, source?, copy?, paste?, send?} — re-send the most recent screenshot (or any workspace file via path) as an attachment on this message and copy it to the clipboard so the user can paste it. Aliases: attach_image, attach_file, attach_screenshot, attach_last_screenshot, attach_recent_image, copy_screenshot, paste_screenshot.`, `— Browser tab control (no Studio needed): tab_read {tabId?, url_contains?} — read the target tab's URL, title, page text and a numbered list of clickable elements; tab_click {selector?|text?|tabId?|url_contains?} — click an element by CSS selector or visible text; tab_type {text, selector?, submit?, tabId?, url_contains?} — type into a field (optionally press Enter); tab_scroll {amount?, tabId?, url_contains?} — scroll the page. By default they act on the active tab that is NOT this chat; pass url_contains to pick a specific site, or tabId for an exact tab.`
 , `— Debugger: plazcode_debug {} — Studio LogService errors/warnings. Automatic Debugger (Settings) appends new errors after mutating commands.`, `— Multi-Agent: plazcode_agent {role: planner|builder|reviewer|debugger, task?} — hand off to a specialist. Enable Multi-Agent in Settings.`, `— Developer Products: developer_product_create {name, price, description?, reward?} — create a real Roblox Developer Product on this published universe (sign into roblox.com in Chrome). developer_product_list {} lists them. Aliases: create_developer_product, create_dev_product.`];
       webLines.push(PlazCodeClarification.DESCRIPTION);
       const virtualCount = animLines.length + skillLines.length + agentLines.length + webLines.length;
@@ -3396,6 +3400,8 @@
     A.taskRequest=preEnhanced?A.creatorPreEnhanced.raw:label;
     A.creatorTask=activeEngine()==="roblox" && typeof PlazCodeChatCreators!=="undefined" && !!(preEnhanced || PlazCodeChatCreators.routeRequest(label));
     A.creatorBrief=A.taskRequest;
+    activity.sync(true, P.conversationKey());
+    activity.task(A.taskRequest, JSON.stringify([P.conversationKey(),label]));
     A.creatorRequestKey=JSON.stringify([P.conversationKey(),activeEngine(),A.sessionGen,user&&P.itemKey?P.itemKey(user):user?P.allItems().indexOf(user):'no-user',label]);
     if(preEnhanced){A.creatorEnhancedKey=A.creatorRequestKey;A.creatorPreEnhanced=null;}
     recallEngram();
@@ -3645,6 +3651,7 @@
           ui.inputCover(false);
           P.setInputLock(false);
           void finishTaskCheckpoint(true);
+          activity.sync(false, P.conversationKey(), undefined, {collapse:true});
           const next = await cowork.take();
           if (next && !A.stop) { completed = false; await beginTaskCheckpoint(); base = next.base; continue; }
           if (cowork.snapshot().pending.length && !cowork.snapshot().paused && !cowork.snapshot().sending) {
@@ -3668,7 +3675,7 @@
           }
           invalidToolAttempts = 0;
           const call = calls[0];
-          if(!/^(?:list_commands|list_tools|plazcode_clarify)$/.test(call.tool)){
+          if(!/^(?:list_commands|list_tools|plazcode_clarify|plazcode_checklist)$/.test(call.tool)){
             const reason=taskBudget.check();
             if(reason){A.budgetResume={base,chat:P.conversationKey(),checkpoint:A.checkpointId,text:P.classifyText(res.item||P.lastAssistant(),".rs-chip")};ui.captureHandoff(reason);ui.banner("warn",reason,"Paused before the next command. Use Resume paused task in Settings after reviewing the chat. No command was replayed.");break;}
             taskBudget.consume();
@@ -5101,7 +5108,7 @@
     // Hide bar: a purely visual preference for this tab. While collapsed the bar
     // keeps its mount, position math, state and every handler; it is only made
     // invisible and click-through so it never covers chat text.
-    let barCollapsed = false, showTab = null, hideBtn = null;
+    let barCollapsed = false, showTab = null, hideBtn = null, taskChecklist = null;
     const BAR_COLLAPSED_KEY = "plazcode.barCollapsed";
     let cover, coverRaf, barRaf;
     let coworkComposer;
@@ -5408,6 +5415,8 @@
       memoryStyle.textContent = "#rs-memory-panel[hidden]{display:none!important}#rs-memory-panel{position:fixed;right:16px;top:8vh;width:440px;max-width:calc(100vw - 32px);max-height:75vh;overflow:auto;background:#091522;color:#f5f8ff;padding:20px;border:1px solid #ff9226;border-radius:14px;z-index:2147483601;font:13px/1.5 system-ui}#rs-memory-panel textarea{display:block;width:100%;box-sizing:border-box;min-height:70px;background:#07111e;color:#fff;border:1px solid #334155;border-radius:8px;margin:8px 0;padding:8px;font:13px/1.5 system-ui}#rs-memory-panel button{padding:7px 10px;margin:6px;border-radius:7px;background:#162338;border:1px solid #ff9226;color:#fff;cursor:pointer}#rs-memory-panel small{display:block;color:#aabbd2}#rs-memory-panel select{margin:8px;padding:8px;border:1px solid #ff92264d;border-radius:8px;background:#162338;color:#ffe5be;font:13px system-ui}#rs-memory-panel label{display:inline-block;margin:6px 8px 6px 0}";
       memoryStyle.textContent += "#rs-activity-panel[hidden]{display:none!important}#rs-activity-panel{position:fixed;right:16px;bottom:90px;width:420px;max-width:calc(100vw - 32px);max-height:60vh;overflow:auto;background:#091522;color:#fff;padding:16px;border:1px solid #ff9226;border-radius:12px;z-index:2147483601;font:13px/1.5 system-ui}#rs-activity-panel button{padding:8px;background:#162338;color:#fff;border:1px solid #ff9226;border-radius:8px;margin:6px 0;width:100%;cursor:pointer}[data-rs-activity-folded='1']{display:none!important}";
       root.appendChild(memoryStyle);
+      taskChecklist = PlazCodeChecklist.mount({root,getGroup:()=>activity.list(P.conversationKey()).at(-1),getBar:()=>bar,blocked:()=>barCollapsed || !!(menuEl && !menuEl.hidden) || !!P.captchaPresent?.() || !!P.overlayBlocking?.()});
+      taskChecklist.render();
       root.querySelector("#rs-activity").onclick = () => {
         const groups = activity.list(P.conversationKey()), group = groups.at(-1);
         if (group) activity.toggle(group.id);
@@ -7390,7 +7399,7 @@ function renderCards(panel) {
       const add = (rows) => { for (const row of rows || []) names.add(typeof row === "string" ? row : row && row.name); };
       if (currentEngine === "local") { if (typeof AgentScriptSkills !== "undefined") add(AgentScriptSkills.SKILL_OPS); }
       else { if (typeof RSAnim !== "undefined") add(RSAnim.ANIM_COMMANDS); if (typeof RobloxScriptSkills !== "undefined") add(RobloxScriptSkills.SKILL_COMMANDS); }
-      add(["list_commands","list_mcp_servers","plazcode_status","web_fetch","web_search","plazcode_screenshot","attach_feedback","tab_read","tab_click","tab_type","tab_scroll","plazcode_debug","plazcode_agent"]);
+      add(["list_commands","list_mcp_servers","plazcode_status","plazcode_checklist","web_fetch","web_search","plazcode_screenshot","attach_feedback","tab_read","tab_click","tab_type","tab_scroll","plazcode_debug","plazcode_agent"]);
       names.delete(undefined); return names.size;
     }
 
@@ -8389,6 +8398,7 @@ function renderCards(panel) {
       // Resize the chat box now rather than on the next placement tick.
       if (changed && bar) { try { placeBar(); } catch {} }
       placeShowTab();
+      taskChecklist?.place();
       if (changed && !(opts && opts.silent)) {
         const target = next ? showTab : hideBtn;
         try { if (target && !target.hidden) target.focus({ preventScroll: true }); } catch {}
@@ -8446,6 +8456,7 @@ function renderCards(panel) {
       placeUnstable();
       placeCardsFab();
       placeShowTab();
+      taskChecklist?.place();
 
       // While a bot-check challenge PlazCode a blocking modal (login / consent) is on
       // screen, get fully out of the way: the (often transparent) anchored bar is
@@ -9043,6 +9054,7 @@ function renderCards(panel) {
     }
     function renderActivity() {
       if (!root) return;
+      taskChecklist?.render();
       const groups = activity.list(P.conversationKey()), group = groups.at(-1);
       const button = root.querySelector("#rs-activity"), panel = root.querySelector("#rs-activity-panel");
       button.hidden = P.id === "chatgpt" || P.id === "notion" || P.id === "arena" || !group;
