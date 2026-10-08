@@ -4245,7 +4245,11 @@
       diag("start.alreadyReady", { path: P.conversationKey() });
       return { ready: true, alreadyStarted: true };
     }
-    if (A.running || A.starting || A.enhancing || A.injecting || A.stopping || A.pendingToolSettles) return;
+    if (A.startupOwner && !A.starting) {
+      try { ui.toast("The previous startup is still cancelling. Try again shortly, or reload the page."); } catch {}
+      return;
+    }
+    if (A.running || A.starting || A.startupOwner || A.enhancing || A.injecting || A.stopping || A.pendingToolSettles) return;
     if (condoLocked()) {
       const s = Math.ceil((condoState.until - Date.now()) / 1000);
       try { ui.toast("CONDO LOCK — Start is frozen for " + s + "s"); } catch {}
@@ -4269,6 +4273,9 @@
     A.starting = true;
     A._startingSince = Date.now(); // stale-bootstrap failsafe anchor (meter loop)
     const myGen = ++A.startGen;   // identity of THIS bootstrap
+    A.startupOwner = myGen; // keep cancelled sends isolated until their promise settles
+    A._startupProgressAt = Date.now();
+    A._startupProgressToken = null;
     A.startingKey = null;          // unknown until the conversation gets an id
     const alive = () => A.startGen === myGen; // false once superseded/aborted
     A.toolCallsSinceReminder = 0; // fresh reminder cadence for the new session
@@ -4341,6 +4348,21 @@
       if (listRes.kind === "text") {
         const parsed = RSParse.parseToolCalls(String(listRes.text || ""));
         if (parsed.length) listRes = { kind: "tool", calls: parsed, item: P.lastAssistant() };
+      }
+      // Notion may translate or answer the setup as prose. Correct a settled
+      // non-command reply once; never execute a different tool or resend an
+      // ambiguous delivery. Readiness still requires a real parsed command.
+      if (P.id === "notion" && listRes.kind === "text" &&
+          (!P.startupReplySettled || P.startupReplySettled())) {
+        diag("start.protocolCorrection", { provider: P.id });
+        const correctionBase = await submitAndGetBase('⟦RS-SYS⟧ Startup protocol correction. Reply ONLY with this exact JSON in a fenced json code block: {"command":"list_commands"}. Do not use native Notion tools or edit pages. Do not translate the command. Antworte nur mit dem exakten JSON, ohne Übersetzung.');
+        if (!alive() || A.stop) return;
+        listRes = await waitForResponse(correctionBase);
+        if (!alive() || A.stop || listRes.kind === "stopped") return;
+        if (listRes.kind === "text") {
+          const parsed = RSParse.parseToolCalls(String(listRes.text || ""));
+          if (parsed.length) listRes = { kind: "tool", calls: parsed, item: P.lastAssistant() };
+        }
       }
       // Some providers can answer the initial request as prose despite having
       // received the command protocol. Their opt-in loads the already fetched
@@ -4421,6 +4443,7 @@
       const readyText = String(readyRes.text || "").replace(/[`*#]/g, "").trim().replace(/^_+|_+$/g, "");
       const readyOk = readyRes.kind === "text" && (
         /^(?:PLAZCODE_READY|PlazCode is ready)[.!]?$/i.test(readyText) ||
+        (P.id === "notion" && /^PlazCode ist bereit[.!]?$/i.test(readyText)) ||
         (P.id === "chatgpt" && /^(?:i(?:'m| am) )?ready(?: to (?:help|work|go))?[.!]?$/i.test(readyText))
       );
       diag("start.readyReply", { kind: readyRes.kind, chars: readyText.length, reply: readyText.slice(0, 80), ok: readyOk });
@@ -4453,13 +4476,14 @@
     } finally {
       // Only tear down our OWN starting state. If we were superseded (the user
       // opened another chat), the newer flow / syncSessionState owns it now.
+      if (A.startupOwner === myGen) A.startupOwner = null;
       if (alive()) {
         A.starting = false;
         A.startingKey = null;
-        ui.setStarting(false);
-        ui.inputCover(false); // lift the Starting Up composer cover
-        P.setInputLock(false); // always unlock after bootstrap
-        decorate.sweep();
+        try { ui.setStarting(false); } catch {}
+        try { ui.inputCover(false); } catch {}
+        try { P.setInputLock(false); } catch {}
+        try { decorate.sweep(); } catch {}
       }
     }
   }
@@ -9567,23 +9591,37 @@ rsInterval(() => {
         try { ui.inputCover(false); } catch {}
         try { P.setInputLock(false); } catch {}
       }
-      // Stuck bootstrap: starting for >120s with no live stream is a wedged
-      // startSession (exception outside its try, provider deadlock, a site
-      // that ate the prompt). Force-abort it so Start becomes clickable again.
-      // A healthy bootstrap NEVER takes this long without generating.
-      if (A.starting && A._startingSince && Date.now() - A._startingSince > 120000) {
+      // Measure real response progress. Slow native thinking gets a bounded
+      // grace period; a stale Stop control cannot hold the composer forever.
+      if (A.starting && A._startingSince) {
+        let busy = false, token = "";
+        try { busy = !!(P.isBusyNow ? P.isBusyNow() : P.isGenerating()); } catch {}
         try {
-          A.startGen++;            // invalidates the in-flight bootstrap
+          const item = P.lastAssistant();
+          const text = String(item && P.classifyText ? P.classifyText(item) : "");
+          token = String(P.lastAssistantId ? P.lastAssistantId() : "") + ":" + text.length + ":" + text.slice(-200);
+        } catch {}
+        if (token !== A._startupProgressToken) {
+          A._startupProgressToken = token;
+          A._startupProgressAt = Date.now();
+        }
+        const idleMs = Date.now() - (A._startupProgressAt || A._startingSince);
+        const elapsedMs = Date.now() - A._startingSince;
+        if (elapsedMs > 600000 || idleMs > (busy ? 300000 : 120000)) {
+          A.stop = true;
+          A.startGen++;
+          A.injectGeneration++;
+          A.injecting = false;
           A.starting = false;
           A.startingKey = null;
           A._startingSince = 0;
-          ui.setStarting(false);
-          ui.inputCover(false);
-          P.setInputLock(false);
-          ui.banner("warn", "Start got stuck",
-            "The startup didn't finish in 2 minutes and was reset. Try Start again — if it repeats, reload the page.");
-          try { diag("start.staleAborted", {}); } catch {}
-        } catch {}
+          try { ui.setStarting(false); } catch {}
+          try { ui.inputCover(false); } catch {}
+          try { P.setInputLock(false); } catch {}
+          try { ui.banner("warn", "Start got stuck",
+            "Startup stopped responding and was cancelled. Your chat box is unlocked. Try Start again once cancellation finishes, or reload the page."); } catch {}
+          try { diag("start.staleAborted", { idleMs, elapsedMs, busy }); } catch {}
+        }
       }
       // Stuck injecting: the 400ms post-send clear in submitAndGetBase's
       // finally should have run; >60s means an exception ate it.
