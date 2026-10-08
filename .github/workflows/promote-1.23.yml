@@ -13,6 +13,61 @@ concurrency:
   group: plazcode-release-1.23
   cancel-in-progress: false
 jobs:
+  windows_package:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    env:
+      CARGO_INCREMENTAL: '0'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require identical reviewed runtime source
+        run: git diff --exit-code a93610aa8411e8b3e7aaa4d45172eed18f53b4bc -- development/1.23.0/overlay
+      - run: python development/1.23.0/prepare.py
+      - run: rustup update stable --no-self-update
+      - name: Build identical native source and rerun Windows release checks
+        shell: pwsh
+        working-directory: build-src/PlazCode
+        run: |
+          cargo +stable build --release --locked --manifest-path agent/Cargo.toml
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Copy-Item agent/target/release/PlazCode.exe PlazCode.exe
+          python test-launcher.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./test-updater.ps1
+          powershell.exe -NoProfile -File ./test-application-icon.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Get-AuthenticodeSignature PlazCode.exe | Format-List | Out-File windows-signature.txt
+      - run: python development/1.23.0/package.py
+      - name: Defender scan availability and result
+        shell: pwsh
+        working-directory: build-src/PlazCode
+        run: |
+          try { $status=Get-MpComputerStatus -ErrorAction Stop } catch { 'Defender unavailable on this runner; no clean verdict claimed.' | Out-File defender-result.txt; exit 0 }
+          if (-not $status.AntivirusEnabled) { 'Defender not enabled on this runner; no clean verdict claimed.' | Out-File defender-result.txt; exit 0 }
+          $scanner=Get-ChildItem 'C:/ProgramData/Microsoft/Windows Defender/Platform/*/MpCmdRun.exe' | Sort-Object FullName | Select-Object -Last 1
+          if (-not $scanner) { throw 'Defender enabled but scanner unavailable.' }
+          $zip=Resolve-Path '../../artifacts/PlazCode-1.23.0-development.zip'
+          Get-FileHash $zip -Algorithm SHA256 | Format-List | Out-File defender-package-sha256.txt
+          $status | Select-Object AMProductVersion,AMEngineVersion,AntivirusSignatureVersion,AntivirusSignatureLastUpdated | ConvertTo-Json | Out-File defender-engine.json
+          Expand-Archive $zip -DestinationPath defender-scan
+          & $scanner.FullName -Scan -ScanType 3 -File "$PWD/defender-scan" -DisableRemediation 2>&1 | Tee-Object defender-result.txt
+          if ($LASTEXITCODE -ne 0) { throw "Defender scan failed or reported a detection ($LASTEXITCODE)." }
+      - name: Record successful Windows release validation
+        run: python -c 'import json,os; json.dump({"native_source":"a93610aa8411e8b3e7aaa4d45172eed18f53b4bc","run_id":os.environ["GITHUB_RUN_ID"],"pe_and_updater_verified":True,"icon_verified":True},open("artifacts/windows-repackage.json","w"))'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plazcode-1.23-Windows-repackaged
+          path: |
+            artifacts/*
+            build-src/PlazCode/windows-signature.txt
+            build-src/PlazCode/defender-result.txt
+            build-src/PlazCode/defender-package-sha256.txt
+            build-src/PlazCode/defender-engine.json
   mac_package:
     runs-on: macos-latest
     timeout-minutes: 10
@@ -44,7 +99,7 @@ jobs:
           name: plazcode-1.23-macOS-repackage-evidence
           path: artifacts/mac-repackage.json
   publish:
-    needs: mac_package
+    needs: [mac_package, windows_package]
     runs-on: ubuntu-latest
     timeout-minutes: 55
     env:
@@ -66,7 +121,7 @@ jobs:
           done
           python3 -c 'import json,os; r=json.load(open("ci-artifacts/run.json")); assert r["head_sha"]==os.environ["VALIDATED_SHA"] and r["status"]=="completed"'
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$VALIDATION_RUN/jobs" > ci-artifacts/jobs.json
-          gh run download "$VALIDATION_RUN" --repo "$GITHUB_REPOSITORY" --name plazcode-1.23-Windows-validation --dir ci-artifacts/plazcode-1.23-Windows-validation
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name plazcode-1.23-Windows-repackaged --dir ci-artifacts/plazcode-1.23-Windows-validation
           gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name plazcode-1.23-macOS-repackaged --dir ci-artifacts/plazcode-1.23-macOS-validation
           gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name plazcode-1.23-macOS-repackage-evidence --dir ci-artifacts
       - name: Assemble versioned archives, check platform contents and update feeds

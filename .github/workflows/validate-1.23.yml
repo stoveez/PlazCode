@@ -88,7 +88,8 @@ jobs:
           python test-launcher.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           ./test-updater.ps1
-          ./test-application-icon.ps1
+          powershell.exe -NoProfile -File ./test-application-icon.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $signature = Get-AuthenticodeSignature PlazCode.exe
           $signature | Format-List | Out-File windows-signature.txt
           # This development workflow does not possess a publisher certificate.
