@@ -7,3 +7,5 @@ Write concise bullets before publishing. For a longer in-app changelog, give its
 Published releases and archives remain immutable. This rule applies to future updates.
 
 Update feeds must remain below the 64 KiB installed-client limit. Use release_feed.compact_feed when generating them: at most five recent entries, with a 48 KiB budget. Preserve the complete history in release-notes.json. Run test-release-feed.py before publishing; never solve oversize feeds solely by increasing the new client limit.
+
+Automatic-learning releases must verify observation names against the exported native tool catalog. Unsupported observations must continue to fail closed.
