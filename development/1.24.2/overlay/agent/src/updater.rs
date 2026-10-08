@@ -356,7 +356,7 @@ async fn run(install: bool, background: bool) -> anyhow::Result<()> {
             std::process::Command::new("/bin/bash").arg(helper_copy).arg(path).arg(hash).arg(latest).arg(std::process::id().to_string()).arg(if restore_window {"restore"} else if quiet_restart {"background"} else {"foreground"}).arg(&root).current_dir(&root).stdout(log.try_clone()?).stderr(log).spawn()?
         };
         let result = tokio::task::spawn_blocking(move || helper_process.wait()).await??;
-        anyhow::ensure!(result.success(), "{}", installer_failure(&root, latest, helper_started, &log_path, result.code()));
+        anyhow::ensure!(result.success(), "{}", installer_failure(&root, &latest, helper_started, &log_path, result.code()));
         progress(100,"Updater finished. Reload the extension and refresh AI chat tabs.");
     }
     Ok(())
