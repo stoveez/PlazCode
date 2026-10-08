@@ -36,7 +36,7 @@ impl Store {
   if action=="read"||action=="export" {let skill=self.data.skills.get(id).ok_or_else(||anyhow::anyhow!("Skill not found."))?;return Ok(json!({"ok":true,"skill":if action=="export"{public(skill)}else{serde_json::to_value(skill)?}}));}
   let mut data=self.data.clone();
   match action {
-   "save"=>{let input=&request["skill"];let mut skill:Skill=serde_json::from_value(input.clone())?;validate(&skill)?;let previous=data.skills.get(&skill.id);anyhow::ensure!(request["revision"].as_u64().unwrap_or(0)==previous.map_or(0,|s|s.revision),"Skill changed. Reload before saving.");skill.revision=previous.map_or(1,|s|s.revision+1);skill.community=false;data.skills.insert(skill.id.clone(),skill.clone());self.persist(data)?;return Ok(json!({"ok":true,"skill":skill}));},
+   "save"=>{let input=&request["skill"];let mut skill:Skill=serde_json::from_value(input.clone())?;validate(&skill)?;anyhow::ensure!(!skill.id.starts_with("global-workflow-"),"Automatic workflow lessons cannot be edited; save an adapted method under a new ID.");let previous=data.skills.get(&skill.id);anyhow::ensure!(request["revision"].as_u64().unwrap_or(0)==previous.map_or(0,|s|s.revision),"Skill changed. Reload before saving.");skill.revision=previous.map_or(1,|s|s.revision+1);skill.community=false;data.skills.insert(skill.id.clone(),skill.clone());self.persist(data)?;return Ok(json!({"ok":true,"skill":skill}));},
    "delete"=>{let current=data.skills.get(id).ok_or_else(||anyhow::anyhow!("Skill not found."))?;anyhow::ensure!(request["revision"].as_u64()==Some(current.revision),"Skill changed. Reload before deleting.");data.skills.remove(id);},
    _=>anyhow::bail!("Unknown skill action.")
   }
@@ -85,15 +85,18 @@ fn maybe_sync(){
  if now-previous<3600{return;}
  if LAST_COMMUNITY_SYNC.compare_exchange(previous,now,std::sync::atomic::Ordering::SeqCst,std::sync::atomic::Ordering::Relaxed).is_ok(){tokio::spawn(async{if let Err(error)=sync().await{tracing::warn!("Community skill sync unavailable: {error}");}});}
 }
-pub async fn post(State(state):State<crate::AppState>,Json(request):Json<Value>)->Response {
- if request["action"]=="match" {maybe_sync();crate::shared_learning::retry();
-  let lessons=crate::shared_learning::lessons(false).await;let mut store=STORE.lock().await;
+async fn refresh_global(force:bool)->usize{
+  let lessons=crate::shared_learning::lessons(force).await;let mut store=STORE.lock().await;
   store.data.skills.retain(|id,_|!id.starts_with("global-workflow-"));
+  let count=lessons.len();
   for lesson in lessons {let recipe=lesson.recipe;let id=format!("global-workflow-{}",recipe.id());store.data.skills.insert(id.clone(),Skill{id,title:recipe.title().into(),description:format!("Generalized local code fix, bug search, feature, file edit and test workflow. {} successful test-command reports; anonymous reports are not proof of task correctness. Adapt to this project and run relevant checks.",lesson.successes),domain:"local".into(),scope:String::new(),steps:recipe.steps(),pitfalls:vec!["Do not assume old paths, implementation or test commands apply to this project.".into()],verification:vec!["The recorded project test command exited successfully after the final edit. Recheck behavior in the current project.".into()],confirmed:true,revision:lesson.revision,community:true});}
- }
+ count
+}
+pub async fn post(State(state):State<crate::AppState>,Json(request):Json<Value>)->Response {
+ if request["action"]=="match" {maybe_sync();crate::shared_learning::retry();refresh_global(false).await;}
  let result:anyhow::Result<Value>=async {
   match request["action"].as_str().unwrap_or("list") {
-   "sync"|"publish"=>{if request["action"]=="sync"{sync().await}else{publish(&request).await}},
+   "sync"|"publish"=>{if request["action"]=="sync"{let count=refresh_global(true).await;let mut result=sync().await?;result["count"]=json!(result["count"].as_u64().unwrap_or(0)+count as u64);Ok(result)}else{publish(&request).await}},
    "checkpoint"=>{if !state.preferences.snapshot().skill_auto_learn&&request["manual"]!=true{return Ok(json!({"ok":true,"skipped":true}));}let journal=crate::checkpoints::STORE.lock().await;let task=journal.task(request["checkpoint"].as_str().unwrap_or(""))?;anyhow::ensure!(task.status=="worked","Finish the task before saving a candidate.");let project=journal.project(&task.chat);let scope=if project.is_empty(){format!("chat:{}",task.chat)}else{format!("project:{project}")};let id=format!("task-{}",task.id);let skill=Skill{id:id.clone(),title:task.label.chars().take(50).collect(),description:"Candidate from observable tool steps. Edit into a reusable method, add checks and confirm it worked before reuse.".into(),domain:task.engine.clone(),scope,steps:if task.steps.is_empty(){vec!["Describe the method that solved this task.".into()]}else{task.steps.iter().take(30).cloned().collect()},pitfalls:task.warnings.iter().take(20).map(|s|s.chars().take(1000).collect()).collect(),verification:vec![],confirmed:false,revision:0,community:false};drop(journal);let mut store=STORE.lock().await;if store.data.skills.contains_key(&id){return Ok(json!({"ok":true,"id":id}));}store.request(&json!({"action":"save","skill":skill,"revision":0})).map(|mut result|{result["id"]=id.into();result})},
    _=>STORE.lock().await.request(&request)
   }

@@ -60,6 +60,15 @@ jobs:
         with:
           python-version: '3.12'
       - run: python development/1.24.0/prepare.py
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: build-src/PlazCode/agent
+      - name: Shared service protocol and database regressions
+        run: |
+          node --experimental-strip-types learning-service/test-protocol.mjs
+          python learning-service/test-sql.py
+          python test-release-feed.py
+          python test-release-notes.py
       - run: rustup update stable --no-self-update
       - run: npm ci --prefix release-tools --ignore-scripts
         working-directory: build-src/PlazCode

@@ -1172,7 +1172,7 @@ async fn checkpoint_tool_inner(state: &AppState, engine: &str, id: &str, name: &
         }else{let result=workspace::dispatch(&state.workspace,name,args.clone()).await.map(|text|McpOutput{text,images:Vec::new()}).map_err(anyhow::Error::msg);let success=result.is_ok();(result,success)};
         let task=journal.task_mut(id)?;if task.learning.len()<101{task.learning.push(shared_learning::observation(name,&args,success));}
         journal.save()?;
-        if let Err(error)=journal.commit_files(&state.workspace,id,&paths) { journal.warn(id,&format!("Checkpoint verification failed: {error}"));let _=journal.save(); }
+        if let Err(error)=journal.commit_files(&state.workspace,id,&paths) { journal.warn(id,&format!("Checkpoint verification failed: {error}"));journal.task_mut(id)?.learning.push(shared_learning::observation("checkpoint_verification_failed",&serde_json::Value::Null,false));let _=journal.save(); }
         return result;
     }
     journal.step(id,name);

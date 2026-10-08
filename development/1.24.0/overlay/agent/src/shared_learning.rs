@@ -50,10 +50,12 @@ static LEDGER:once_cell::sync::Lazy<tokio::sync::Mutex<Ledger>>=once_cell::sync:
 fn save(ledger:&Ledger)->anyhow::Result<()>{let path=path();std::fs::create_dir_all(path.parent().unwrap())?;let temporary=path.with_extension("json.tmp");std::fs::write(&temporary,serde_json::to_vec(ledger)?)?;std::fs::rename(temporary,path)?;Ok(())}
 fn client()->anyhow::Result<reqwest::Client>{Ok(reqwest::Client::builder().user_agent("PlazCode-shared-learning").redirect(reqwest::redirect::Policy::none()).timeout(std::time::Duration::from_secs(3)).build()?)}
 async fn bounded(response:reqwest::Response)->anyhow::Result<Value>{let response=response.error_for_status()?;anyhow::ensure!(response.content_length().unwrap_or(0)<=8192,"Learning response too large");let mut stream=response.bytes_stream();let mut bytes=Vec::new();while let Some(chunk)=stream.next().await{let chunk=chunk?;anyhow::ensure!(bytes.len()+chunk.len()<=8192,"Learning response too large");bytes.extend_from_slice(&chunk);}Ok(serde_json::from_slice(&bytes)?)}
+static LAST_ATTEMPT:std::sync::atomic::AtomicI64=std::sync::atomic::AtomicI64::new(0);
 static SYNC_LOCK:tokio::sync::Mutex<()>=tokio::sync::Mutex::const_new(());
 pub async fn lessons(force:bool)->Vec<Lesson>{
  let _guard=SYNC_LOCK.lock().await;let now=chrono::Utc::now().timestamp();let synced=LEDGER.lock().await.synced;
- if force||now-synced>3600 {
+ if force||(now-synced>3600&&now-LAST_ATTEMPT.load(Ordering::Relaxed)>60) {
+  LAST_ATTEMPT.store(now,Ordering::Relaxed);
   let result:anyhow::Result<Index>=async{let value=bounded(client()?.get(format!("{SERVICE}/lessons")).send().await?).await?;let index:Index=serde_json::from_value(value)?;anyhow::ensure!(index.schema==1&&index.lessons.len()<=3,"Unknown learning schema");let mut seen=std::collections::BTreeSet::new();for lesson in &index.lessons{anyhow::ensure!(seen.insert(lesson.recipe.id())&&lesson.successes<=1000000&&lesson.failures<=1000000&&lesson.revision>0,"Invalid learning index");}Ok(index)}.await;
   if let Ok(index)=result {let mut ledger=LEDGER.lock().await;ledger.lessons=index.lessons;ledger.synced=now;let _=save(&ledger);}
  }
