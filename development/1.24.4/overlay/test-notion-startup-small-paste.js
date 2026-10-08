@@ -2,7 +2,7 @@ const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict'),{JS
 (async()=>{for(const behavior of ['retain','tall','hidden-control','hidden-narrow-control','delayed-control','reject','stop','remount','foreign']){
  const dom=new JSDOM('<main><section id="composer"><div id="editor-wrap"><div role="textbox" contenteditable="true" data-placeholder="Frage Notion AI"></div></div><div role="button" data-testid="agent-chat-send-button" aria-label="Nachricht senden">Send</div></section></main>',{url:'https://app.notion.com/ai',runScripts:'outside-only',pretendToBeVisual:true}),w=dom.window;
  let ed=w.document.querySelector('[role=textbox]'),model='',commits=0,pastes=0,stopped=false;const sent=[];
- w.HTMLElement.prototype.getBoundingClientRect=function(){return {left:200,top:600,width:650,height:this===ed?40:behavior==='tall'?900:100,right:850,bottom:700};};
+ w.HTMLElement.prototype.getBoundingClientRect=function(){if(this.style.display==='none')return {left:0,top:0,width:0,height:0,right:0,bottom:0};return {left:200,top:600,width:650,height:this===ed?40:behavior==='tall'?900:100,right:850,bottom:700};};
  class Transfer{constructor(){this.data={};}setData(k,v){this.data[k]=v;}getData(k){return this.data[k]||'';}}
  class Paste extends w.Event{constructor(type,options){super(type,options);this.clipboardData=options.clipboardData;}}
  w.DataTransfer=Transfer;w.ClipboardEvent=Paste;w.document.execCommand=()=>false;
