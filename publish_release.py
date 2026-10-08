@@ -49,14 +49,16 @@ def validate_archive(data,version,platform="windows"):
             if manifest.get('version_name',manifest['version'])!=manifest['version']:raise ValueError('Extension display version contradicts release version: '+path)
         if platform=='windows' and 'PlazCode/PlazCode.exe' not in archive.namelist():raise ValueError('Windows desktop executable missing')
         if platform=='macos' and 'PlazCode/PlazCode.exe' in archive.namelist():raise ValueError('Mac download must not contain the Windows executable')
-        import plistlib, struct
-        app='PlazCode/PlazCode.app/Contents/'
-        if tuple(map(int,plistlib.loads(archive.read(app+'Info.plist'))['CFBundleShortVersionString'].split('.')))>tuple(map(int,version.split('.'))):raise ValueError('Mac app version exceeds package version')
-        binary=archive.read(app+'MacOS/PlazCode')
-        if binary[:4]!=bytes.fromhex('cafebabe'):raise ValueError('Universal Mac application missing')
-        count=struct.unpack('>I',binary[4:8])[0]
-        architectures={struct.unpack('>I',binary[8+i*20:12+i*20])[0] for i in range(count)}
-        if not {0x01000007,0x0100000c}.issubset(architectures):raise ValueError('Mac architecture missing')
+        # Windows archives no longer bundle macOS; older combined downloads remain valid.
+        if platform=='macos' or any(name.startswith('PlazCode/PlazCode.app/') for name in names):
+            import plistlib, struct
+            app='PlazCode/PlazCode.app/Contents/'
+            if tuple(map(int,plistlib.loads(archive.read(app+'Info.plist'))['CFBundleShortVersionString'].split('.')))>tuple(map(int,version.split('.'))):raise ValueError('Mac app version exceeds package version')
+            binary=archive.read(app+'MacOS/PlazCode')
+            if binary[:4]!=bytes.fromhex('cafebabe'):raise ValueError('Universal Mac application missing')
+            count=struct.unpack('>I',binary[4:8])[0]
+            architectures={struct.unpack('>I',binary[8+i*20:12+i*20])[0] for i in range(count)}
+            if not {0x01000007,0x0100000c}.issubset(architectures):raise ValueError('Mac architecture missing')
 
 
 def main():
