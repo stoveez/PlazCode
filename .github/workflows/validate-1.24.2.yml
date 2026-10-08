@@ -40,6 +40,8 @@ jobs:
         working-directory: build-src/PlazCode
       - run: node release-tools/test-browsers.cjs
         working-directory: build-src/PlazCode
+      - run: node release-tools/test-ultracode-appearance.cjs
+        working-directory: build-src/PlazCode
   native:
     strategy:
       fail-fast: false

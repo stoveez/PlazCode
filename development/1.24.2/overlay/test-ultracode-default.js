@@ -21,3 +21,13 @@ for(const theme of ['default','solar']){const value=box.Applyappearance({theme,g
 box.Applyappearance({theme:'cyan'});assert.equal(style.getPropertyValue('--orange'),'#27c1e7');dom.window.close();
 const popup=fs.readFileSync('popup.js','utf8'),a=popup.indexOf('const POPUP_PALETTES'),b=popup.indexOf('const ENGINE_KEY',a),vars={},root={dataset:{},style:{setProperty:(k,v)=>vars[k]=v}},p=vm.createContext({document:{documentElement:root}});vm.runInContext(popup.slice(a,b),p);p.applyPopupAppearance({theme:'solar',glow:'strong',gradients:'off'});assert.equal(root.dataset.palette,'default');assert.equal(vars['--accent'],'#e9ba53');assert.equal(root.dataset.glow,'strong');
 console.log('PASS Ultracode activation/deactivation, engine-aware instructions, all dropdowns/load order, new Default theme and Solar Dusk migration.');
+// Every shipped extension entry point receives the same UI and mode hooks.
+for(const path of ['popup.js','popup.html','overlay.css'])assert.equal(fs.readFileSync('PlazCode-Extension/'+path,'utf8'),fs.readFileSync(path,'utf8'));
+const main=fs.readFileSync('core/main.js','utf8'),hooks=main.match(/window\.__rsThinkingLevel = \(\) => thinkingLevel;[^;]+;/g);assert.equal(hooks.length,5);
+const appearanceDom=new JSDOM(desktop),appearanceRoot=appearanceDom.window.document.documentElement;
+appearanceRoot.dataset.desktopTheme='cyan';
+const appearanceCtx=vm.createContext({document:appearanceDom.window.document,window:{},thinkingLevel:'ultracode'});
+for(const hook of hooks){vm.runInContext(hook,appearanceCtx);assert.equal(appearanceRoot.dataset.rsThinking,'ultracode');assert.equal(appearanceRoot.dataset.desktopTheme,'cyan');appearanceCtx.thinkingLevel='max';vm.runInContext(hook,appearanceCtx);assert.equal(appearanceRoot.dataset.rsThinking,'max');appearanceCtx.thinkingLevel='ultracode';}
+appearanceDom.window.close();
+for(const [path,prefix] of [['agent/src/desktop.html','data-desktop'],['popup.html','data'],['overlay.css','data-rs']]){const css=fs.readFileSync(path,'utf8');assert(css.includes(prefix+'-thinking=ultracode'));assert(css.includes(prefix+'-glow=off'));assert(css.includes(prefix+'-gradients=off'));}
+console.log('PASS selected-only purple appearance hooks and packaged popup/style parity.');
