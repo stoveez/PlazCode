@@ -3,7 +3,7 @@ const {chromium,firefox}=require('playwright'),fs=require('node:fs'),assert=requ
  const browser=await engine.launch({headless:true}),page=await browser.newPage({viewport:{width:1000,height:800}});
  await page.setContent('<style>'+fs.readFileSync('overlay.css','utf8')+'</style><div id="rs-root"><div id="rs-bar" style="position:fixed;top:650px;left:100px;width:800px">PlazCode</div></div>');
  await page.addScriptTag({path:'core/activity.js'});await page.addScriptTag({path:'core/checklist.js'});
- await page.evaluate(()=>{window.act=PlazCodeActivity.create();act.sync(true,'test');act.task('Create a polished menu','one');act.checklist([{label:'Inspect the game',status:'completed'},{label:'Build the menu',status:'in_progress'},{label:'Test interactions',status:'pending'}]);window.widget=PlazCodeChecklist.mount({root:document.getElementById('rs-root'),getGroup:()=>act.list('test').at(-1),getBar:()=>document.getElementById('rs-bar'),blocked:()=>document.documentElement.hasAttribute('data-rs-bar-collapsed')});widget.render();});
+ await page.evaluate(()=>{window.act=PlazCodeActivity.create();act.sync(true,'test');act.task('Create a polished menu','one');act.checklist([{label:'Inspect the game',status:'completed'},{label:'Build the menu',status:'in_progress'},{label:'Test interactions',status:'pending'}]);window.widget=PlazCodeChecklist.mount({root:document.getElementById('rs-root'),getGroup:()=>act.list('test').at(-1),getBar:()=>document.getElementById('rs-bar'),getDetached:()=>document.documentElement.hasAttribute('data-rs-bar-collapsed'),blocked:()=>false});widget.render();});
  await page.emulateMedia({reducedMotion:'reduce'});
  const colors=[];for(const [palette,bg,rgb,accent] of [['default','#18140d','233 186 83','#e9ba53'],['cyan','#071b24','58 211 233','#3ad3e9'],['rose','#25141d','237 134 172','#ed86ac']]){
   await page.evaluate(({palette,bg,rgb,accent})=>{const h=document.documentElement;h.dataset.rsPalette=palette;h.dataset.rsThinking='max';h.dataset.rsGlow='subtle';h.style.setProperty('--pc-bg',bg);h.style.setProperty('--pc-rgb',rgb);h.style.setProperty('--pc-accent',accent);}, {palette,bg,rgb,accent});
@@ -19,6 +19,14 @@ const {chromium,firefox}=require('playwright'),fs=require('node:fs'),assert=requ
  }
  await page.getByRole('button',{name:'Hide task checklist',exact:true}).click();assert(await page.locator('#rs-task-checklist').isHidden());await page.getByRole('button',{name:'Show task checklist',exact:true}).click();assert(await page.locator('#rs-task-checklist').isVisible());
  await page.setViewportSize({width:360,height:800});await page.evaluate(()=>{const bar=document.getElementById('rs-bar');bar.style.left='8px';bar.style.width='344px';widget.place();});const rect=await page.locator('#rs-task-checklist').boundingBox();assert(rect.x>=8&&rect.x+rect.width<=352);assert(rect.y+rect.height<650);
- await page.evaluate(()=>{document.documentElement.dataset.rsBarCollapsed='1';widget.place();});assert(await page.locator('#rs-task-checklist').isHidden());
+ await page.evaluate(()=>{document.documentElement.dataset.rsBarCollapsed='1';widget.place();});assert(await page.locator('#rs-task-checklist').isVisible());
+ const floating=await page.locator('#rs-task-checklist').boundingBox();await page.mouse.move(floating.x+90,floating.y+20);await page.mouse.down();await page.mouse.move(20,35,{steps:5});await page.mouse.up();
+ const moved=await page.locator('#rs-task-checklist').boundingBox();assert(moved.x>=8&&moved.y>=8&&moved.x+moved.width<=352);assert(moved.y<floating.y);
+ await page.evaluate(()=>widget.place());assert.deepEqual(await page.locator('#rs-task-checklist').boundingBox(),moved);
+ await page.locator('#rs-task-checklist header').focus();await page.keyboard.press('ArrowDown');const keyed=await page.locator('#rs-task-checklist').boundingBox();assert.equal(keyed.y,moved.y+10);
+ await page.evaluate(()=>{document.documentElement.removeAttribute('data-rs-bar-collapsed');widget.place();});const docked=await page.locator('#rs-task-checklist').boundingBox();assert(docked.y+ docked.height<650);
+ await page.evaluate(()=>{document.documentElement.dataset.rsBarCollapsed='1';widget.place();});const restored=await page.locator('#rs-task-checklist').boundingBox();assert.equal(restored.y,keyed.y);
+ await page.getByRole('button',{name:'Hide task checklist',exact:true}).click();assert(await page.locator('#rs-task-checklist').isHidden());assert(await page.locator('#rs-checklist-show').isVisible());await page.getByRole('button',{name:'Show task checklist',exact:true}).click();assert(await page.locator('#rs-task-checklist').isVisible());
+
  console.log(name+' PASS checklist themes, preserved background, purple fade, completion contrast, hide/restore and narrow placement');await browser.close();
 }})().catch(e=>{console.error(e);process.exit(1);});

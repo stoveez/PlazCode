@@ -21,3 +21,7 @@ Show approach summary is default off, persisted and synchronized across desktop/
 Pinned task checklist sits above the bar at its right edge and follows placement, navigation, bar hiding and blocking modals. The per-tab hide preference preserves a restore button. Task labels appear immediately; explicit AI checklist steps supply plan percentages, rather than elapsed time/tool counts. Completion turns text/checks green; pauses retain partial progress. The shared palette, glow/gradient preferences and reduced motion apply, including selected-only Ultracode purple crossfade.
 
 A subsequent full-package test exposed unavailable Get-FileHash in inherited PowerShell module environments. File/package verification now uses built-in .NET SHA-256 with the same rejection rules, rather than depending on that optional cmdlet.
+
+Release descriptions use emoji feature headings, bold feature names and short everyday-language bullets, following the supplied announcement example. The complete GitHub text including installation steps is 1,767 UTF-16 characters.
+
+Hiding the bar now detaches the checklist as a separately movable box. Pointer capture and arrow-key controls clamp it to the viewport; its position persists for the tab. Restoring the bar redocks it, and its own hide/restore remains independent. Blocking modals and conversation changes still suppress unrelated tasks.

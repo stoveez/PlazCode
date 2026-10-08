@@ -26,13 +26,16 @@ def checked_release_body(body):
 def notes(feed):
     version=feed['version'];entry=next(x for x in feed['release_notes'] if x['version']==version)
     entry={**entry,**entry.get('github',{})}
-    lines=['**PlazCode '+version+': '+entry['title']+'**','','- '+entry['summary'],'']
-    for key,title in [('added','New additions'),('improved','Improvements'),('fixed','Bug fixes'),('notes','Validation and limitations')]:
-        if entry.get(key):lines+=['***'+title+'***','']+['- '+x for x in entry[key]]+['']
-    lines+=['## Update','','- Open PlazCode to update automatically, or choose **Updates → Update now**.',
-            '- Windows: **PlazCode-'+version+'.zip**. Mac: **PlazCode-macOS-'+version+'.zip**. Firefox: **PlazCode-Firefox-'+version+'.zip**.',
-            '- Reload the browser extension, then refresh your AI chat tabs. Firefox users: reload the temporary add-on after restarting Firefox.',
-            '- Your settings, memory and enabled MCP servers are kept.','','See VALIDATION.txt for test details.']
+    lines=['## ✨ PlazCode '+version,'',entry['summary'],'']
+    sections=entry.get('sections')
+    if sections is None:
+        sections=[{'title':title,'items':entry.get(key,[])} for key,title in [('added','✨ New features'),('improved','💡 Improvements'),('fixed','🛠️ Fixes'),('notes','🧪 Checks')]]
+    for section in sections:
+        if section.get('items'):lines+=['### '+section['title'],'']+['- '+x for x in section['items']]+['']
+    lines+=['### 📥 How to update','','- Open PlazCode, or choose **Updates → Update now**.',
+            '- Manual downloads: **PlazCode-'+version+'.zip** for Windows, **PlazCode-macOS-'+version+'.zip** for Mac, or **PlazCode-Firefox-'+version+'.zip** for Firefox.',
+            '- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.',
+            '- Your settings, memory and connections are kept.','','Test details are included in VALIDATION.txt.']
     return 'PlazCode '+version+': '+entry['title'],checked_release_body('\n'.join(lines)+'\n')
 
 def validate_archive(data,version,platform="windows"):
