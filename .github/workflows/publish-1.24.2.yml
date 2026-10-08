@@ -18,7 +18,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       VALIDATED_SHA: f6f34847f22811a4dca7790374ad558c3293b53f
-      VALIDATION_RUN: '37812729341'
+      VALIDATION_RUN: '0'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -63,7 +63,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       VALIDATED_SHA: f6f34847f22811a4dca7790374ad558c3293b53f
-      VALIDATION_RUN: '37812729341'
+      VALIDATION_RUN: '0'
     steps:
       - uses: actions/checkout@v4
         with:
