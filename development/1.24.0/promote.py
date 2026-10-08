@@ -1,6 +1,6 @@
 """Promote only successful exact-source artifacts; never overwrite release archives."""
 from pathlib import Path
-import importlib.util,json,os,hashlib,shutil
+import importlib.util,json,os,hashlib,shutil,re
 ROOT=Path(__file__).resolve().parents[2]
 VERSION='1.24.0'
 spec=importlib.util.spec_from_file_location('archive_tools',ROOT/'development/1.23.0/promote.py')
@@ -30,6 +30,13 @@ def main():
     entry=a.load(Path(__file__).with_name('release-entry.json'));notes=[entry]+[n for n in a.load(ROOT/'release-notes.json') if n['version']!=VERSION]
     a.write_json(ROOT/'release-notes.json',notes)
     defender=find('defender-result.txt','Windows').read_text(encoding='utf-8-sig').strip();assert defender
+    # Bind the scan evidence to the actual Windows bytes promoted into the final ZIP.
+    scanned_package=find('defender-package-sha256.txt','Windows') if 'unavailable' not in defender.lower() and 'not enabled' not in defender.lower() else None
+    if scanned_package:
+        hashes=re.findall(r'\b[0-9A-Fa-f]{64}\b',scanned_package.read_text(encoding='utf-8-sig'))
+        assert hashlib.sha256(find('PlazCode-1.24.0-development.zip','Windows').read_bytes()).hexdigest() in [h.lower() for h in hashes]
+        hashes=re.findall(r'\b[0-9A-Fa-f]{64}\b',find('defender-executable-sha256.txt','Windows').read_text(encoding='utf-8-sig'))
+        assert hashlib.sha256(windows['PlazCode/PlazCode.exe'][0]).hexdigest() in [h.lower() for h in hashes]
     validation=f'''PlazCode {VERSION}\nSource: {base}\nCI: {run['html_url']}\nAll platform Rust/JavaScript regressions and Chromium/Firefox fixtures passed.\nWindows PE/updater/icon checks and real automatic update download/checksum/handoff checks passed. Mac x86_64/arm64, ad-hoc codesign and real automatic update handoff checks passed.\nShared service protocol and SQL tests passed; private-field reports and unauthorized retraction were rejected by the live API.\nAutomatic sharing is mandatory, limited to three predefined local edit/test workflows and actual recorded test-command exit status. No task prompts, code, paths, user/project identifiers or raw errors are submitted. Unsupported workflows stay local. Anonymous aggregate reports cannot establish task correctness.\nWorkflow retrieval does not change provider model weights. No benchmark improvement is claimed.\nLive signed-in providers and real Studio/Blender were not tested. Windows binaries are unsigned.\nMicrosoft Defender runner result before cross-platform assembly:\n{defender}\nThe scanned package checksum and scan availability are recorded in release-validation-{VERSION}.\n'''
     notice=f'''PlazCode is GPL-3.0-or-later. Editable source and build instructions:\nhttps://github.com/stoveez/PlazCode/releases/tag/v{VERSION}\nDownload PlazCode-source-{VERSION}.zip.\nVerify GitHub build provenance using gh attestation verify <archive> --repo stoveez/PlazCode.\nGitHub provenance is separate from Windows Authenticode and Apple notarization.\n'''.encode()
     common={'PlazCode/release-notes.json':(a.encode(notes) if hasattr(a,'encode') else (json.dumps(notes,indent=2,ensure_ascii=False)+'\n').encode(),0o100644<<16),'PlazCode/VALIDATION.txt':(validation.encode(),0o100644<<16),'PlazCode/SOURCE.txt':(notice,0o100644<<16),'PlazCode/PlazCode-Extension/SOURCE.txt':(notice,0o100644<<16)}

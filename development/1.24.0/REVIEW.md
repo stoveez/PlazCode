@@ -9,3 +9,7 @@ The public service uses expiring one-use proof-of-work tickets, atomic deduplica
 Scope limitation: this first automatic release learns which of three supported local workflows pass tests, not arbitrary problem-specific answers. Roblox/Blender and unsupported local workflows remain private. It neither changes provider model weights nor claims benchmark improvements.
 
 Validation: pending exact-source platform CI.
+
+Automatic updater validation includes real published-asset downloads and SHA-256 checks on Windows/macOS at launch and after an initially current launch. The fixture records installer handoff; it does not replace files or relaunch a real user GUI. The existing launcher already forwards launch requests to an existing agent; the feed size was a confirmed blocker.
+
+Antivirus investigation remains open pending the reported vendor, detection name, flagged file and matching SHA-256. The v1.23.0 build-runner Defender scan found no threats, which is not a verdict for every vendor or future definitions. The next Windows scan refreshes Defender definitions, scans the packaged installation including bundled runtimes, and records engine/signature versions and package/executable hashes. Promotion verifies those hashes match the scanned package and promoted Windows executable. No security exclusions, protection disabling, packing or signature spoofing are introduced. Legitimate publisher signing requires a publisher certificate; GitHub provenance does not substitute for it.
