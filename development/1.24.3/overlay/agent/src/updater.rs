@@ -445,7 +445,7 @@ pub async fn post(Json(value): Json<Value>) -> axum::response::Response {
         let record=serde_json::json!({"version":"1.24.3","at":101,"message":"Cannot replace a locked file."});
         let mut bytes=vec![0xEF,0xBB,0xBF];bytes.extend(serde_json::to_vec(&record).unwrap());std::fs::write(failure_path(&root),bytes).unwrap();
         assert!(installer_failure(&root,"1.24.3",100,&log,Some(1)).contains("Cannot replace a locked file."));
-        for (version,started) in [("1.24.3",100),("1.24.3",102)] {
+        for (version,started) in [("9.99.0",100),("1.24.3",102)] {
             let error=installer_failure(&root,version,started,&log,Some(1));
             assert!(error.contains("PowerShell rejected this script."));assert!(!error.contains("Cannot replace a locked file."));assert!(error.contains("updater.log"));
         }
