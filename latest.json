@@ -1,9 +1,46 @@
 {
-  "version": "1.24.0",
-  "desktop_version": "1.24.0",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.0.zip",
-  "sha256": "8b1fad4dcab378ce1c4f144054bc279b6ea949bf25b943c202a6b377f74dac6f",
+  "version": "1.24.1",
+  "desktop_version": "1.24.1",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.1.zip",
+  "sha256": "10757c593711ea9ae7e56680068e955a1cd83c2c8e444a8358a262f86f7d2230",
   "release_notes": [
+    {
+      "version": "1.24.1",
+      "title": "Reliable results and a browsable Skills page",
+      "summary": "Keep repeated tool results flowing, wait for complete ChatGPT replies, and browse, inspect or add adaptable project skills.",
+      "added": [
+        "A searchable desktop Skills menu with readable names, detailed descriptions, method steps and checks for all 11 starter skills and saved methods.",
+        "Add skill and Ask AI to add skill, with generated names for unnamed methods and full paginated starter instructions."
+      ],
+      "improved": [
+        "Skills are applied by inspecting project context, adapting relevant methods and verifying behavior. AI-created candidates stay unverified until checked."
+      ],
+      "fixed": [
+        "Identical results from separate command turns are now delivered independently. Only the same confirmed delivery is deduplicated.",
+        "ChatGPT output pauses no longer finalize a command while the native Stop control is present; a stuck reply pauses safely without auto-stopping the AI.",
+        "CodeMirror command text refreshes after same-length replacements."
+      ],
+      "notes": [
+        "Automated fixtures and platform checks cover these cases; live signed-in provider conversations remain untested. Windows remains unsigned."
+      ],
+      "github": {
+        "summary": "Reliable tool-result delivery and a searchable Skills page.",
+        "added": [
+          "Browse all 11 starter skills and saved methods; click for details and read full starter instructions.",
+          "Add a skill manually or ask AI to name and describe one."
+        ],
+        "improved": [
+          "Adapt skills to the current game’s systems and constraints."
+        ],
+        "fixed": [
+          "Equal results from new commands are delivered; confirmed retries are coalesced.",
+          "Wait for ChatGPT’s native completion; refresh equal-length code edits."
+        ],
+        "notes": [
+          "Fixture/platform validation included. Live signed-in provider chats remain untested."
+        ]
+      }
+    },
     {
       "version": "1.24.0",
       "title": "Starter skills, automatic learning and reliable updates",
@@ -97,26 +134,12 @@
       ],
       "improved": [],
       "fixed": []
-    },
-    {
-      "version": "1.21.1",
-      "title": "No more hang on Starting Up",
-      "summary": "The agent no longer hangs on Starting Up when the PlazCode bridge stops answering, the extension always answers its own startup checks, and the Notion AI chat box is also found when its placeholder reads How can I help.",
-      "added": [],
-      "improved": [
-        "Every request to the PlazCode bridge now gives up after a time limit, and background checks for memory, status and updates never run twice at the same time."
-      ],
-      "fixed": [
-        "Starting an agent could hang on Starting Up when the bridge accepted a connection but never replied, because waiting background requests filled the browser's connection limit.",
-        "An unexpected error while handling an extension message could leave the bar waiting forever. An error reply is now always sent.",
-        "The Notion AI chat box was not found when its placeholder read How can I help instead of the known wording."
-      ]
     }
   ],
   "platforms": {
     "macos": {
-      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.0.zip",
-      "sha256": "85b31f796eea99743581a688421a1f13a487e9ba3ee4d6b193ce2a229eb59379"
+      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.1.zip",
+      "sha256": "0cea364abd9d2dbf2f66adcd933f3719acef9a3a91c1d2757a9390aaddfea644"
     }
   }
 }

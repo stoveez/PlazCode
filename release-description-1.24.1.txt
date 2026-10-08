@@ -1,0 +1,32 @@
+**PlazCode 1.24.1: Reliable results and a browsable Skills page**
+
+- Reliable tool-result delivery and a searchable Skills page.
+
+***New additions***
+
+- Browse all 11 starter skills and saved methods; click for details and read full starter instructions.
+- Add a skill manually or ask AI to name and describe one.
+
+***Improvements***
+
+- Adapt skills to the current game’s systems and constraints.
+
+***Bug fixes***
+
+- Equal results from new commands are delivered; confirmed retries are coalesced.
+- Wait for ChatGPT’s native completion; refresh equal-length code edits.
+
+***Validation and limitations***
+
+- Fixture/platform validation included. Live signed-in provider chats remain untested.
+
+## Update
+
+- Desktop launch automatically checks and updates to the newest release when outdated. Manual update: choose **Updates → Update now**.
+- Windows: run **Update-PlazCode.bat** for a manual update. macOS: launch **PlazCode.app** from the extracted folder; use **MacOS_Setup.command** for setup.
+- Chromium: reload at chrome://extensions, edge://extensions or brave://extensions and refresh AI tabs. Firefox: open about:debugging, Load Temporary Add-on and select manifest.json inside PlazCode-Extension-Firefox or the standalone Firefox ZIP. Unsigned temporary addons are removed when Firefox restarts; permanent installation needs Mozilla signing.
+- Windows: download **PlazCode-1.24.1.zip**. macOS: download **PlazCode-macOS-1.24.1.zip**. The normal ZIP retains Mac compatibility for older installed updaters.
+- Firefox: download **PlazCode-Firefox-1.24.1.zip** or use **PlazCode-Extension-Firefox** inside either desktop package. Requires Firefox 140 or newer.
+- Existing settings, memory and enabled MCP servers keep their data locations.
+
+See VALIDATION.txt inside the ZIP for checks and live-test limitations.

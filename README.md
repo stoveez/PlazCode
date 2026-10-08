@@ -1,3 +1,14 @@
+PlazCode 1.24.1 — Reliable results and a browsable Skills page
+
+Keep repeated tool results flowing, wait for complete ChatGPT replies, and browse, inspect or add adaptable project skills.
+
+- A searchable desktop Skills menu with readable names, detailed descriptions, method steps and checks for all 11 starter skills and saved methods.
+- Add skill and Ask AI to add skill, with generated names for unnamed methods and full paginated starter instructions.
+- Skills are applied by inspecting project context, adapting relevant methods and verifying behavior. AI-created candidates stay unverified until checked.
+- Identical results from separate command turns are now delivered independently. Only the same confirmed delivery is deduplicated.
+- ChatGPT output pauses no longer finalize a command while the native Stop control is present; a stuck reply pauses safely without auto-stopping the AI.
+- CodeMirror command text refreshes after same-length replacements.
+
 PlazCode 1.24.0 — Starter skills, automatic learning and reliable updates
 
 Start with 11 Roblox skills, reuse privacy-safe workflow methods automatically and prevent oversized update feeds.
