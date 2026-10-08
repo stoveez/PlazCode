@@ -13,3 +13,5 @@ Ultracode (Beta) follows Max in desktop, popup and browser thinking controls. Th
 Ultracode adds selected-only purple details to desktop, popup and bar without changing the saved palette. Glow/gradient preferences still apply. Bundled/root popup and stylesheet copies are byte-identical. Browser render checks cover activation/deactivation and background preservation.
 
 Purple gradients crossfade over existing backgrounds in both directions over 420 ms. Borders and shadows fade with them; overlays ignore pointer events. Reduced-motion mode disables these transitions. Chromium and Firefox render regressions verify intermediate blending and both endpoints.
+
+Notion startup/catalogue messages first try one native editor transaction, verify full retention across two renders, then use the existing single commit and receipt checks. Rejected empty writes keep the exact protocol-file fallback. Changed/remounted nonempty drafts are preserved without submission. Live Notion latency has not been measured; the page hydration and server response remain outside PlazCode control.

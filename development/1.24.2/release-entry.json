@@ -9,7 +9,8 @@
     "Shorter, simpler release and update descriptions.",
     "More reliable model and UI creation.",
     "Solar Dusk is now the Default theme; the separate option is removed.",
-    "Ultracode smoothly fades purple accents and glow in and out while keeping your theme."
+    "Ultracode smoothly fades purple accents and glow in and out while keeping your theme.",
+    "Faster Notion startup when its editor accepts the complete setup text."
   ],
   "fixed": [
     "Saved previews insert and export without extra errors.",
