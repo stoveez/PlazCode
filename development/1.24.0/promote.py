@@ -11,18 +11,29 @@ def find(name,platform):
     assert len(matches)==1,(name,matches)
     return matches[0]
 
+def unpack_package(path):
+    files=a.unpack(path)
+    # Only our added text notices differ due to Windows checkout/write_text.
+    # Preserve all 217 supplied files, fonts and validated executable bytes.
+    notices=('starter-skills/syphodev/PLAZCODE-ADAPTER.md',
+             'starter-skills/syphodev/skills/roblox-ui/references/fonts/OFL.txt')
+    for name,(raw,mode) in files.items():
+        if name.endswith(notices):
+            files[name]=(raw.replace(b'\r\n',b'\n'),mode)
+    return files
+
 def main():
     base=os.environ['VALIDATED_SHA'];run=a.load(ROOT/'ci-artifacts/run.json');jobs=a.load(ROOT/'ci-artifacts/jobs.json')['jobs']
     assert run['head_sha']==base and run['status']=='completed' and run['conclusion']=='success'
     assert {j['name'] for j in jobs}=={'browsers','native (ubuntu-latest)','native (windows-latest)','native (macos-latest)'}
     assert all(j['conclusion']=='success' for j in jobs)
-    windows=a.unpack(find('PlazCode-1.24.0-development.zip','Windows'));mac=a.unpack(find('PlazCode-macOS-1.24.0-development.zip','macOS'))
+    windows=unpack_package(find('PlazCode-1.24.0-development.zip','Windows'));mac=unpack_package(find('PlazCode-macOS-1.24.0-development.zip','macOS'))
     for name,value in windows.items():
         if name.startswith(('PlazCode/core/','PlazCode/providers/','PlazCode/PlazCode-Extension/')):assert mac[name][0]==value[0],name
-    firefox=a.firefox_text(a.unpack(find('PlazCode-Firefox-1.24.0-development.zip','Windows')))
-    other=a.firefox_text(a.unpack(find('PlazCode-Firefox-1.24.0-development.zip','macOS')))
+    firefox=a.firefox_text(unpack_package(find('PlazCode-Firefox-1.24.0-development.zip','Windows')))
+    other=a.firefox_text(unpack_package(find('PlazCode-Firefox-1.24.0-development.zip','macOS')))
     assert {n:v[0] for n,v in firefox.items()}=={n:v[0] for n,v in other.items()}
-    source=a.unpack(find('PlazCode-source-1.24.0-development.zip','macOS'));other=a.unpack(find('PlazCode-source-1.24.0-development.zip','Windows'))
+    source=unpack_package(find('PlazCode-source-1.24.0-development.zip','macOS'));other=unpack_package(find('PlazCode-source-1.24.0-development.zip','Windows'))
     for files in [source,other]:
         for name in list(files):
             if name.startswith('PlazCode/visual-checks/') or Path(name).name in {'windows-signature.txt','defender-result.txt','defender-package-sha256.txt','defender-engine.json','defender-executable-sha256.txt'}:del files[name]
