@@ -337,9 +337,15 @@ async fn run(install: bool, background: bool) -> anyhow::Result<()> {
             if let Some(appearance)=appearance {helper_command.arg("-Theme").arg(appearance.theme).arg("-Glow").arg(appearance.glow);if appearance.gradients=="off" {helper_command.arg("-NoGradients");}}
         }
         let helper_started = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)?.as_millis() as u64;
-        let log_path = if cfg!(windows) { root.join("logs").join("updater.log") } else { crate::platform::configuration_root().join("logs").join("updater.log") };
+        #[cfg(windows)]
+        let log_path = root.join("logs").join("updater.log");
+        #[cfg(target_os="macos")]
+        let log_path = crate::platform::configuration_root().join("logs").join("updater.log");
         let log_path = if std::fs::create_dir_all(log_path.parent().unwrap()).is_ok() { log_path } else { stage.join("updater.log") };
-        let log = std::fs::OpenOptions::new().create(true).append(true).open(&log_path)?;
+        let (log_path, log) = match std::fs::OpenOptions::new().create(true).append(true).open(&log_path) {
+            Ok(log) => (log_path, log),
+            Err(_) => { let fallback=stage.join("updater.log");let log=std::fs::OpenOptions::new().create(true).append(true).open(&fallback)?;(fallback,log) }
+        };
         #[cfg(windows)]
         let mut helper_process = helper_command.current_dir(&root).stdout(log.try_clone()?).stderr(log).creation_flags(0x08000000).spawn()?;
         #[cfg(target_os="macos")]
@@ -350,7 +356,7 @@ async fn run(install: bool, background: bool) -> anyhow::Result<()> {
             std::process::Command::new("/bin/bash").arg(helper_copy).arg(path).arg(hash).arg(latest).arg(std::process::id().to_string()).arg(if restore_window {"restore"} else if quiet_restart {"background"} else {"foreground"}).arg(&root).current_dir(&root).stdout(log.try_clone()?).stderr(log).spawn()?
         };
         let result = tokio::task::spawn_blocking(move || helper_process.wait()).await??;
-        anyhow::ensure!(result.success(), "{}", installer_failure(&root, latest, helper_started, &log_path, result.code()));
+        anyhow::ensure!(result.success(), "{}", installer_failure(&root, &latest, helper_started, &log_path, result.code()));
         progress(100,"Updater finished. Reload the extension and refresh AI chat tabs.");
     }
     Ok(())

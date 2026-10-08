@@ -1,11 +1,14 @@
 {
   "version": "1.24.2",
-  "title": "Creation and update fixes",
+  "title": "Ultracode, creation fixes and a new Default theme",
   "summary": "Fewer creation errors and clearer updates.",
-  "added": [],
+  "added": [
+    "Ultracode (Beta) after Max: deeper planning, review and verification when selected."
+  ],
   "improved": [
     "Shorter, simpler release and update descriptions.",
-    "More reliable model and UI creation."
+    "More reliable model and UI creation.",
+    "Solar Dusk is now the Default theme; the separate option is removed."
   ],
   "fixed": [
     "Saved previews insert and export without extra errors.",
@@ -13,7 +16,7 @@
     "Failed updates show the actual error and log location."
   ],
   "notes": [
-    "Windows, Mac and browser checks passed. Live AI chats remain untested."
+    "Platform checks passed. Live AI chats remain untested; no performance gain is claimed."
   ],
   "github": {
     "summary": "Fewer creation errors and clearer updates."

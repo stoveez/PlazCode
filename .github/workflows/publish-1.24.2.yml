@@ -17,8 +17,8 @@ jobs:
     timeout-minutes: 50
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: 078bbea655a485d2c6f689d18eb408adedc1cf0f
-      VALIDATION_RUN: '37806991486'
+      VALIDATED_SHA: 4b51baa198eccc7ef8f5344f884201588cdbf328
+      VALIDATION_RUN: '37808648095'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -62,8 +62,8 @@ jobs:
     timeout-minutes: 55
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: 078bbea655a485d2c6f689d18eb408adedc1cf0f
-      VALIDATION_RUN: '37806991486'
+      VALIDATED_SHA: 4b51baa198eccc7ef8f5344f884201588cdbf328
+      VALIDATION_RUN: '37808648095'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -110,7 +110,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add PlazCode-1.24.2.zip PlazCode-macOS-1.24.2.zip PlazCode-source-1.24.2.zip PlazCode-Firefox-1.24.2.zip PlazCode-1.24.2.sigstore.json latest.json latest-macos.json release-notes.json release-metadata.json release-description-1.24.2.txt README.md release-validation-1.24.2 development/1.24.2/REVIEW.md
-          git commit -m 'Release PlazCode 1.24.2: creation fixes and simpler updates'
+          git commit -m 'Release PlazCode 1.24.2: Ultracode, creation fixes and Default theme'
           git push origin HEAD:codex/plazcode-publish-1.24.2
       - name: Publish verified assets before exposing the update feed
         run: |

@@ -22,17 +22,26 @@ const PlazCodeCreator = (() => {
     for(const node of document.nodes){walk(node.id);for(const value of Object.values(node.properties||{}))if(value?.type==='Ref'&&!nodes.has(value.id))throw Error('Missing reference '+value.id);}
     return document;
   }
-  function preparePass(request) {
+  function preparePass(request, previous) {
     const out=clone(request);
     // Saved compiler output may be read and reused, but its metadata is not input.
     if(out.version===ZSHeadlessBuilder.FORMAT_VERSION)delete out.version;
     for(const node of out.nodes||[]){
       for(const key of ['name','parent','class'])if(node[key]==='')delete node[key];
+      const className=node.class || previous?.nodes.find(saved=>saved.id===node.id)?.class;
+      const gui=/^(Frame|ScrollingFrame|CanvasGroup|TextLabel|TextButton|TextBox|ImageLabel|ImageButton|ViewportFrame|VideoFrame)$/.test(className);
+      for(const [key,value] of Object.entries(node.properties||{})) {
+        const dimension=gui && ['Size','Position'].includes(key) ? 'UDim2' : part({class:className}) && ['Size','Position','Orientation'].includes(key) ? 'Vector3' : null;
+        if(dimension && Array.isArray(value) && value.length===(dimension==='UDim2'?4:3) && value.every(Number.isFinite))node.properties[key]=dimension==='UDim2'?{type:dimension,xs:value[0],xo:value[1],ys:value[2],yo:value[3]}:{type:dimension,x:value[0],y:value[1],z:value[2]};
+        else if(dimension && value && typeof value==='object' && !Array.isArray(value) && !value.type && Object.keys(value).length && Object.keys(value).every(k=>(dimension==='UDim2'?['xs','xo','ys','yo','xScale','xOffset','yScale','yOffset']:['x','y','z']).includes(k)))node.properties[key]={type:dimension,...value};
+        const typed=node.properties[key];
+        if(typed?.type==='UDim2' && dimension==='UDim2')for(const [short,long] of [['xs','xScale'],['xo','xOffset'],['ys','yScale'],['yo','yOffset']])if(typed[short]===undefined && typed[long]===undefined)typed[short]=0;
+      }
     }
     return out;
   }
   function merge(previous, request) {
-    const compiled=ZSHeadlessBuilder.compile(preparePass(request));if(!compiled.ok)throw Error(compiled.error);
+    const compiled=ZSHeadlessBuilder.compile(preparePass(request,previous));if(!compiled.ok)throw Error(compiled.error);
     const normalized=JSON.parse(JSON.stringify(compiled.request,(key,value)=>value && value.type==='Enum'?{...value,value:'Enum.'+value.value}:value));
     if(previous && normalized.build_id!==previous.build_id)throw Error('Build identity changed.');
     if(normalized.operation==='replace')return validate({...normalized,operation:'replace',nodes:normalized.nodes.map(node=>({...node,create:true})),delete_ids:[]});
