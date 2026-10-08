@@ -1,0 +1,39 @@
+## ✨ PlazCode 1.24.3
+
+Less wasted work, a smaller Windows download and a refreshed workspace.
+
+### ⚡ Smoother performance
+
+- **Less lag:** unchanged tools and logs stay in place. New log lines append without rebuilding the list.
+- **Less background work:** fewer repeated requests and refreshes while hidden.
+
+### 📦 Smaller downloads
+
+- **Windows:** no longer bundles the Mac app and Mac memory helpers. Mac keeps its own complete download. Features and starter skills are preserved.
+
+### 📁 Better workspace
+
+- **Explorer:** a cleaner game tree, class icons, search, and script/property panels that match your theme.
+- **Navigation:** centered collapsed icons and your requested page order. Updates is in Settings.
+
+### 🧠 See your effort level
+
+- **Desktop and bar:** show your selected effort. Low starts yellow, Max is red, and Ultracode is purple.
+- **Ultracode:** selected pages get a purple outline while keeping your theme glow, with a smooth transition.
+
+### 🔧 Startup and chat fixes
+
+- **Windows startup:** skips unnecessary process scans and detects old agents across display languages.
+- **Startup:** another verified text-send path when Notion file uploads fail.
+- **Normal chat:** idle or disconnected chats no longer turn ordinary messages into queued follow-ups.
+- **Faster reply detection:** recognize finished responses in more languages, removing avoidable waiting after Notion finishes.
+- **Engine selection:** a delayed settings load no longer overrides your choice of AgentScript.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.3.zip** for Windows, **PlazCode-macOS-1.24.3.zip** for Mac, or **PlazCode-Firefox-1.24.3.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.

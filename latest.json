@@ -1,9 +1,76 @@
 {
-  "version": "1.24.2",
-  "desktop_version": "1.24.2",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.2.zip",
-  "sha256": "69e3ac690c25bf8a1213895f4efab9a8261a9376829d4e1c2ff8ed6fd48d4f5f",
+  "version": "1.24.3",
+  "desktop_version": "1.24.3",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.3.zip",
+  "sha256": "6816e921a8ab409139b1d714967b69d382a19136e8fd3d16535e1010a73ba5bb",
   "release_notes": [
+    {
+      "version": "1.24.3",
+      "title": "Faster desktop, smaller downloads and a better Explorer",
+      "summary": "Less wasted work, a smaller Windows download and a refreshed workspace.",
+      "added": [
+        "Effort indicators on the desktop and browser bar, with colors from Low through Ultracode."
+      ],
+      "improved": [
+        "Unchanged tool lists and logs stay in place instead of rebuilding every second.",
+        "MCP listings reuse recent data and share simultaneous requests; hidden windows poll less often.",
+        "Explorer has a themed hierarchy, class icons, search and polished script/property panels.",
+        "Windows downloads contain the Windows app; Mac has its own complete download."
+      ],
+      "fixed": [
+        "Collapsed sidebar icons are centered; pages follow the requested order.",
+        "Ultracode changes the selected page outline while preserving the theme glow.",
+        "Notion startup can use small verified text pastes when native editing and file uploads fail.",
+        "Co-Work leaves idle or disconnected chats available for ordinary messages.",
+        "Notion recognizes localized completion controls to avoid waiting after a reply has finished.",
+        "A delayed settings read no longer resets a newly selected AgentScript mode.",
+        "Windows starts without unnecessary process scans and detects stale agents in any display language."
+      ],
+      "notes": [
+        "Automated platform and browser checks passed. Live signed-in providers and Studio sessions remain untested."
+      ],
+      "github": {
+        "sections": [
+          {
+            "title": "⚡ Smoother performance",
+            "items": [
+              "**Less lag:** unchanged tools and logs stay in place. New log lines append without rebuilding the list.",
+              "**Less background work:** fewer repeated requests and refreshes while hidden."
+            ]
+          },
+          {
+            "title": "📦 Smaller downloads",
+            "items": [
+              "**Windows:** no longer bundles the Mac app and Mac memory helpers. Mac keeps its own complete download. Features and starter skills are preserved."
+            ]
+          },
+          {
+            "title": "📁 Better workspace",
+            "items": [
+              "**Explorer:** a cleaner game tree, class icons, search, and script/property panels that match your theme.",
+              "**Navigation:** centered collapsed icons and your requested page order. Updates is in Settings."
+            ]
+          },
+          {
+            "title": "🧠 See your effort level",
+            "items": [
+              "**Desktop and bar:** show your selected effort. Low starts yellow, Max is red, and Ultracode is purple.",
+              "**Ultracode:** selected pages get a purple outline while keeping your theme glow, with a smooth transition."
+            ]
+          },
+          {
+            "title": "🔧 Startup and chat fixes",
+            "items": [
+              "**Windows startup:** skips unnecessary process scans and detects old agents across display languages.",
+              "**Startup:** another verified text-send path when Notion file uploads fail.",
+              "**Normal chat:** idle or disconnected chats no longer turn ordinary messages into queued follow-ups.",
+              "**Faster reply detection:** recognize finished responses in more languages, removing avoidable waiting after Notion finishes.",
+              "**Engine selection:** a delayed settings load no longer overrides your choice of AgentScript."
+            ]
+          }
+        ]
+      }
+    },
     {
       "version": "1.24.2",
       "title": "Ultracode, task checklists and smoother creation",
@@ -168,32 +235,12 @@
         "Antivirus-related launch and metadata changes are candidate improvements, not a guarantee against future Microsoft Defender detections. The executable remains unsigned; GitHub provenance is not an Authenticode publisher signature.",
         "Existing settings, memory, templates and enabled MCP servers retain their existing data locations. Reload the browser extension and refresh AI tabs after updating."
       ]
-    },
-    {
-      "version": "1.22.1",
-      "title": "Model Builder, Notion and add-on fixes",
-      "summary": "Model Builder and UI Builder Generate works again, Notion AI turns no longer stop with Message was not confirmed after an accepted message, Studio add-ons such as robloxstudio-mcp stay connected during long playtests, and Git, Ollama and Roblox requests no longer fail or wait forever.",
-      "added": [],
-      "improved": [
-        "Add-on tools get the time they ask for: a tool's own timeoutMs or timeout_seconds is honored (plus 30 seconds, up to 10.5 minutes), and Studio add-ons such as robloxstudio-mcp get 5.5 minutes by default.",
-        "Ollama chat waits up to 10 minutes for an answer, so large local models on a CPU still have time to reply. Past that, the Ollama page shows OLLAMA TIMED OUT. Listing models gives up after 5 seconds.",
-        "Each Roblox request (developer products, universe lookup) ends after 20 seconds with a message naming the address that did not answer."
-      ],
-      "fixed": [
-        "Generate in the desktop Model Builder and UI Builder no longer fails with Invalid desktop agent action.",
-        "creation_preview no longer fails with action_id must be a string when the AI leaves out the blueprint action_id; a preview ID is filled in.",
-        "When the AI wraps a tool such as creation_preview in a Studio MCP skill call, PlazCode runs that tool directly instead of returning Unknown skill.",
-        "Notion AI: the composer is found again when Notion renders it as a page-style block next to its own send button, so accepted messages are confirmed instead of stopping the turn with Message was not confirmed.",
-        "A slow add-on tool call no longer kills the add-on server. PlazCode cancels the call and keeps the server, so robloxstudio-mcp keeps its Studio plugin connection; the server restarts only after two timeouts in a row.",
-        "The Git add-on finds Git installed after PlazCode started (current user and system PATH), and Git from GitHub Desktop or Chocolatey.",
-        "The Ollama page no longer stays on the thinking indicator forever when Ollama accepts the connection but never replies."
-      ]
     }
   ],
   "platforms": {
     "macos": {
-      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.2.zip",
-      "sha256": "877bae28d07196fb2496e119729b30e03d619ce3624f84ca257bd23b3f10fc12"
+      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.3.zip",
+      "sha256": "7137d5a412c6749f33566b19f655f7104e1361c95d525400c2fa94866f2b5af7"
     }
   }
 }

@@ -1,3 +1,20 @@
+PlazCode 1.24.3 — Faster desktop, smaller downloads and a better Explorer
+
+Less wasted work, a smaller Windows download and a refreshed workspace.
+
+- Effort indicators on the desktop and browser bar, with colors from Low through Ultracode.
+- Unchanged tool lists and logs stay in place instead of rebuilding every second.
+- MCP listings reuse recent data and share simultaneous requests; hidden windows poll less often.
+- Explorer has a themed hierarchy, class icons, search and polished script/property panels.
+- Windows downloads contain the Windows app; Mac has its own complete download.
+- Collapsed sidebar icons are centered; pages follow the requested order.
+- Ultracode changes the selected page outline while preserving the theme glow.
+- Notion startup can use small verified text pastes when native editing and file uploads fail.
+- Co-Work leaves idle or disconnected chats available for ordinary messages.
+- Notion recognizes localized completion controls to avoid waiting after a reply has finished.
+- A delayed settings read no longer resets a newly selected AgentScript mode.
+- Windows starts without unnecessary process scans and detects stale agents in any display language.
+
 PlazCode 1.24.2 — Ultracode, task checklists and smoother creation
 
 Follow your AI’s progress, try Ultracode and create with fewer interruptions.
