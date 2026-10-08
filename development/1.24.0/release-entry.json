@@ -1,0 +1,32 @@
+{
+  "version": "1.24.0",
+  "title": "Automatic shared learning and reliable updates",
+  "summary": "Reuse privacy-safe workflow methods automatically and prevent oversized update feeds.",
+  "added": [
+    "Automatic retrieval and contribution of predefined local edit workflows after recorded test commands. Offline reports queue locally without prompts, code, paths or user identifiers."
+  ],
+  "improved": [
+    "Shared learning is always active; local free-text candidates remain private and separate manual contributions still require review."
+  ],
+  "fixed": [
+    "Fixed \u201cRelease feed is too large\u201d for existing installations. Feeds retain five recent entries with a byte budget; the full changelog remains separate."
+  ],
+  "notes": [
+    "Workflow reports do not train provider model weights or prove benchmark gains. Unsupported workflows remain local. Live signed-in providers and Studio/Blender are untested; Windows remains unsigned."
+  ],
+  "github": {
+    "summary": "Automatic privacy-safe workflow reuse; reliable updates.",
+    "added": [
+      "Always-active shared workflows with bounded reports and offline retry."
+    ],
+    "improved": [
+      "Private prompts, code, paths and identifiers stay local."
+    ],
+    "fixed": [
+      "Oversized update feeds blocked older installations; compact feeds now have a release gate."
+    ],
+    "notes": [
+      "Workflow reuse does not train model weights. No benchmark gain claimed. See ZIP validation."
+    ]
+  }
+}
