@@ -22,6 +22,20 @@ Pinned task checklist sits above the bar at its right edge and follows placement
 
 A subsequent full-package test exposed unavailable Get-FileHash in inherited PowerShell module environments. File/package verification now uses built-in .NET SHA-256 with the same rejection rules, rather than depending on that optional cmdlet.
 
-Release descriptions use emoji feature headings, bold feature names and short everyday-language bullets, following the supplied announcement example. The complete GitHub text including installation steps is 1,767 UTF-16 characters.
+Release descriptions use emoji feature headings, bold feature names and short everyday-language bullets, following the supplied announcement example. The complete GitHub text including installation steps is 1,813 UTF-16 characters.
 
 Hiding the bar now detaches the checklist as a separately movable box. Pointer capture and arrow-key controls clamp it to the viewport; its position persists for the tab. Restoring the bar redocks it, and its own hide/restore remains independent. Blocking modals and conversation changes still suppress unrelated tasks.
+
+Notion startup recovery now restores every text editor touched by a lock, including detached/hidden nodes and periods with no discoverable editor. Original native readonly/placeholder/aria-disabled values survive. Cleanup operations are isolated so a remounted UI cannot prevent input restoration. Composer hydration observes cancellation. Pending startup ownership prevents a later Start from reactivating a cancelled asynchronous send.
+
+The startup watchdog tracks response identity/text changes, allows up to five minutes without visible progress while native generation is active, cancels idle starts after two minutes without progress, and bounds total startup at ten minutes. Cancellation invalidates send/start generations and unlocks independently. One settled prose reply can receive one exact protocol correction; readiness still requires a parsed list_commands/list_tools call, actual execution and an exact acknowledgement. German acknowledgement and additional German/French/Spanish/Portuguese attribute-only composer hints are supported without promoting historical response text or ordinary page editors.
+
+| Startup path | Verification |
+| --- | --- |
+| Localized or delayed composer | German variants, existing localized editors, 35-second hydration and bounded missing-editor failure |
+| Editor replacement / failed cleanup | Detached editor, missing current editor, preserved native readonly and UI cleanup exceptions |
+| Slow / stalled response | Healthy generation past two minutes, advancing text, idle timeout and stale busy-state cancellation |
+| Protocol / acknowledgement mismatch | One prose correction, real command execution, exact German acknowledgement, wrong-tool and ambiguous-readiness rejection |
+| Delivery / attachments / navigation | Existing single-send receipt, protocol-file fallback, retry, pending navigation and remount regressions |
+
+Chromium and Firefox fixtures also confirm trusted keyboard typing after removing, replacing, unlocking and reusing a localized native editor. These tests reproduce the identified client-side failure paths. They do not establish every possible cause on a user's machine: signed-in Notion, account eligibility, server failures and future site layout changes remain unverified.
