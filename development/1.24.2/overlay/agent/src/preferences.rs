@@ -87,7 +87,8 @@ impl DesktopPreferences {
         self.command_cooldown=if self.command_cooldown.is_finite(){(self.command_cooldown.clamp(0.0,120.0)*10.0).round()/10.0}else{0.0};
         if !matches!(self.stop_mode.as_str(),"safe"|"immediate") {self.stop_mode="immediate".into();}
         if let Some(value) = &mut self.appearance {
-            if !matches!(value.theme.as_str(), "default" | "amethyst" | "cyan" | "rose" | "emerald" | "graphite" | "crimson" | "ocean" | "copper" | "aurora" | "orchid" | "solar") { value.theme = "default".into(); }
+            if value.theme=="solar" {value.theme="default".into();}
+            if !matches!(value.theme.as_str(), "default" | "amethyst" | "cyan" | "rose" | "emerald" | "graphite" | "crimson" | "ocean" | "copper" | "aurora" | "orchid") { value.theme = "default".into(); }
             if !matches!(value.glow.as_str(), "off" | "subtle" | "strong") { value.glow = "subtle".into(); }
             if !matches!(value.gradients.as_str(), "off" | "on") { value.gradients = "on".into(); }
         }
@@ -100,7 +101,7 @@ impl DesktopPreferences {
         if !matches!(self.perm_mode.as_str(), "sandbox" | "ask" | "full") {
             self.perm_mode = "sandbox".to_string();
         }
-        if !matches!(self.thinking_level.as_str(), "default" | "low" | "mid" | "high" | "max") {
+        if !matches!(self.thinking_level.as_str(), "default" | "low" | "mid" | "high" | "max" | "ultracode") {
             self.thinking_level = "default".to_string();
         }
     }
@@ -208,6 +209,13 @@ mod tests {
         std::env::temp_dir().join(format!("plazcode-settings-{}-{nonce}.json", std::process::id()))
     }
 
+    #[test]
+    fn ultracode_and_legacy_solar_preferences_are_preserved() {
+        let mut prefs=DesktopPreferences::default();prefs.thinking_level="ultracode".into();
+        prefs.appearance=Some(Appearance{theme:"solar".into(),glow:"strong".into(),gradients:"off".into()});
+        prefs.normalize();assert_eq!(prefs.thinking_level,"ultracode");
+        let appearance=prefs.appearance.unwrap();assert_eq!(appearance.theme,"default");assert_eq!(appearance.glow,"strong");assert_eq!(appearance.gradients,"off");
+    }
     #[test]
     fn immediate_stop_default_and_selected_safe_mode_persist() {
         let path=temp_settings_path();let store=PreferencesStore::load_from(path.clone());

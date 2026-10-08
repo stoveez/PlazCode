@@ -16,7 +16,7 @@ for path in (Path(__file__).parent/'overlay').rglob('*'):
   target=source/path.relative_to(Path(__file__).parent/'overlay');target.parent.mkdir(parents=True,exist_ok=True)
   # Git on Windows may use autocrlf; embedded source and extraction fixtures
   # must have the same line endings on every host. Do not alter binary assets.
-  if path.suffix in {".js",".cjs",".rs",".html",".luau",".json",".py",".toml",".lock",".command",".ps1"}:target.write_bytes(path.read_bytes().replace(b"\r\n",b"\n"))
+  if path.suffix in {".js",".cjs",".rs",".html",".luau",".json",".py",".toml",".lock",".command",".ps1",".cs"}:target.write_bytes(path.read_bytes().replace(b"\r\n",b"\n"))
   else:shutil.copy2(path,target)
   if path.suffix==".command":target.chmod(0o755)
 # Keep the supplied third-party reference pack intact and separate from GPL code.

@@ -506,7 +506,7 @@
     autumn:     { name: "Autumn",     sub: "Harvest ember",    glyph: "❧", blurb: "Autumn — falling leaves and harvest fire." },
   };
   const PLAZCODE_PALETTES = {
-    default:{rgb:"255 146 38",accent:"#ff9226",light:"#ffc052",bg:"#050b14",legacy:"autumn",name:"Orange"},
+    default:{rgb:"233 186 83",accent:"#e9ba53",light:"#ffe0a1",bg:"#18140d",legacy:"autumn",name:"Default"},
     amethyst:{rgb:"165 113 255",accent:"#a571ff",light:"#d7b8ff",bg:"#0c0918",legacy:"starglaze",name:"Amethyst"},
     cyan:{rgb:"39 193 231",accent:"#27c1e7",light:"#a5eaff",bg:"#041017",legacy:"starglaze",name:"Cyan"},
     rose:{rgb:"241 112 151",accent:"#f17097",light:"#ffbdd1",bg:"#160912",legacy:"sakura",name:"Rose"},
@@ -516,11 +516,11 @@
     ocean:{rgb:"70 146 246",accent:"#4692f6",light:"#a5ceff",bg:"#091323",legacy:"starglaze",name:"Oceanic"},
     copper:{rgb:"219 144 102",accent:"#db9066",light:"#f4c4a3",bg:"#17110f",legacy:"autumn",name:"Copper Atelier"},
     aurora:{rgb:"102 211 184",accent:"#66d3b8",light:"#b4f6e7",bg:"#0c151b",legacy:"starglaze",name:"Aurora"},
-    orchid:{rgb:"205 137 235",accent:"#cd89eb",light:"#edc6ff",bg:"#150e1c",legacy:"sakura",name:"Orchid Noir"},
-    solar:{rgb:"233 186 83",accent:"#e9ba53",light:"#ffe0a1",bg:"#18140d",legacy:"autumn",name:"Solar Dusk"}
+    orchid:{rgb:"205 137 235",accent:"#cd89eb",light:"#edc6ff",bg:"#150e1c",legacy:"sakura",name:"Orchid Noir"}
   };
   let sharedAppearance = null;
   function applySharedAppearance(value) {
+    if(value?.theme === "solar") value={...value,theme:"default"};
     if (!value || !Object.prototype.hasOwnProperty.call(PLAZCODE_PALETTES,value.theme)) return;
     sharedAppearance = {theme:value.theme,glow:["off","strong"].includes(value.glow)?value.glow:"subtle",gradients:value.gradients==="off"?"off":"on"};
     const palette = PLAZCODE_PALETTES[sharedAppearance.theme], root=document.documentElement;
@@ -531,6 +531,7 @@
     for(const [key,val] of Object.entries({"--pc-accent":palette.accent,"--pc-light":palette.light,"--pc-bg":palette.bg,"--pc-rgb":palette.rgb,"--pc-glow-strength":sharedAppearance.glow==="off"?"0":sharedAppearance.glow==="strong"?".35":".13"})) root.style.setProperty(key,val);
   }
   let plazcodeTheme = "night";
+  applySharedAppearance({theme:"default",glow:"subtle",gradients:"on"});
   let soundOn = true;
   try {
     chrome.storage.local.get(["rsTheme", "rsSounds", "rsAppearance"], (r) => {
@@ -5676,7 +5677,7 @@
     let thinkingLevel = "default";
     try {
       chrome.storage.local.get("rsThinkingLevel", (r) => {
-        if (r && ["default","low","mid","high","max"].includes(r.rsThinkingLevel)) {
+        if (r && ["default","low","mid","high","max","ultracode"].includes(r.rsThinkingLevel)) {
           thinkingLevel = r.rsThinkingLevel;
           try { window.__rsThinkingLevel = () => thinkingLevel; } catch {}
           if (!menuEl.hidden) buildMenu();
@@ -5732,7 +5733,7 @@
         if (changes.rsBgMode && typeof changes.rsBgMode.newValue === "boolean") {
           bgMode = changes.rsBgMode.newValue; dirty = true;
         }
-        if (changes.rsThinkingLevel && ["default","low","mid","high","max"].includes(changes.rsThinkingLevel.newValue)) {
+        if (changes.rsThinkingLevel && ["default","low","mid","high","max","ultracode"].includes(changes.rsThinkingLevel.newValue)) {
           thinkingLevel = changes.rsThinkingLevel.newValue;
           try { window.__rsThinkingLevel = () => thinkingLevel; } catch {}
           dirty = true;
@@ -5769,7 +5770,7 @@
       });
     } catch {}
     function setThinkingLevel(v){
-      if (!["default","low","mid","high","max"].includes(v)) return;
+      if (!["default","low","mid","high","max","ultracode"].includes(v)) return;
       thinkingLevel = v;
       try{ chrome.storage.local.set({rsThinkingLevel: v}); }catch{}
       try{ window.__rsThinkingLevel = () => thinkingLevel; }catch{}
@@ -6215,7 +6216,7 @@
               <div class="rs-sec-label"><span>Reasoning</span></div>
               <div class="rs-menu-note">How much the AI plans and self-reviews. Higher is slower and more careful. Extra Thinking is a separate toggle.</div>
               <div class="rs-thinking-row">
-                ${["default","low","mid","high","max"].map(l => `<button class="rs-lvl-btn ${thinkingLevel===l?"on":""}" data-lvl="${l}" title="Set thinking level: ${l}">${l[0].toUpperCase()+l.slice(1)}</button>`).join("")}
+                ${["default","low","mid","high","max","ultracode"].map(l => `<button class="rs-lvl-btn ${thinkingLevel===l?"on":""}" data-lvl="${l}" title="Set thinking level: ${l}">${l==="ultracode"?"Ultracode (Beta)":l[0].toUpperCase()+l.slice(1)}</button>`).join("")}
               </div>
               <div class="rs-menu-note" id="rs-thinking-hint" style="margin-top:8px;">${thinkingLevel==="default" ? "Default — this site picks its own thinking depth." : `Level ${thinkingLevel.toUpperCase()} — applied on the next turn.`}</div>
             </section>

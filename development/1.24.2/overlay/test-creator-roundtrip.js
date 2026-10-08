@@ -21,3 +21,9 @@ for(const mode of ['model','ui']){
  assert(C.tool.inputSchema.properties.blueprint.properties.nodes.items.properties.class);
 }
 console.log('PASS saved model/UI preview insertion, export, reload and patch round trips; strict validation and valid AI examples.');
+
+const ui={build_id:'sizes',action_id:'sizes',mode:'ui',operation:'replace',target_parent:'game.StarterGui',root_name:'Sizes',nodes:[{id:'root',class:'ScreenGui'},{id:'panel',class:'Frame',parent:'root',properties:{Size:{xScale:.5,yOffset:44},Position:[0,20,0,30]}}]};
+const fixed=C.merge(null,ui);const size=fixed.nodes.find(n=>n.id==='panel').properties.Size;assert.equal(size.type,'UDim2');assert.equal(size.xs,.5);assert.equal(size.xo,0);assert.equal(size.ys,0);assert.equal(size.yo,44);
+const edit=C.merge(fixed,{...ui,operation:'patch',nodes:[{id:'panel',properties:{Size:{type:'UDim2',xo:100,yo:50}}}]});assert.equal(edit.nodes.find(n=>n.id==='panel').properties.Size.xs,0);
+assert.throws(()=>C.merge(null,{...ui,nodes:[ui.nodes[0],{...ui.nodes[1],properties:{Size:{width:5,height:5}}}]}),/type/);
+console.log('PASS screenshot Size cases: explicit UI shorthand and omitted UDim2 coordinates; ambiguous objects still rejected.');

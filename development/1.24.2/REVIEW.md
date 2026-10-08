@@ -7,3 +7,5 @@ Coverage includes saved model/UI round trips, invalid fields and strict patch be
 Validation: pending exact-source platform CI.
 
 The supplied screenshot has no underlying installer reason; it does not establish the original failure cause. Live signed-in AI chats and user-machine installation failures remain untested.
+
+Ultracode (Beta) follows Max in desktop, popup and browser thinking controls. The uploaded Python was parsed as literal instruction data, not executed. Instructions are adapted to actual tools and project architecture, apply only while selected, and do not promise a model/benchmark improvement. Solar Dusk becomes Default across desktop, browser, popup and Windows updater; legacy solar selections normalize to Default without losing glow/gradient settings. Screenshot-specific UI Size shorthand is normalized only when class and property establish its type; ambiguous objects remain rejected.
