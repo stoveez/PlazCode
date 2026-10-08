@@ -1,0 +1,14 @@
+PlazCode 1.24.2
+Source: 79583690c212c675509031ade28a8b610e6dbbdc
+CI: https://github.com/stoveez/PlazCode/actions/runs/37823996381
+All platform Rust/JavaScript regressions and Chromium/Firefox fixtures passed. Saved creator model/UI insertion, export and reload round trips, strict patch checks and valid generation examples passed. Complete Windows package installation under PowerShell 5.1 and installer error freshness checks passed. Starter pack completeness, safe resource reads, user-skill preservation and migration checks passed.
+Windows PE/updater/icon checks and real automatic update download/checksum/handoff checks passed. Mac x86_64/arm64, ad-hoc codesign, automatic update handoff, real desktop relaunch in three modes and 210-second visible process lifetime checks passed.
+Shared service protocol and SQL tests passed; private-field reports and unauthorized retraction were rejected by the live API.
+Automatic sharing is mandatory, limited to three predefined local edit/test workflows and actual recorded test-command exit status. No task prompts, code, paths, user/project identifiers or raw errors are submitted. Unsupported workflows stay local. Anonymous aggregate reports cannot establish task correctness.
+Workflow retrieval does not change provider model weights. No benchmark improvement is claimed.
+Live signed-in providers and real Studio/Blender were not tested. Windows binaries are unsigned.
+Microsoft Defender runner result before cross-platform assembly:
+Scan starting...
+Scan finished.
+Scanning D:\a\PlazCode\PlazCode\build-src\PlazCode/defender-scan found no threats.
+The scanned package checksum and scan availability are recorded in release-validation-1.24.2.

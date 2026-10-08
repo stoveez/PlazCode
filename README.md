@@ -1,3 +1,21 @@
+PlazCode 1.24.2 — Ultracode, task checklists and smoother creation
+
+Follow your AI’s progress, try Ultracode and create with fewer interruptions.
+
+- Ultracode (Beta) after Max: deeper planning, review and verification when selected.
+- Show approach summary: an optional paragraph before each command; off by default.
+- Pinned task checklist with progress and green checks; hide the bar to drag the checklist anywhere.
+- Shorter, simpler release and update descriptions.
+- More reliable model and UI creation.
+- Solar Dusk is now the Default theme; the separate option is removed.
+- Ultracode smoothly fades purple accents and glow in and out while keeping your theme.
+- Faster Notion startup when its editor accepts the complete setup text.
+- Saved previews insert and export without extra errors.
+- Editing saved creations no longer causes repeated errors.
+- Failed updates show the actual error and log location.
+- Updates handle missing or incomplete saved update settings.
+- Notion startup handles slow responses and localized editors, and restores typing after cancellation.
+
 PlazCode 1.24.1 — Reliable results and a browsable Skills page
 
 Keep repeated tool results flowing, wait for complete ChatGPT replies, and browse, inspect or add adaptable project skills.

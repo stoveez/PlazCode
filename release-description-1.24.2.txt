@@ -1,0 +1,36 @@
+## ✨ PlazCode 1.24.2
+
+Follow your AI’s progress, try Ultracode and create with fewer interruptions.
+
+### 🧠 Ultracode (Beta)
+
+- **A new option after Max:** asks the AI to plan carefully, review its work and check the result. Turn it on when you want a more thorough approach.
+
+### ✅ Follow the task
+
+- **Pinned checklist:** task steps, a progress circle and a percentage above the bar. Finished steps turn green with a check. Hide the bar to turn it into a box you can drag anywhere; hide the checklist separately.
+- **Show approach summary:** turn on a short explanation before each command. Off by default. This explains the approach; it does not reveal hidden thoughts.
+
+### 🎨 A fresh look
+
+- **New Default theme:** the former Solar Dusk look is now built in.
+- **Purple Ultracode accents:** your theme stays, with purple details that fade smoothly in and out. The checklist matches too.
+
+### 🛠️ Fewer interruptions
+
+- **Creation tools:** saved previews, edits and exports work with fewer errors.
+- **Notion:** better startup recovery, localized chat boxes and typing unlocked after failed starts; fewer unnecessary setup uploads.
+- **Updates:** handles incomplete update settings and shows the actual reason if installation fails.
+
+### 🧪 Checks
+
+- Windows, Mac, Linux and browser checks passed. Live AI chats are not tested; speed and benchmark gains are not guaranteed.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.2.zip** for Windows, **PlazCode-macOS-1.24.2.zip** for Mac, or **PlazCode-Firefox-1.24.2.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.

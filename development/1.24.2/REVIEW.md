@@ -4,7 +4,7 @@ Saved normalized creator drafts are cleaned back into valid command fields befor
 
 Coverage includes saved model/UI round trips, invalid fields and strict patch behavior, all existing creator/provider regressions, installer error freshness, and complete Windows package installation under Windows PowerShell 5.1. The full-package fixture replaces only the final GUI launch; the separate native relaunch checks exercise the real desktop.
 
-Validation: pending exact-source platform CI.
+Validation: all exact-source platform CI jobs passed. See release-validation-1.24.2.
 
 The supplied screenshot has no underlying installer reason; it does not establish the original failure cause. Live signed-in AI chats and user-machine installation failures remain untested.
 
