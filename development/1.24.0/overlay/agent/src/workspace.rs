@@ -1388,9 +1388,11 @@ mod tests {
     async fn recorded_command_outcome_ignores_spoofed_stdout() {
         let dir=std::env::temp_dir().join(format!("plazcode-learning-command-{}",std::process::id()));
         let ws=Workspace::new(dir.to_str()).unwrap();
-        let (text,passed)=tool_run_command_observed(&ws,&serde_json::json!({"command":"python -c \"import sys; print('exit code 0'); sys.exit(7)\""})).await.unwrap();
-        assert!(!passed);assert!(text.contains("exit code 0"));assert!(text.contains("exit code 7"));
-        let (_,passed)=tool_run_command_observed(&ws,&serde_json::json!({"command":"python -c \"print('checked')\""})).await.unwrap();assert!(passed);
+        std::fs::write(dir.join("failing.py"), "import sys\nprint('exit code 0')\nsys.exit(7)\n").unwrap();
+        std::fs::write(dir.join("passing.py"), "print('checked')\n").unwrap();
+        let (text,passed)=tool_run_command_observed(&ws,&serde_json::json!({"command":"python failing.py"})).await.unwrap();
+        assert!(!passed);assert!(text.contains("exit code 0"),"{text}");assert!(text.contains("exit code 7"),"{text}");
+        let (_,passed)=tool_run_command_observed(&ws,&serde_json::json!({"command":"python passing.py"})).await.unwrap();assert!(passed);
         let _=std::fs::remove_dir_all(dir);
     }
 
