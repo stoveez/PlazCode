@@ -18,9 +18,9 @@ class ReleaseNotesTests(unittest.TestCase):
         title,body=notes({'version':'9.9.9','release_notes':[entry]})
         self.assertLess(len(body.encode('utf-16-le'))//2,2000)
         self.assertEqual(title,'PlazCode 9.9.9: Update')
-        for text in ['**PlazCode 9.9.9: Update**','***New additions***',
-                     '***Improvements***','***Bug fixes***',
-                     '***Validation and limitations***','## Update',
+        for text in ['## ✨ PlazCode 9.9.9','### ✨ New features',
+                     '### 💡 Improvements','### 🛠️ Fixes',
+                     '### 🧪 Checks','### 📥 How to update',
                      'PlazCode-9.9.9.zip','PlazCode-macOS-9.9.9.zip',
                      'PlazCode-Firefox-9.9.9.zip']:
             self.assertIn(text,body)
