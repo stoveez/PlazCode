@@ -162,7 +162,10 @@ def main():
         feed=load(ROOT/path);feed.update(version=VERSION,desktop_version=VERSION,release_notes=notes,
             url='https://raw.githubusercontent.com/stoveez/PlazCode/main/'+byplatform[platform]['file'],sha256=byplatform[platform]['sha256'])
         if platform=='windows':feed['platforms']['macos'].update(url='https://raw.githubusercontent.com/stoveez/PlazCode/main/'+byplatform['macos']['file'],sha256=byplatform['macos']['sha256'])
-        write_json(ROOT/path,feed)
+        import sys
+        sys.path.insert(0,str(ROOT))
+        from release_feed import compact_feed
+        write_json(ROOT/path,compact_feed(feed,notes))
     import sys
     sys.path.insert(0,str(ROOT));import publish_release
     _,body=publish_release.notes(load(ROOT/'latest.json'))

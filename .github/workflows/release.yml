@@ -2,7 +2,7 @@ name: Publish PlazCode release page
 on:
   push:
     branches: [main]
-    paths: [latest.json, .github/workflows/release.yml, publish_release.py]
+    paths: [latest.json, latest-macos.json, .github/workflows/release.yml, publish_release.py, release_feed.py, test-release-feed.py]
   workflow_dispatch:
 permissions:
   contents: write
@@ -18,6 +18,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh api "repos/$GITHUB_REPOSITORY/contents/publish_release.py?ref=$GITHUB_SHA" --jq .content | base64 --decode > publish_release.py
+      - name: Validate feeds against installed updater size limit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for file in release_feed.py test-release-feed.py latest.json latest-macos.json; do
+            gh api "repos/$GITHUB_REPOSITORY/contents/$file?ref=$GITHUB_SHA" --jq .content | base64 --decode > "$file"
+          done
+          python3 test-release-feed.py
       - name: Test release description limit and format
         env:
           GH_TOKEN: ${{ github.token }}

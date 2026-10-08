@@ -57,7 +57,10 @@ def main():
     repo=os.environ['GITHUB_REPOSITORY'];commit=os.environ['GITHUB_SHA']
     if not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+',repo) or not re.fullmatch(r'[a-f0-9]{40}',commit):raise ValueError('Invalid repository or commit')
     root='https://raw.githubusercontent.com/'+repo+'/'+commit+'/'
-    feed=json.loads(fetch(root+'latest.json'));version=feed['version']
+    from release_feed import validate
+    raw=fetch(root+'latest.json');feed=validate(json.loads(raw),raw);version=feed['version']
+    mac_raw=fetch(root+'latest-macos.json');mac_feed=validate(json.loads(mac_raw),mac_raw)
+    if mac_feed['version']!=version or mac_feed['sha256']!=feed['platforms']['macos']['sha256']:raise ValueError('Platform feed mismatch')
     if not re.fullmatch(r'\d+\.\d+\.\d+',version):raise ValueError('Invalid release version')
     tag='v'+version
     try:existing=json.loads(gh('release','view',tag,'--repo',repo,'--json','isDraft'))
