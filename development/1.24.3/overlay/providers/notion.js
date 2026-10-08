@@ -1618,7 +1618,7 @@ const RSProvider = (() => {
     });
     return accepted;
   }
-  async function pasteRichTextChunked(el,value,deadline=Date.now()+60000){
+  async function pasteRichTextChunked(el,value,deadline=Date.now()+12000){
     let offset=0,prefix='';
     while(offset<value.length){
       if(isStopped()||!safeRead(() => el.isConnected, false)||Date.now()>=deadline)return false;
@@ -1927,7 +1927,7 @@ const RSProvider = (() => {
         // uploads. Use small clipboard transactions only for this locked startup
         // draft; each prefix and the complete message must survive reconciliation.
         else if (!isStopped() && !edText(initialEditor) && text.length <= 131072 &&
-                 await pasteRichTextChunked(initialEditor, text)) verifiedNativeEditor = initialEditor;
+                 await pasteRichTextChunked(initialEditor, text, Date.now()+60000)) verifiedNativeEditor = initialEditor;
         else if (edText(initialEditor)) {
           // A changed/remounted draft is not proof that our complete edit landed.
           // Preserve it rather than overwrite unknown content with a fallback.
