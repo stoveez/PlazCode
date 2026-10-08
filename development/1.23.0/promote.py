@@ -101,6 +101,8 @@ def main():
             if name.startswith('PlazCode/visual-checks/') or Path(name).name in {'windows-signature.txt','defender-result.txt','defender-package-sha256.txt','defender-engine.json'}:
                 del files[name]
     assert {n:v[0] for n,v in source.items()} == {n:v[0] for n,v in other_source.items()}
+    # Preserve executable source/build-script modes from the POSIX host.
+    source = other_source
     entry = load(Path(__file__).with_name('release-entry.json'))
     notes = [entry] + [n for n in load(ROOT/'release-notes.json') if n['version'] != VERSION]
     write_json(ROOT/'release-notes.json', notes)
@@ -137,11 +139,14 @@ def main():
             files['PlazCode/PlazCode-Extension-Firefox/'+relative] = value
         files.update(common)
     for name,value in mac.items():
-        if name.startswith('PlazCode/PlazCode.app/'):
+        if name.startswith('PlazCode/PlazCode.app/') or name.endswith('.command'):
             windows[name] = value
     source.update(common)
     source['PlazCode/README.md'] = (('PlazCode '+VERSION+' — '+entry['title']+'\n\n'+entry['summary']+'\n').encode(), 0o100644 << 16)
     validate(windows, 'windows'); validate(mac, 'macos')
+    for files in [windows,mac]:
+        for name,value in files.items():
+            if name.endswith('.command'):assert value[1] >> 16 & 0o111, name
     for name in source:
         assert not name.endswith('.exe') and '/target/' not in name and '/node_modules/' not in name, name
     packages = [('PlazCode-'+VERSION+'.zip','windows',windows), ('PlazCode-macOS-'+VERSION+'.zip','macos',mac),
@@ -169,6 +174,9 @@ def main():
     shutil.copy2(ROOT/'ci-artifacts/run.json',evidence/'run.json');shutil.copy2(ROOT/'ci-artifacts/jobs.json',evidence/'jobs.json')
     shutil.copy2(ROOT/'ci-artifacts/mac-repackage.json',evidence/'mac-repackage.json')
     shutil.copy2(find('windows-repackage.json','Windows'),evidence/'windows-repackage.json')
+    if (ROOT/'ci-artifacts/recovery-run.json').exists():
+        shutil.copy2(ROOT/'ci-artifacts/recovery-run.json',evidence/'recovery-run.json')
+        shutil.copy2(ROOT/'ci-artifacts/recovery-jobs.json',evidence/'recovery-jobs.json')
     for name in ['defender-result.txt','defender-package-sha256.txt','defender-engine.json','windows-signature.txt']:
         matches=list((ROOT/'ci-artifacts/plazcode-1.23-Windows-validation').rglob(name))
         if matches:shutil.copy2(matches[0],evidence/name)
