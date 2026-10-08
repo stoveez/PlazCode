@@ -1,3 +1,17 @@
+PlazCode 1.24.4 — Faster Ultracode and more reliable chat
+
+Less repeated work, easier Settings and fixes for Notion and screenshots.
+
+- Updates is back as its own sidebar page.
+- Settings sections expand and collapse while keeping their title and description visible.
+- Ultracode uses a 62% smaller instruction pack, reuses verified information and avoids repeated planning and checks. Core skills and verification requirements are preserved.
+- Workspace pages and the sidebar scroll within the window and use visible theme-matched scrollbars.
+- The full effort label matches its selected level. Indicators show Ultracode; the Settings dropdown keeps Ultracode (Beta).
+- Notion finds send controls in tall composers, ignores hidden old controls and waits for rich-editor controls to become ready.
+- Large locked Notion tool feedback can use verified small text pastes when native editing and file uploads fail.
+- Studio screenshots use the Roblox bridge even when AgentScript is selected.
+- ChatGPT screenshot uploads use one transport, verify a new attachment and commit once. Failed uploads are reported without sending text-only feedback.
+
 PlazCode 1.24.3 — Faster desktop, smaller downloads and a better Explorer
 
 Less wasted work, a smaller Windows download and a refreshed workspace.

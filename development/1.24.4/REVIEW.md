@@ -1,6 +1,6 @@
 # PlazCode 1.24.4
 
-Validation: local JavaScript and browser checks in progress; exact-source platform CI pending. Release promotion must require all four validation jobs and the real macOS desktop check.
+Validation: all exact-source platform CI jobs passed. See release-validation-1.24.4.
 
 Ultracode's injected Roblox method pack drops from 10,592 to 4,067 characters (62%). All ten complete original skill references remain in the module; concise summaries preserve server validation order, imported script inspection, measured bounds, networking checks, timed waits, Stop Play before editing, and truthful verification. The active mode tells the provider to reuse verified evidence and focus deep work on uncertainty rather than repeat passing checks. A short turn reminder applies when selected during a conversation. Other effort levels receive no Ultracode instructions. This measures instruction overhead, not live provider latency, model weights or benchmark accuracy.
 

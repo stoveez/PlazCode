@@ -1,9 +1,58 @@
 {
-  "version": "1.24.3",
-  "desktop_version": "1.24.3",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.3.zip",
-  "sha256": "6816e921a8ab409139b1d714967b69d382a19136e8fd3d16535e1010a73ba5bb",
+  "version": "1.24.4",
+  "desktop_version": "1.24.4",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.4.zip",
+  "sha256": "9d6b7c08c89b82f3bff2cc69565eee45666937220b0ab04f7f2175f418725960",
   "release_notes": [
+    {
+      "version": "1.24.4",
+      "title": "Faster Ultracode and more reliable chat",
+      "summary": "Less repeated work, easier Settings and fixes for Notion and screenshots.",
+      "added": [
+        "Updates is back as its own sidebar page.",
+        "Settings sections expand and collapse while keeping their title and description visible."
+      ],
+      "improved": [
+        "Ultracode uses a 62% smaller instruction pack, reuses verified information and avoids repeated planning and checks. Core skills and verification requirements are preserved.",
+        "Workspace pages and the sidebar scroll within the window and use visible theme-matched scrollbars.",
+        "The full effort label matches its selected level. Indicators show Ultracode; the Settings dropdown keeps Ultracode (Beta)."
+      ],
+      "fixed": [
+        "Notion finds send controls in tall composers, ignores hidden old controls and waits for rich-editor controls to become ready.",
+        "Large locked Notion tool feedback can use verified small text pastes when native editing and file uploads fail.",
+        "Studio screenshots use the Roblox bridge even when AgentScript is selected.",
+        "ChatGPT screenshot uploads use one transport, verify a new attachment and commit once. Failed uploads are reported without sending text-only feedback."
+      ],
+      "notes": [
+        "Automated checks use production code and browser fixtures. Live signed-in providers and Studio/Blender sessions are not verified. The instruction-size reduction is not a measured provider speedup or benchmark result."
+      ],
+      "github": {
+        "sections": [
+          {
+            "title": "⚡ Faster Ultracode",
+            "items": [
+              "**Less waiting:** a 62% smaller instruction pack, less repeated planning, and reuse of verified information.",
+              "**Careful problem solving:** keeps its skills, safety checks and verification."
+            ]
+          },
+          {
+            "title": "🖥️ Easier workspace",
+            "items": [
+              "**Scrolling:** reach the bottom of pages, with scrollbars that match your theme.",
+              "**Settings:** click a section to open or close it. Updates is back in the sidebar.",
+              "**Effort labels:** the whole label matches the level’s color. The bar says Ultracode; Settings keeps Ultracode (Beta)."
+            ]
+          },
+          {
+            "title": "🔧 Chat and screenshot fixes",
+            "items": [
+              "**Notion:** better send-button detection, including tall composers and delayed startup controls. Large tool replies have a verified text-send fallback.",
+              "**Screenshots:** Studio captures use the right bridge. ChatGPT waits for an attachment and sends it once; failed uploads show an error."
+            ]
+          }
+        ]
+      }
+    },
     {
       "version": "1.24.3",
       "title": "Faster desktop, smaller downloads and a better Explorer",
@@ -209,38 +258,12 @@
           "Workflow reuse does not train model weights. No benchmark gain claimed. See ZIP validation."
         ]
       }
-    },
-    {
-      "version": "1.23.0",
-      "title": "Saved skills, Studio Explorer and provider resilience",
-      "summary": "Save project-aware skills and completed-task methods, edit your game from a Studio-synced Explorer, collapse the sidebar to icons, and recover Model Builder responses that previously appeared as raw JSON. All provider adapters now handle failed DOM reads and bounded waits more safely.",
-      "added": [
-        "Skills page: save reusable methods, turn completed tasks into editable candidates, add verification checks and mark successful methods ready for reuse. Skills instruct the AI to inspect and adapt to the current project.",
-        "Optional shared learning: download approved community skills and submit reviewed methods to the shared GitHub repository. Sharing is off by default and never uploads raw chats or project files. These lessons improve task context, not AI model weights.",
-        "Studio Explorer with a game tree, script editor and supported object-property controls. Auto-sync is on by default and can be disabled; local drafts, manual push, Studio comparison, conflict protection and undo recording are included.",
-        "A saved hamburger toggle collapses the desktop sidebar to page icons."
-      ],
-      "improved": [
-        "All 13 active providers and two retained legacy adapters guard DOM reads and selectors, use bounded asynchronous waits, and avoid treating a failed read as send confirmation.",
-        "Notion uses semantic ancestor resolution and finally-protected input cleanup so failures do not leave the composer locked.",
-        "Fresh Windows and universal Intel/Apple Silicon macOS native builds; Windows executables include consistent version metadata."
-      ],
-      "fixed": [
-        "Valid bare Model/UI Builder save JSON is recovered only within the active creator task and goes through the existing blueprint validation and preview flow. Creator context survives prompt enhancement and resets for unrelated tasks.",
-        "Windows app and file launch no longer route executable paths through cmd start. Background helpers suppress console windows and command execution disables CMD AutoRun, addressing paths that could cause unexpected command windows.",
-        "Updater invocation no longer explicitly bypasses PowerShell execution policy."
-      ],
-      "notes": [
-        "Automated provider, Explorer, skills, native HTTP, Luau and platform regressions are included. Signed-in provider sites and real Studio/Blender end-to-end tests were not performed.",
-        "Antivirus-related launch and metadata changes are candidate improvements, not a guarantee against future Microsoft Defender detections. The executable remains unsigned; GitHub provenance is not an Authenticode publisher signature.",
-        "Existing settings, memory, templates and enabled MCP servers retain their existing data locations. Reload the browser extension and refresh AI tabs after updating."
-      ]
     }
   ],
   "platforms": {
     "macos": {
-      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.3.zip",
-      "sha256": "7137d5a412c6749f33566b19f655f7104e1361c95d525400c2fa94866f2b5af7"
+      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.4.zip",
+      "sha256": "83f25c4890772c18403d02e39145412dff15623c4d65fcdcfd6bffd5442f626e"
     }
   }
 }

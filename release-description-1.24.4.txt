@@ -1,0 +1,28 @@
+## ✨ PlazCode 1.24.4
+
+Less repeated work, easier Settings and fixes for Notion and screenshots.
+
+### ⚡ Faster Ultracode
+
+- **Less waiting:** a 62% smaller instruction pack, less repeated planning, and reuse of verified information.
+- **Careful problem solving:** keeps its skills, safety checks and verification.
+
+### 🖥️ Easier workspace
+
+- **Scrolling:** reach the bottom of pages, with scrollbars that match your theme.
+- **Settings:** click a section to open or close it. Updates is back in the sidebar.
+- **Effort labels:** the whole label matches the level’s color. The bar says Ultracode; Settings keeps Ultracode (Beta).
+
+### 🔧 Chat and screenshot fixes
+
+- **Notion:** better send-button detection, including tall composers and delayed startup controls. Large tool replies have a verified text-send fallback.
+- **Screenshots:** Studio captures use the right bridge. ChatGPT waits for an attachment and sends it once; failed uploads show an error.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.4.zip** for Windows, **PlazCode-macOS-1.24.4.zip** for Mac, or **PlazCode-Firefox-1.24.4.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.

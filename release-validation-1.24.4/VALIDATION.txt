@@ -1,0 +1,12 @@
+PlazCode 1.24.4 — exact-source validation passed on Linux, Windows and macOS, with Chromium/Firefox UI fixtures and the real macOS desktop lifetime check.
+Ultracode injected instructions reduced 62% (10,592 to 4,067 characters); all ten skill summaries and complete reference bodies preserved. This is prompt overhead, not a measured provider speedup or accuracy improvement.
+Workspace/side navigation scroll reachability, accessible Settings expansion, retained control values/listeners, Updates navigation and effort labels passed.
+Notion tall nested German composers, hidden old controls, delayed control hydration, verified startup/catalogue/tool-result pastes, upload fallback/retries, Stop, remount and foreign draft preservation passed.
+Studio bridge routing and ChatGPT attachment confirmation, one transport, rejected upload and at-most-once commit fixtures passed.
+Platform Rust/JavaScript regression suites, starter pack completeness, creator round trips and archive preservation checks passed. Windows installer and update checksum/handoff checks passed. Mac x86_64/arm64 packaging, relaunch modes and 210-second visible process lifetime passed.
+Live signed-in providers and real Studio/Blender sessions were not tested. Windows binaries are unsigned; Mac uses ad-hoc signing, not notarization.
+Microsoft Defender runner result before assembly:
+Scan starting...
+Scan finished.
+Scanning D:\a\PlazCode\PlazCode\build-src\PlazCode/defender-scan found no threats.
+The scanned checksum and availability are recorded in release-validation-1.24.4.
