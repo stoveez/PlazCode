@@ -8,7 +8,7 @@ The public service uses expiring one-use proof-of-work tickets, atomic deduplica
 
 Scope limitation: this first automatic release learns which of three supported local workflows pass tests, not arbitrary problem-specific answers. Roblox/Blender and unsupported local workflows remain private. It neither changes provider model weights nor claims benchmark improvements.
 
-Validation: pending exact-source platform CI.
+Validation: all exact-source platform CI jobs passed. See release-validation-1.24.0.
 
 Automatic updater validation includes real published-asset downloads and SHA-256 checks on Windows/macOS at launch and after an initially current launch. The fixture records installer handoff; it does not replace files or relaunch a real user GUI. The existing launcher already forwards launch requests to an existing agent; the feed size was a confirmed blocker.
 

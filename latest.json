@@ -1,9 +1,45 @@
 {
-  "version": "1.23.0",
-  "desktop_version": "1.23.0",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.23.0.zip",
-  "sha256": "09b0db8e85ef969bd7e1eb60eb26a219bd80ed60e5d221970e1b3af6750e510b",
+  "version": "1.24.0",
+  "desktop_version": "1.24.0",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.0.zip",
+  "sha256": "8b1fad4dcab378ce1c4f144054bc279b6ea949bf25b943c202a6b377f74dac6f",
   "release_notes": [
+    {
+      "version": "1.24.0",
+      "title": "Starter skills, automatic learning and reliable updates",
+      "summary": "Start with 11 Roblox skills, reuse privacy-safe workflow methods automatically and prevent oversized update feeds.",
+      "added": [
+        "Eleven bundled SyphoDev Roblox starter skills, with complete instructions, references and helpers. Relevant skills are matched automatically; users can add their own methods.",
+        "Automatic retrieval and contribution of predefined local edit workflows after recorded test commands. Offline reports queue locally without prompts, code, paths or user identifiers."
+      ],
+      "improved": [
+        "Shared learning is always active; local free-text candidates remain private and separate manual contributions still require review."
+      ],
+      "fixed": [
+        "Fixed “Release feed is too large” for existing installations. Feeds retain five recent entries with a byte budget; the full changelog remains separate.",
+        "macOS background launches apply window state after desktop startup; agent and updater logs stay outside the signed app bundle."
+      ],
+      "notes": [
+        "Workflow reports do not train provider model weights or prove benchmark gains. Unsupported workflows remain local. Live signed-in providers and Studio/Blender are untested; Windows remains unsigned."
+      ],
+      "github": {
+        "summary": "11 Roblox starter skills, automatic privacy-safe workflow reuse and reliable updates.",
+        "added": [
+          "11 SyphoDev Roblox starter skills, full references and helpers; add your own anytime.",
+          "Always-active shared workflows with bounded reports and offline retry."
+        ],
+        "improved": [
+          "Private prompts, code, paths and identifiers stay local."
+        ],
+        "fixed": [
+          "Oversized update feeds blocked older installations; compact feeds now have a release gate.",
+          "macOS background window state and logs outside the signed app bundle."
+        ],
+        "notes": [
+          "Workflow reuse does not train model weights. No benchmark gain claimed. See ZIP validation."
+        ]
+      }
+    },
     {
       "version": "1.23.0",
       "title": "Saved skills, Studio Explorer and provider resilience",
@@ -75,39 +111,12 @@
         "An unexpected error while handling an extension message could leave the bar waiting forever. An error reply is now always sent.",
         "The Notion AI chat box was not found when its placeholder read How can I help instead of the known wording."
       ]
-    },
-    {
-      "version": "1.21.0",
-      "title": "Working Model Builder and UI Builder, Studio vision, asset upload and DeepSeek rate-limit handling",
-      "summary": "The Model Builder and UI Builder now generate with the AI selected in PlazCode and insert into Roblox Studio 1:1 in front of the camera, PlazCode reviews Studio screenshots after visual changes and fixes problems on its own, assets can be uploaded to Studio from the toolkit or by asking the AI, and DeepSeek rate limits are waited out instead of stopping a run.",
-      "added": [
-        "Model Builder and UI Builder have a simplified layout: prompt, detail and style options, reference image, presets, a live preview, recolour and size controls, revise-by-request and saved creations.",
-        "The UI Builder preview switches between phone, tablet and PC sizes.",
-        "Upload to Studio in the toolkit lists every uploadable asset (models, animations, sounds, images and more) with search. The AI can also upload an asset when asked.",
-        "Automatic Studio vision: after a visual change, a Studio screenshot is reviewed and problems such as misplaced parts, VFX or weapon grips are fixed without being asked.",
-        "Seconds between commands setting (0 = no pause, the previous behaviour) to stay under provider rate limits.",
-        "Saved memories now have a title describing what each memory is about."
-      ],
-      "improved": [
-        "Builders use the AI currently selected in PlazCode instead of a separate model.",
-        "Insert into Studio builds one Model in front of the camera, snapped to the ground, as a single undo step (Ctrl+Z).",
-        "DeepSeek busy or rate-limit replies are waited out automatically with growing pauses (5 s to 120 s) and the last message is resent, with no retry limit. Stop still works during the wait.",
-        "Repeated failed commands no longer pause a run; the AI is told to change approach instead.",
-        "The memory settings page is simplified and the separate Engram section is removed.",
-        "Image-to-model keeps refining until the result matches the reference instead of stopping after two rounds.",
-        "When the PlazCode bridge is running in Roblox mode, other bridges or AI tools holding the Studio MCP connection are closed so the agent can start."
-      ],
-      "fixed": [
-        "Model Builder and UI Builder did not produce or insert anything.",
-        "The clarify tool failed with Recommend one option and explain why, which could trigger the repeated tool failures pause.",
-        "Test windows no longer pop up on screen while tests run."
-      ]
     }
   ],
   "platforms": {
     "macos": {
-      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.23.0.zip",
-      "sha256": "fc004c0416c9be1d84fca9a026f62ca939eec15d294b89ec465f0986641ab21c"
+      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.0.zip",
+      "sha256": "85b31f796eea99743581a688421a1f13a487e9ba3ee4d6b193ce2a229eb59379"
     }
   }
 }

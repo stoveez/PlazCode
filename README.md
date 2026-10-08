@@ -1,3 +1,13 @@
+PlazCode 1.24.0 — Starter skills, automatic learning and reliable updates
+
+Start with 11 Roblox skills, reuse privacy-safe workflow methods automatically and prevent oversized update feeds.
+
+- Eleven bundled SyphoDev Roblox starter skills, with complete instructions, references and helpers. Relevant skills are matched automatically; users can add their own methods.
+- Automatic retrieval and contribution of predefined local edit workflows after recorded test commands. Offline reports queue locally without prompts, code, paths or user identifiers.
+- Shared learning is always active; local free-text candidates remain private and separate manual contributions still require review.
+- Fixed “Release feed is too large” for existing installations. Feeds retain five recent entries with a byte budget; the full changelog remains separate.
+- macOS background launches apply window state after desktop startup; agent and updater logs stay outside the signed app bundle.
+
 PlazCode 1.23.0 — Saved skills, Studio Explorer and provider resilience
 
 Save project-aware skills and completed-task methods, edit your game from a Studio-synced Explorer, collapse the sidebar to icons, and recover Model Builder responses that previously appeared as raw JSON. All provider adapters now handle failed DOM reads and bounded waits more safely.
