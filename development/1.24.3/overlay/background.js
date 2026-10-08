@@ -359,7 +359,7 @@ const tabEngines = new Map();
 async function tabEngine(tabId) {
   if (!Number.isInteger(tabId)) return "roblox";
   if (tabEngines.has(tabId)) return tabEngines.get(tabId);
-  try { const key="rs-tab-engine-"+tabId; const saved=await chrome.storage.session.get(key); tabEngines.set(tabId,normalizeEngine(saved[key])); } catch { tabEngines.set(tabId,"roblox"); }
+  try { const key="rs-tab-engine-"+tabId; const saved=await chrome.storage.session.get(key); if (!tabEngines.has(tabId)) tabEngines.set(tabId,normalizeEngine(saved[key])); } catch { if (!tabEngines.has(tabId)) tabEngines.set(tabId,"roblox"); }
   return tabEngines.get(tabId);
 }
 chrome.tabs.onRemoved?.addListener(tabId=>{tabEngines.delete(tabId);try{chrome.storage.session.remove("rs-tab-engine-"+tabId);}catch{}});

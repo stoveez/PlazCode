@@ -16,7 +16,8 @@
     "Ultracode changes the selected page outline while preserving the theme glow.",
     "Notion startup can use small verified text pastes when native editing and file uploads fail.",
     "Co-Work leaves idle or disconnected chats available for ordinary messages.",
-    "Notion recognizes localized completion controls to avoid waiting after a reply has finished."
+    "Notion recognizes localized completion controls to avoid waiting after a reply has finished.",
+    "A delayed settings read no longer resets a newly selected AgentScript mode."
   ],
   "notes": [
     "Automated platform and browser checks passed. Live signed-in providers and Studio sessions remain untested."
@@ -55,7 +56,8 @@
         "items": [
           "**Startup:** another verified text-send path when Notion file uploads fail.",
           "**Normal chat:** idle or disconnected chats no longer turn ordinary messages into queued follow-ups.",
-          "**Faster reply detection:** recognize finished responses in more languages, removing avoidable waiting after Notion finishes."
+          "**Faster reply detection:** recognize finished responses in more languages, removing avoidable waiting after Notion finishes.",
+          "**Engine selection:** a delayed settings load no longer overrides your choice of AgentScript."
         ]
       }
     ]

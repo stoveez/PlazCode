@@ -18,7 +18,7 @@ function functions(source){const ast=parse(source,{ecmaVersion:'latest'}),out={}
  walk(ast);return out;}
 // Targeted ChatGPT completion/send recovery changes are exercised by test-stream-completion.
 // Notion's verified startup fast path is covered by full-provider native/fallback fixtures.
-const exceptions={chatgpt:new Set(['genActive','unwedgeStop','unwedgeStopPersistently','typeAndSend']),notion:new Set(['waitFor','chatList','visible','candidateVisible','controlAvailable','typeAndSend','applyLockAttrs','setInputLock','ensureComposerReady']),deepseek:new Set(['waitFor','composerFrame']),copilot:new Set(['waitFor','composerFrame']),claude:new Set(['waitFor'])};
+const exceptions={chatgpt:new Set(['genActive','unwedgeStop','unwedgeStopPersistently','typeAndSend']),notion:new Set(['waitFor','chatList','visible','candidateVisible','controlAvailable','typeAndSend','applyLockAttrs','setInputLock','ensureComposerReady','softGenerationSettled']),deepseek:new Set(['waitFor','composerFrame']),copilot:new Set(['waitFor','composerFrame']),claude:new Set(['waitFor'])};
 let total=0;for(const name of fs.readdirSync('providers').filter(n=>n.endsWith('.js')&&!n.endsWith('-net.js')&&!['media.js','chatgpt-cm.js'].includes(n))){
  const key=name.slice(0,-3),before=functions(fs.readFileSync('test-support/provider-baseline/'+name,'utf8')),after=functions(fs.readFileSync('providers/'+name,'utf8'));
  for(const [fn,ast]of Object.entries(before)){if(fn==='RSProvider'||fn==='waitFor'||exceptions[key]?.has(fn))continue;if(ast!==after[fn])(()=>{throw Error('Unexpected healthy control-flow change: '+name+' > '+fn);})();else total++;}

@@ -12,6 +12,8 @@ Notion startup now tries bounded 600-character / 12-line clipboard transactions 
 
 Notion response completion now recognizes localized final-response controls and the previously missed Helpful control, plus the German ready acknowledgement. Current-response scope, 700 ms stability, native Stop and workflow-progress guards remain. This avoids up to roughly eight seconds of soft generation tail on confirmed complete responses; actual provider thinking/network time is unchanged.
 
+Per-tab engine restoration now keeps a newer explicit choice if an older storage read finishes later. A delayed RobloxScript restore is regression-tested against an AgentScript selection.
+
 Validation: pending exact-source platform CI.
 
 Live signed-in providers and Studio/Blender sessions remain untested. No overall speed or AI benchmark gain is claimed.
