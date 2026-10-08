@@ -27,7 +27,7 @@ pub fn read(root: &Path, id: &str, request: &Value) -> anyhow::Result<Value> {
         "next_offset":if end<chars.len(){Some(end)}else{None},"total_chars":chars.len(),
         "bundle_root":root,"resources":paths,"source":"SyphoDev Roblox Skills","source_url":"https://www.youtube.com/@SyphoDev",
         "license":"Original bundled LICENSE.txt; free redistribution with attribution, no sale or paid bundles.",
-        "adaptation":"These are reference instructions. Use actual PlazCode tools, keep personal configuration outside the bundle, and inspect and verify this project."}))
+        "adaptation":"These are reference instructions. Use actual PlazCode tools, keep personal configuration outside the bundle, copy helpers and required references into a project-owned working copy when they expect adjacent LOCAL.md, and inspect and verify this project."}))
 }
 
 #[cfg(test)]
