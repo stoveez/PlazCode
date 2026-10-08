@@ -13,7 +13,38 @@ concurrency:
   group: plazcode-release-1.23
   cancel-in-progress: false
 jobs:
+  mac_package:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify compiled Mac artifact belongs to the validated source
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/11520264469" > mac-artifact.json
+          python3 -c 'import json; a=json.load(open("mac-artifact.json")); assert a["workflow_run"]["head_sha"]=="a93610aa8411e8b3e7aaa4d45172eed18f53b4bc" and not a["expired"]'
+          gh run download 37707590040 --repo "$GITHUB_REPOSITORY" --name plazcode-1.23-macOS-validation --dir recovered
+          codesign --verify --deep --strict recovered/artifacts/staging/PlazCode/PlazCode.app
+          lipo recovered/artifacts/staging/PlazCode/PlazCode.app/Contents/MacOS/PlazCode -verify_arch x86_64 arm64
+      - name: Repackage verified native build with corrected lipo arguments
+        run: |
+          python3 development/1.23.0/prepare.py
+          mkdir -p build-src/PlazCode/agent/target/release
+          cp recovered/artifacts/staging/PlazCode/PlazCode.app/Contents/MacOS/PlazCode build-src/PlazCode/agent/target/release/PlazCode
+          chmod +x build-src/PlazCode/agent/target/release/PlazCode
+          python3 development/1.23.0/package.py
+          python3 -c 'import json,os; json.dump({"native_source":"a93610aa8411e8b3e7aaa4d45172eed18f53b4bc","artifact_id":11520264469,"run_id":os.environ["GITHUB_RUN_ID"],"codesign_verified":True,"architectures_verified":["x86_64","arm64"]},open("artifacts/mac-repackage.json","w"))'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plazcode-1.23-macOS-repackaged
+          path: artifacts/*.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plazcode-1.23-macOS-repackage-evidence
+          path: artifacts/mac-repackage.json
   publish:
+    needs: mac_package
     runs-on: ubuntu-latest
     timeout-minutes: 55
     env:
@@ -33,9 +64,11 @@ jobs:
             if [ "$state" = completed ]; then break; fi
             sleep 30
           done
-          python3 -c 'import json,os; r=json.load(open("ci-artifacts/run.json")); assert r["head_sha"]==os.environ["VALIDATED_SHA"] and r["conclusion"]=="success", r["conclusion"]'
+          python3 -c 'import json,os; r=json.load(open("ci-artifacts/run.json")); assert r["head_sha"]==os.environ["VALIDATED_SHA"] and r["status"]=="completed"'
           gh api "repos/$GITHUB_REPOSITORY/actions/runs/$VALIDATION_RUN/jobs" > ci-artifacts/jobs.json
-          gh run download "$VALIDATION_RUN" --repo "$GITHUB_REPOSITORY" --dir ci-artifacts
+          gh run download "$VALIDATION_RUN" --repo "$GITHUB_REPOSITORY" --name plazcode-1.23-Windows-validation --dir ci-artifacts/plazcode-1.23-Windows-validation
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name plazcode-1.23-macOS-repackaged --dir ci-artifacts/plazcode-1.23-macOS-validation
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name plazcode-1.23-macOS-repackage-evidence --dir ci-artifacts
       - name: Assemble versioned archives, check platform contents and update feeds
         run: python3 development/1.23.0/promote.py
       - name: Attest exact release archives

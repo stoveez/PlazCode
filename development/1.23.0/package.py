@@ -26,7 +26,7 @@ else:
  plist=app/'Contents/Info.plist';value=plistlib.loads(plist.read_bytes());value['CFBundleShortVersionString']=value['CFBundleVersion']='1.23.0';plist.write_bytes(plistlib.dumps(value))
  subprocess.run(['codesign','--force','--deep','--sign','-',str(app)],check=True)
  subprocess.run(['codesign','--verify','--deep','--strict',str(app)],check=True)
- subprocess.run(['lipo','-verify_arch','x86_64','arm64',str(app/'Contents/MacOS/PlazCode')],check=True)
+ subprocess.run(['lipo',str(app/'Contents/MacOS/PlazCode'),'-verify_arch','x86_64','arm64'],check=True)
 # Do not carry a stale v1.22 minification hash report into development builds.
 (package/'production-build.json').unlink(missing_ok=True)
 (package/'DEVELOPMENT.txt').write_text('PlazCode 1.23.0 development build. Validation and live-provider/Studio checks remain required before release. This build is not publisher-signed. Existing stable update feeds are unchanged.\n')

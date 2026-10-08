@@ -67,10 +67,19 @@ def validate(files, platform):
 
 def main():
     run = load(ROOT/'ci-artifacts/run.json')
-    assert run['head_sha'] == BASE and run['conclusion'] == 'success', 'Exact source CI must pass before release'
+    assert run['head_sha'] == BASE and run['status'] == 'completed', 'Exact source CI must complete before release'
     jobs = load(ROOT/'ci-artifacts/jobs.json')['jobs']
-    assert all(j['conclusion'] == 'success' for j in jobs)
     assert {j['name'] for j in jobs} == {'browsers','native (ubuntu-latest)','native (windows-latest)','native (macos-latest)'}
+    for job in jobs:
+        if job['name'] != 'native (macos-latest)':
+            assert job['conclusion'] == 'success', job['name']
+        else:
+            assert [s['name'] for s in job['steps'] if s['conclusion']=='failure'] == ['Package fresh native artifacts']
+            required={'JavaScript regression suite','Native regression suite','Build debug binary and test authenticated routes','Build native executable','Build both macOS architectures'}
+            assert required.issubset({s['name'] for s in job['steps'] if s['conclusion']=='success'})
+    recovery=load(ROOT/'ci-artifacts/mac-repackage.json')
+    assert recovery['native_source']==BASE and recovery['artifact_id']==11520264469
+    assert recovery['codesign_verified'] and recovery['architectures_verified']==['x86_64','arm64']
     windows = unpack(find('PlazCode-1.23.0-development.zip', 'Windows'))
     mac = unpack(find('PlazCode-macOS-1.23.0-development.zip', 'macOS'))
     # Both native builds must use precisely the same reviewed JS sources.
@@ -94,7 +103,9 @@ def main():
     result = find('defender-result.txt', 'Windows').read_text(encoding='utf-8-sig')
     assert result.strip(), 'Defender availability must be reported'
     validation = ('PlazCode '+VERSION+'\nSource: '+BASE+'\nCI: '+run['html_url']+'\n'
-                  'All platform CI jobs, Chromium/Firefox fixtures, JavaScript and native regressions passed.\n'
+                  'Chromium/Firefox fixtures, JavaScript and all native-platform regressions passed.\n'
+                  'Original Mac packaging failed on lipo argument order after both architectures compiled.\n'
+                  'Corrected packaging reused the exact compiled artifact and passed codesign/architecture verification.\n'
                   'Live signed-in providers and real Studio/Blender were not tested. Windows binaries remain unsigned.\n'
                   'Skills improve retrieved task context, not underlying AI model weights. Sharing is opt-in.\n'
                   'Microsoft Defender runner result (before final cross-platform assembly):\n'+result+'\n'
@@ -151,6 +162,7 @@ def main():
     (ROOT/'README.md').write_text(header+(ROOT/'README.md').read_text())
     evidence=ROOT/('release-validation-'+VERSION);evidence.mkdir(exist_ok=True)
     shutil.copy2(ROOT/'ci-artifacts/run.json',evidence/'run.json');shutil.copy2(ROOT/'ci-artifacts/jobs.json',evidence/'jobs.json')
+    shutil.copy2(ROOT/'ci-artifacts/mac-repackage.json',evidence/'mac-repackage.json')
     for name in ['defender-result.txt','defender-package-sha256.txt','defender-engine.json','windows-signature.txt']:
         matches=list((ROOT/'ci-artifacts/plazcode-1.23-Windows-validation').rglob(name))
         if matches:shutil.copy2(matches[0],evidence/name)
