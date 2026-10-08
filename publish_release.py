@@ -17,13 +17,20 @@ def fetch(url):
     if len(data)>64*1024*1024: raise ValueError('Release download exceeds 64 MB')
     return data
 
+def checked_release_body(body):
+    characters=len(body.encode('utf-16-le'))//2
+    if characters>=2000:
+        raise ValueError(f'GitHub release description is {characters} characters; shorten it to at most 1999. Use the entry github fields for a concise release-only summary; keep full details in the changelog.')
+    return body
+
 def notes(feed):
     version=feed['version'];entry=next(x for x in feed['release_notes'] if x['version']==version)
+    entry={**entry,**entry.get('github',{})}
     lines=['**PlazCode '+version+': '+entry['title']+'**','','- '+entry['summary'],'']
     for key,title in [('added','New additions'),('improved','Improvements'),('fixed','Bug fixes'),('notes','Validation and limitations')]:
         if entry.get(key):lines+=['***'+title+'***','']+['- '+x for x in entry[key]]+['']
     lines+=['## Update','','- Desktop launch automatically checks and updates to the newest release when outdated. Manual update: choose **Updates → Update now**.\n- Windows: run **Update-PlazCode.bat** for a manual update. macOS: launch **PlazCode.app** from the extracted folder; use **MacOS_Setup.command** for setup.','- Chromium: reload at chrome://extensions, edge://extensions or brave://extensions and refresh AI tabs. Firefox: open about:debugging, Load Temporary Add-on and select manifest.json inside PlazCode-Extension-Firefox or the standalone Firefox ZIP. Unsigned temporary addons are removed when Firefox restarts; permanent installation needs Mozilla signing.','- Windows: download **PlazCode-'+version+'.zip**. macOS: download **PlazCode-macOS-'+version+'.zip**. The normal ZIP retains Mac compatibility for older installed updaters.','- Firefox: download **PlazCode-Firefox-'+version+'.zip** or use **PlazCode-Extension-Firefox** inside either desktop package. Requires Firefox 140 or newer.', '- Existing settings, memory and enabled MCP servers keep their data locations.','','See VALIDATION.txt inside the ZIP for checks and live-test limitations.']
-    return 'PlazCode '+version+': '+entry['title'],'\n'.join(lines)+'\n'
+    return 'PlazCode '+version+': '+entry['title'],checked_release_body('\n'.join(lines)+'\n')
 
 def validate_archive(data,version,platform="windows"):
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
@@ -52,11 +59,12 @@ def main():
     root='https://raw.githubusercontent.com/'+repo+'/'+commit+'/'
     feed=json.loads(fetch(root+'latest.json'));version=feed['version']
     if not re.fullmatch(r'\d+\.\d+\.\d+',version):raise ValueError('Invalid release version')
-    tag='v'+version;title,body=notes(feed)
+    tag='v'+version
     try:existing=json.loads(gh('release','view',tag,'--repo',repo,'--json','isDraft'))
     except subprocess.CalledProcessError:existing=None
     if existing and not existing['isDraft']:
         print('Version is already published; leaving it unchanged.');return
+    title,body=notes(feed)
     assets=[]
     for name,platform,expected_hash in [('PlazCode-'+version+'.zip','windows',feed['sha256']),('PlazCode-macOS-'+version+'.zip','macos',feed['platforms']['macos']['sha256'])]:
         data=fetch(root+name)
