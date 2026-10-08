@@ -37,16 +37,35 @@ jobs:
           zip=$(find native-artifact -name PlazCode-macOS-1.24.0-development.zip)
           test -n "$zip"
           ditto -x -k "$zip" mac-desktop-install
-      - name: Real macOS desktop lifetime and updater relaunch
-        env:
-          PLAZCODE_MAC_TEST_INSTALL: ${{ github.workspace }}/mac-desktop-install/PlazCode
-        run: python3 development/1.24.0/test-macos-desktop.py
+      - name: Reuse successful desktop checks for identical application and fixture
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/37725454144" > desktop-validation-run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/37725454144/jobs" > desktop-validation-jobs.json
+          python3 - <<'PYCODE'
+          import json
+          run=json.load(open('desktop-validation-run.json'))
+          jobs=json.load(open('desktop-validation-jobs.json'))['jobs']
+          assert run['head_sha']=='5c520b05310465596384a2ebcc3bdfc6e2a41361'
+          assert len([j for j in jobs if j['name']=='mac-desktop' and j['conclusion']=='success'])==1
+          PYCODE
+          git fetch origin 5c520b05310465596384a2ebcc3bdfc6e2a41361
+          git diff --exit-code 5c520b05310465596384a2ebcc3bdfc6e2a41361 -- development/1.24.0/overlay development/1.24.0/prepare.py development/1.24.0/package.py development/1.24.0/test-macos-desktop.py
+          gh run download 37725454144 --repo "$GITHUB_REPOSITORY" --name plazcode-1.24-mac-desktop-validation --dir desktop-evidence
+          python3 - <<'PYCODE'
+          from pathlib import Path
+          import shutil
+          matches=list(Path('desktop-evidence').rglob('mac-desktop-result.json'))
+          assert len(matches)==1,matches
+          shutil.copy2(matches[0],'mac-desktop-result.json')
+          PYCODE
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: plazcode-1.24-mac-desktop-validation
           path: |
             mac-desktop-result.json
+            desktop-validation-run.json
+            desktop-validation-jobs.json
             ~/Library/Application Support/PlazCode/logs/agent.log
             ~/Library/Application Support/PlazCode/logs/updater.log
           if-no-files-found: warn

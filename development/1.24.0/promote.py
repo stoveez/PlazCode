@@ -38,7 +38,9 @@ def main():
         for name in list(files):
             if name.startswith('PlazCode/visual-checks/') or Path(name).name in {'windows-signature.txt','defender-result.txt','defender-package-sha256.txt','defender-engine.json','defender-executable-sha256.txt'}:del files[name]
     assert {n:v[0] for n,v in source.items()}=={n:v[0] for n,v in other.items()}
-    desktop=a.load(ROOT/'ci-artifacts/mac-desktop/mac-desktop-result.json');assert {d['mode'] for d in desktop}=={'foreground','background','restore'} and all(d['desktop_ready'] and d['version']==VERSION and d['alive_seconds']>=15 for d in desktop)
+    desktop_paths=list((ROOT/'ci-artifacts/mac-desktop').rglob('mac-desktop-result.json'));assert len(desktop_paths)==1,desktop_paths
+    desktop_path=desktop_paths[0]
+    desktop=a.load(desktop_path);assert {d['mode'] for d in desktop}=={'foreground','background','restore'} and all(d['desktop_ready'] and d['version']==VERSION and d['alive_seconds']>=15 for d in desktop)
     assert next(d for d in desktop if d['mode']=='foreground')['alive_seconds']>=210
     assert all(d['window_visible']==(d['mode']!='background') for d in desktop)
     entry=a.load(Path(__file__).with_name('release-entry.json'));notes=[entry]+[n for n in a.load(ROOT/'release-notes.json') if n['version']!=VERSION]
@@ -90,7 +92,10 @@ def main():
     for name in ['defender-result.txt','defender-package-sha256.txt','defender-engine.json','defender-executable-sha256.txt','windows-signature.txt']:
         matches=list((ROOT/'ci-artifacts/plazcode-1.24-Windows-validation').rglob(name))
         if matches:shutil.copy2(matches[0],evidence/name)
-    shutil.copy2(ROOT/'ci-artifacts/mac-desktop/mac-desktop-result.json',evidence/'mac-desktop-result.json')
+    shutil.copy2(desktop_path,evidence/'mac-desktop-result.json')
+    for name in ['desktop-validation-run.json','desktop-validation-jobs.json']:
+        matches=list((ROOT/'ci-artifacts/mac-desktop').rglob(name));assert len(matches)==1,matches
+        shutil.copy2(matches[0],evidence/name)
     (evidence/'VALIDATION.txt').write_text(validation)
     p=ROOT/'development/1.24.0/REVIEW.md';p.write_text(p.read_text().replace('Validation: pending exact-source platform CI.','Validation: all exact-source platform CI jobs passed. See release-validation-1.24.0.'))
     print(json.dumps(metadata,indent=2))
