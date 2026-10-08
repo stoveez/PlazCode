@@ -331,7 +331,7 @@ async fn run(install: bool, background: bool) -> anyhow::Result<()> {
         #[cfg(windows)]
         {
             let appearance=crate::preferences::PreferencesStore::load().snapshot().appearance;
-            helper_command.args(["-NoProfile","-File"]).arg(helper_copy).arg("-InstallRoot").arg(&root).arg("-ZipPath").arg(path).arg("-ExpectedSha256").arg(hash).arg("-ExpectedVersion").arg(latest).arg("-ShowProgress");
+            helper_command.args(["-NoProfile","-File"]).arg(helper_copy).arg("-InstallRoot").arg(&root).arg("-ZipPath").arg(path).arg("-ExpectedSha256").arg(hash).arg("-ExpectedVersion").arg(&latest).arg("-ShowProgress");
             if quiet_restart { helper_command.arg("-BackgroundUpdate"); }
             if restore_window { helper_command.arg("-RestoreWindow"); }
             if let Some(appearance)=appearance {helper_command.arg("-Theme").arg(appearance.theme).arg("-Glow").arg(appearance.glow);if appearance.gradients=="off" {helper_command.arg("-NoGradients");}}
@@ -353,7 +353,7 @@ async fn run(install: bool, background: bool) -> anyhow::Result<()> {
             // The helper survives the old desktop's exit; keep its diagnostics
             // outside the signed app so a failed relaunch remains inspectable.
 
-            std::process::Command::new("/bin/bash").arg(helper_copy).arg(path).arg(hash).arg(latest).arg(std::process::id().to_string()).arg(if restore_window {"restore"} else if quiet_restart {"background"} else {"foreground"}).arg(&root).current_dir(&root).stdout(log.try_clone()?).stderr(log).spawn()?
+            std::process::Command::new("/bin/bash").arg(helper_copy).arg(path).arg(hash).arg(&latest).arg(std::process::id().to_string()).arg(if restore_window {"restore"} else if quiet_restart {"background"} else {"foreground"}).arg(&root).current_dir(&root).stdout(log.try_clone()?).stderr(log).spawn()?
         };
         let result = tokio::task::spawn_blocking(move || helper_process.wait()).await??;
         anyhow::ensure!(result.success(), "{}", installer_failure(&root, &latest, helper_started, &log_path, result.code()));
