@@ -13,7 +13,11 @@ with zipfile.ZipFile(archive) as z:
 source=destination/'PlazCode'
 for path in (Path(__file__).parent/'overlay').rglob('*'):
  if path.is_file():
-  target=source/path.relative_to(Path(__file__).parent/'overlay');target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(path,target)
+  target=source/path.relative_to(Path(__file__).parent/'overlay');target.parent.mkdir(parents=True,exist_ok=True)
+  # Git on Windows may use autocrlf; embedded source and extraction fixtures
+  # must have the same line endings on every host. Do not alter binary assets.
+  if path.suffix in {".js",".cjs",".rs",".html",".luau",".json",".py",".toml",".lock"}:target.write_bytes(path.read_bytes().replace(b"\r\n",b"\n"))
+  else:shutil.copy2(path,target)
 # Desktop embeds the nested compatibility extension. Keep both byte-identical.
 for folder in ['core','providers']:
  shutil.copytree(source/folder,source/'PlazCode-Extension'/folder,dirs_exist_ok=True)

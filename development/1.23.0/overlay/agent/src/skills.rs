@@ -5,6 +5,7 @@ use serde::{Deserialize,Serialize};
 use serde_json::{json,Value};
 use std::{collections::BTreeMap,path::PathBuf};
 use sha2::{Digest,Sha256};
+use futures::StreamExt;
 #[derive(Clone,Serialize,Deserialize)]
 struct Skill {id:String,title:String,description:String,domain:String,scope:String,steps:Vec<String>,pitfalls:Vec<String>,verification:Vec<String>,confirmed:bool,revision:u64,#[serde(default)]community:bool}
 #[derive(Default,Clone,Serialize,Deserialize)]
@@ -58,7 +59,7 @@ async fn github(client:&reqwest::Client,method:reqwest::Method,path:&str,body:Op
 async fn sync()->anyhow::Result<Value>{
  let repo=repository()?;let response=client()?.get(format!("https://raw.githubusercontent.com/{repo}/main/learned-skills/index.json")).send().await?.error_for_status()?;
  anyhow::ensure!(response.content_length().unwrap_or(0)<=1024*1024,"Community index is too large.");
- let bytes=response.bytes().await?;anyhow::ensure!(bytes.len()<=1024*1024,"Community index is too large.");let lessons:Vec<Skill>=serde_json::from_slice(&bytes)?;anyhow::ensure!(lessons.len()<=100,"Too many community lessons.");
+ let mut chunks=response.bytes_stream();let mut bytes=Vec::new();while let Some(chunk)=chunks.next().await{let chunk=chunk?;anyhow::ensure!(bytes.len()+chunk.len()<=1024*1024,"Community index is too large.");bytes.extend_from_slice(&chunk);}let lessons:Vec<Skill>=serde_json::from_slice(&bytes)?;anyhow::ensure!(lessons.len()<=100,"Too many community lessons.");
  let mut store=STORE.lock().await;let mut data=store.data.clone();let mut count=0;
  for mut skill in lessons {validate(&skill)?;anyhow::ensure!(skill.confirmed&&skill.scope.is_empty(),"Community index contains an unreviewed or project-specific lesson.");skill.id=format!("community-{}",skill.id);validate(&skill)?;skill.community=true;if data.skills.get(&skill.id).is_some_and(|s|!s.community){continue;}data.skills.insert(skill.id.clone(),skill);count+=1;}
  store.persist(data)?;Ok(json!({"ok":true,"count":count}))
@@ -78,7 +79,14 @@ async fn publish(request:&Value)->anyhow::Result<Value>{
  let pull=github(&client,post,&format!("repos/{repo}/pulls"),Some(json!({"title":format!("Shared skill: {}",skill.title),"head":branch,"base":"main","body":"Reviewed reusable method. Maintainers: verify the lesson, remove private details and add approved content to learned-skills/index.json. No raw chat logs or project files are included.","draft":true})),&token).await?;
  Ok(json!({"ok":true,"url":pull["html_url"],"message":"Draft contribution created. Global use starts after maintainer review and index approval."}))
 }
+static LAST_COMMUNITY_SYNC:std::sync::atomic::AtomicI64=std::sync::atomic::AtomicI64::new(0);
+fn maybe_sync(){
+ let now=chrono::Utc::now().timestamp();let previous=LAST_COMMUNITY_SYNC.load(std::sync::atomic::Ordering::Relaxed);
+ if now-previous<3600{return;}
+ if LAST_COMMUNITY_SYNC.compare_exchange(previous,now,std::sync::atomic::Ordering::SeqCst,std::sync::atomic::Ordering::Relaxed).is_ok(){tokio::spawn(async{if let Err(error)=sync().await{tracing::warn!("Community skill sync unavailable: {error}");}});}
+}
 pub async fn post(State(state):State<crate::AppState>,Json(request):Json<Value>)->Response {
+ if request["action"]=="match"&&state.preferences.snapshot().shared_learning{maybe_sync();}
  let result:anyhow::Result<Value>=async {
   match request["action"].as_str().unwrap_or("list") {
    "sync"|"publish"=>{anyhow::ensure!(state.preferences.snapshot().shared_learning,"Enable shared learning before contacting the community repository.");if request["action"]=="sync"{sync().await}else{publish(&request).await}},

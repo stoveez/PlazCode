@@ -3380,6 +3380,7 @@
     const label=user ? P.itemText(user) : "Agent task";
     const preEnhanced=A.creatorPreEnhanced && String(A.creatorPreEnhanced.text).replace(/\s+/g," ").trim()===String(label).replace(/\s+/g," ").trim() && A.creatorPreEnhanced.context===JSON.stringify([P.conversationKey(),activeEngine(),A.sessionGen]);
     A.taskRequest=preEnhanced?A.creatorPreEnhanced.raw:label;
+    A.creatorTask=activeEngine()==="roblox" && typeof PlazCodeChatCreators!=="undefined" && !!(preEnhanced || PlazCodeChatCreators.routeRequest(label));
     A.creatorBrief=A.taskRequest;
     A.creatorRequestKey=JSON.stringify([P.conversationKey(),activeEngine(),A.sessionGen,user&&P.itemKey?P.itemKey(user):user?P.allItems().indexOf(user):'no-user',label]);
     if(preEnhanced){A.creatorEnhancedKey=A.creatorRequestKey;A.creatorPreEnhanced=null;}
@@ -3471,7 +3472,7 @@
         const res = await waitForResponse(base);
         if (res.kind === 'text' && typeof PlazCodeChatCreators !== 'undefined') {
           const recovered = PlazCodeChatCreators.recoverPreview(res.text || res.raw || '',
-            activeEngine() === 'roblox' && !!(A.creatorPreEnhanced || PlazCodeChatCreators.routeRequest(A.taskRequest)));
+            activeEngine() === 'roblox' && !!A.creatorTask);
           if (recovered) { res.kind = 'tools'; res.calls = [recovered]; }
         }
         diag("response", { kind: res.kind });
