@@ -35,6 +35,13 @@ def find(name, platform):
     assert len(matches) == 1, (name, matches)
     return matches[0]
 
+def firefox_text(files):
+    # These two files are generated with host-native newlines by build-firefox.
+    for name in ['manifest.json', 'FIREFOX-INSTALL.txt']:
+        data, mode = files[name]
+        files[name] = (data.replace(b'\r\n', b'\n'), mode)
+    return files
+
 def validate(files, platform):
     for manifest in ['manifest.json', 'PlazCode-Extension/manifest.json', 'PlazCode-Extension-Firefox/manifest.json']:
         assert json.loads(files['PlazCode/'+manifest][0])['version'] == VERSION
@@ -70,15 +77,15 @@ def main():
     for name, value in windows.items():
         if name.startswith(('PlazCode/core/', 'PlazCode/providers/', 'PlazCode/PlazCode-Extension/')):
             assert mac[name][0] == value[0], 'Platform source mismatch: '+name
-    firefox = unpack(find('PlazCode-Firefox-1.23.0-development.zip', 'Windows'))
-    other_firefox = unpack(find('PlazCode-Firefox-1.23.0-development.zip', 'macOS'))
+    firefox = firefox_text(unpack(find('PlazCode-Firefox-1.23.0-development.zip', 'Windows')))
+    other_firefox = firefox_text(unpack(find('PlazCode-Firefox-1.23.0-development.zip', 'macOS')))
     assert {n:v[0] for n,v in firefox.items()} == {n:v[0] for n,v in other_firefox.items()}
     source = unpack(find('PlazCode-source-1.23.0-development.zip', 'Windows'))
     other_source = unpack(find('PlazCode-source-1.23.0-development.zip', 'macOS'))
     # Platform test evidence is not source; mode bits differ on Windows.
     for files in [source, other_source]:
         for name in list(files):
-            if Path(name).name in {'windows-signature.txt','defender-result.txt','defender-package-sha256.txt','defender-engine.json'}:
+            if name.startswith('PlazCode/visual-checks/') or Path(name).name in {'windows-signature.txt','defender-result.txt','defender-package-sha256.txt','defender-engine.json'}:
                 del files[name]
     assert {n:v[0] for n,v in source.items()} == {n:v[0] for n,v in other_source.items()}
     entry = load(Path(__file__).with_name('release-entry.json'))
@@ -94,6 +101,16 @@ def main():
                   'See release-validation-1.23.0/ for the CI scan result and original scanned package checksum.\n')
     common = {'PlazCode/release-notes.json': (json.dumps(notes, indent=2, ensure_ascii=False).encode()+b'\n', 0o100644 << 16),
               'PlazCode/VALIDATION.txt': (validation.encode(), 0o100644 << 16)}
+    notice = ('PlazCode is GPL-3.0-or-later. Preferred editable source and build instructions\n'
+              'for this version are distributed as PlazCode-source-'+VERSION+'.zip at:\n'
+              'https://github.com/stoveez/PlazCode/releases/tag/v'+VERSION+'\n\n'
+              'GitHub build provenance can be checked with:\n'
+              'gh attestation verify PlazCode-'+VERSION+'.zip --repo stoveez/PlazCode\n'
+              'Use the matching macOS or Firefox ZIP filename for those downloads.\n'
+              'GitHub provenance is separate from Windows Authenticode and Apple notarization.\n').encode()
+    common['PlazCode/SOURCE.txt'] = (notice, 0o100644 << 16)
+    common['PlazCode/PlazCode-Extension/SOURCE.txt'] = (notice, 0o100644 << 16)
+    firefox['SOURCE.txt'] = (notice, 0o100644 << 16)
     for files in [windows,mac]:
         for name in list(files):
             if name.startswith('PlazCode/PlazCode-Extension-Firefox/') or name == 'PlazCode/DEVELOPMENT.txt':
