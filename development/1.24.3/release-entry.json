@@ -17,7 +17,8 @@
     "Notion startup can use small verified text pastes when native editing and file uploads fail.",
     "Co-Work leaves idle or disconnected chats available for ordinary messages.",
     "Notion recognizes localized completion controls to avoid waiting after a reply has finished.",
-    "A delayed settings read no longer resets a newly selected AgentScript mode."
+    "A delayed settings read no longer resets a newly selected AgentScript mode.",
+    "Windows starts without unnecessary process scans and detects stale agents in any display language."
   ],
   "notes": [
     "Automated platform and browser checks passed. Live signed-in providers and Studio sessions remain untested."
@@ -27,8 +28,8 @@
       {
         "title": "⚡ Smoother performance",
         "items": [
-          "**Less lag:** tool lists and terminal logs stop rebuilding when nothing has changed. New log lines appear without replacing the whole list.",
-          "**Less background work:** fewer repeated MCP requests, update checks and refreshes while the window is hidden."
+          "**Less lag:** unchanged tools and logs stay in place. New log lines append without rebuilding the list.",
+          "**Less background work:** fewer repeated requests and refreshes while hidden."
         ]
       },
       {
@@ -52,8 +53,9 @@
         ]
       },
       {
-        "title": "🔧 Notion and Co-Work",
+        "title": "🔧 Startup and chat fixes",
         "items": [
+          "**Windows startup:** skips unnecessary process scans and detects old agents across display languages.",
           "**Startup:** another verified text-send path when Notion file uploads fail.",
           "**Normal chat:** idle or disconnected chats no longer turn ordinary messages into queued follow-ups.",
           "**Faster reply detection:** recognize finished responses in more languages, removing avoidable waiting after Notion finishes.",

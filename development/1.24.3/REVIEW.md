@@ -14,6 +14,8 @@ Notion response completion now recognizes localized final-response controls and 
 
 Per-tab engine restoration now keeps a newer explicit choice if an older storage read finishes later. A delayed RobloxScript restore is regression-tested against an AgentScript selection.
 
+Windows binds free bridge ports immediately instead of launching netstat/tasklist for every port. Occupied-port recovery uses native IPv4/IPv6 listener tables and process image queries without localized text parsing. Recovery runs on a blocking worker and still only closes an identified old PlazCode process; unrelated owners are preserved. Live Windows listener/image checks, table validation and existing occupied/exiting-port tests run in platform CI. This addresses an identified startup bottleneck and stale-agent failure path, not every possible installation or permission error.
+
 Validation: pending exact-source platform CI.
 
 Live signed-in providers and Studio/Blender sessions remain untested. No overall speed or AI benchmark gain is claimed.

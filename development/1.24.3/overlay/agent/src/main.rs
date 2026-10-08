@@ -410,17 +410,44 @@ struct ExecResult { id: String, ok: bool, result: String, error: Option<String>,
 
 #[cfg(windows)]
 fn port_owner_pid(port: u16) -> Option<u32> {
-    let out = std::process::Command::new("netstat")
-        .args(["-ano", "-p", "TCP"])
-        .creation_flags(CREATE_NO_WINDOW)
-        .output().ok()?;
-    let text = String::from_utf8_lossy(&out.stdout);
-    for line in text.lines() {
-        let fields: Vec<&str> = line.split_whitespace().collect();
-        if fields.len() < 5 || fields[3] != "LISTENING" || fields[1].rsplit(':').next().and_then(|value| value.parse::<u16>().ok()) != Some(port) { continue; }
-        if let Some(pid) = line.split_whitespace().last().and_then(|s| s.parse::<u32>().ok()) {
-            return Some(pid);
+    #[link(name="iphlpapi")]
+    unsafe extern "system" {
+        fn GetExtendedTcpTable(table:*mut std::ffi::c_void,size:*mut u32,ordered:i32,family:u32,class:u32,reserved:u32)->u32;
+    }
+    for (family,ipv6) in [(2,false),(23,true)] {
+        let mut size=0;
+        let first=unsafe { GetExtendedTcpTable(std::ptr::null_mut(),&mut size,0,family,3,0) };
+        if first!=122 || size<4 { continue; }
+        // The OS can add a listener between sizing and reading the table.
+        for _ in 0..3 {
+            if size>16*1024*1024 { break; }
+            let mut table=vec![0u32;(size as usize+3)/4];
+            let result=unsafe { GetExtendedTcpTable(table.as_mut_ptr().cast(),&mut size,0,family,3,0) };
+            if result==122 { continue; }
+            if result!=0 || size as usize>table.len()*4 { break; }
+            if let Some(pid)=tcp_listener_owner(&table[..size as usize/4],ipv6,port) { return Some(pid); }
+            break;
         }
+    }
+    None
+}
+
+#[cfg(any(windows,test))]
+fn tcp_listener_owner(table:&[u32],ipv6:bool,port:u16)->Option<u32> {
+    let count=*table.first()? as usize;
+    let width=if ipv6 {14}else{6};
+    if count>table.len().saturating_sub(1)/width { return None; }
+    for row in table[1..].chunks_exact(width).take(count) {
+        let (state,network_port,pid,local)=if ipv6 {
+            let mut bytes=[0u8;16];
+            for (slot,word) in bytes.chunks_exact_mut(4).zip(row[..4].iter()) {slot.copy_from_slice(&word.to_ne_bytes());}
+            let address=std::net::Ipv6Addr::from(bytes);
+            (row[12],row[5],row[13],address.is_unspecified()||address.is_loopback()||address.to_ipv4_mapped().is_some_and(|v|v.is_loopback()))
+        } else {
+            let address=std::net::Ipv4Addr::from(row[1].to_ne_bytes());
+            (row[0],row[2],row[5],address.is_unspecified()||address.is_loopback())
+        };
+        if state==2 && local && u16::from_be(network_port as u16)==port && pid!=0 {return Some(pid);}
     }
     None
 }
@@ -429,14 +456,20 @@ fn port_owner_pid(_port: u16) -> Option<u32> { None }
 
 #[cfg(windows)]
 fn process_image(pid: u32) -> Option<String> {
-    let out = std::process::Command::new("tasklist")
-        .args(["/FI", &format!("PID eq {}", pid), "/FO", "CSV", "/NH"])
-        .creation_flags(CREATE_NO_WINDOW)
-        .output().ok()?;
-    let text = String::from_utf8_lossy(&out.stdout);
-    text.lines().next()
-        .and_then(|l| l.split(',').next())
-        .map(|s| s.trim_matches('"').to_lowercase())
+    #[link(name="kernel32")]
+    unsafe extern "system" {
+        fn OpenProcess(access:u32,inherit:i32,pid:u32)->*mut std::ffi::c_void;
+        fn QueryFullProcessImageNameW(process:*mut std::ffi::c_void,flags:u32,path:*mut u16,size:*mut u32)->i32;
+        fn CloseHandle(handle:*mut std::ffi::c_void)->i32;
+    }
+    let process=unsafe {OpenProcess(0x1000,0,pid)};
+    if process.is_null(){return None;}
+    let mut path=vec![0u16;32768];let mut size=path.len() as u32;
+    let ok=unsafe {QueryFullProcessImageNameW(process,0,path.as_mut_ptr(),&mut size)};
+    unsafe {CloseHandle(process);}
+    if ok==0 || size as usize>path.len(){return None;}
+    let path=String::from_utf16_lossy(&path[..size as usize]);
+    PathBuf::from(path).file_name().map(|name|name.to_string_lossy().to_ascii_lowercase())
 }
 #[cfg(not(windows))]
 fn process_image(_pid: u32) -> Option<String> { None }
@@ -531,7 +564,14 @@ struct StartupGuard;
 impl StartupGuard {fn acquire(_addr:SocketAddr)->anyhow::Result<Self>{Ok(Self)}}
 
 async fn bind_required(addr: SocketAddr, wait: Duration) -> anyhow::Result<tokio::net::TcpListener> {
-    reclaim_port(addr.port())?;
+    // Healthy startup binds immediately: no process scans or helper launches.
+    match tokio::net::TcpListener::bind(addr).await {
+        Ok(listener)=>return Ok(listener),
+        Err(error) if error.kind()==std::io::ErrorKind::AddrInUse=>{},
+        Err(error)=>anyhow::bail!("Cannot start the local bridge at {addr}: {error}. Details: logs/agent.log."),
+    }
+    let port=addr.port();
+    tokio::task::spawn_blocking(move||reclaim_port(port)).await??;
     let deadline = tokio::time::Instant::now() + wait;
     loop {
         match tokio::net::TcpListener::bind(addr).await {
@@ -683,6 +723,36 @@ for line in sys.stdin:
         let error = bind_required(addr, Duration::from_millis(50)).await.unwrap_err().to_string();
         assert!(error.contains(&addr.to_string()), "{error}");
         assert!(error.contains("logs/agent.log"), "{error}");
+    }
+
+    #[tokio::test]
+    async fn free_ports_bind_without_startup_recovery() {
+        let listener=bind_required("127.0.0.1:0".parse().unwrap(),Duration::ZERO).await.unwrap();
+        assert_ne!(listener.local_addr().unwrap().port(),0);
+    }
+
+    #[test]
+    fn native_tcp_tables_find_only_local_listening_owners() {
+        let network=u16::to_be(3000) as u32;
+        let local=u32::from_ne_bytes([127,0,0,1]);
+        assert_eq!(tcp_listener_owner(&[1,2,local,network,0,0,42],false,3000),Some(42));
+        assert_eq!(tcp_listener_owner(&[1,5,local,network,0,0,42],false,3000),None);
+        assert_eq!(tcp_listener_owner(&[1,2,local,network,0,0,42],false,3001),None);
+        assert_eq!(tcp_listener_owner(&[1,2,u32::from_ne_bytes([10,0,0,1]),network,0,0,42],false,3000),None);
+        assert_eq!(tcp_listener_owner(&[2,2,local,network,0,0,42],false,3000),None);
+        let mut v6=vec![0u32;15];v6[0]=1;v6[6]=network;v6[13]=2;v6[14]=43;
+        assert_eq!(tcp_listener_owner(&v6,true,3000),Some(43));
+        v6[1]=u32::from_ne_bytes([0x20,1,0x0d,0xb8]);assert_eq!(tcp_listener_owner(&v6,true,3000),None);
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_native_owner_lookup_matches_live_listener_and_image() {
+        let listener=std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        assert_eq!(port_owner_pid(listener.local_addr().unwrap().port()),Some(std::process::id()));
+        let image=std::env::current_exe().unwrap().file_name().unwrap().to_string_lossy().to_ascii_lowercase();
+        assert_eq!(process_image(std::process::id()),Some(image));
+        if let Ok(v6)=std::net::TcpListener::bind("[::1]:0") {assert_eq!(port_owner_pid(v6.local_addr().unwrap().port()),Some(std::process::id()));}
     }
 
     #[tokio::test]
