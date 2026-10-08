@@ -12,7 +12,45 @@ concurrency:
   group: plazcode-final-1.24
   cancel-in-progress: false
 jobs:
+  mac-desktop:
+    runs-on: macos-latest
+    timeout-minutes: 50
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VALIDATED_SHA: ea2939f8da02529accbb465582f3a95b07e5fd5d
+      VALIDATION_RUN: '37720035685'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Wait for the verified native artifact
+        run: |
+          for attempt in $(seq 1 80); do
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$VALIDATION_RUN" > run.json
+            state=$(python3 -c 'import json; print(json.load(open("run.json"))["status"])')
+            if [ "$state" = completed ]; then break; fi
+            sleep 30
+          done
+          python3 -c 'import json,os; r=json.load(open("run.json")); assert r["head_sha"]==os.environ["VALIDATED_SHA"] and r["status"]=="completed" and r["conclusion"]=="success"'
+          gh run download "$VALIDATION_RUN" --repo "$GITHUB_REPOSITORY" --name plazcode-1.24-macOS-validation --dir native-artifact
+          zip=$(find native-artifact -name PlazCode-macOS-1.24.0-development.zip)
+          test -n "$zip"
+          ditto -x -k "$zip" mac-desktop-install
+      - name: Real macOS desktop lifetime and updater relaunch
+        env:
+          PLAZCODE_MAC_TEST_INSTALL: ${{ github.workspace }}/mac-desktop-install/PlazCode
+        run: python3 development/1.24.0/test-macos-desktop.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plazcode-1.24-mac-desktop-validation
+          path: |
+            mac-desktop-result.json
+            mac-desktop-install/PlazCode/logs/agent.log
+          if-no-files-found: warn
   publish:
+    needs: mac-desktop
     runs-on: ubuntu-latest
     timeout-minutes: 55
     env:
@@ -38,6 +76,8 @@ jobs:
           for platform in Windows macOS; do
             gh run download "$VALIDATION_RUN" --repo "$GITHUB_REPOSITORY" --name "plazcode-1.24-$platform-validation" --dir "ci-artifacts/plazcode-1.24-$platform-validation"
           done
+      - name: Download macOS desktop lifetime evidence
+        run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name plazcode-1.24-mac-desktop-validation --dir ci-artifacts/mac-desktop
       - name: Assemble immutable archives and compact feeds
         run: |
           python3 development/1.24.0/promote.py
