@@ -256,13 +256,17 @@
 
     html[data-palette] body{background:var(--bg)}html[data-palette] .hero,html[data-palette] body::before{background:var(--bg)!important}html[data-palette] .hero::after{background:linear-gradient(110deg,var(--bg),var(--surface-2))!important}html[data-palette] .hero{border-color:var(--line)}html[data-palette] .crest,html[data-palette] .tag,html[data-palette] .work-card.on,html[data-palette] #engine-roblox.on,html[data-palette] #engine-local.on{background:var(--accent);color:var(--bg)}html[data-palette] .logo{color:var(--accent-light)}html[data-palette] .card{background:var(--surface);border-color:var(--line);box-shadow:0 10px 28px #0004,0 0 16px var(--glow)}html[data-palette] .card::before,html[data-palette] .sec-label::before{background:var(--accent)}html[data-palette] .seg,html[data-palette] .work-card,html[data-palette] button.act,html[data-palette] .tgl-well,html[data-palette] #reasoning-level{background:var(--bg)!important;border-color:var(--line)!important;color:var(--text)}html[data-palette] .work-card.on,html[data-palette] #engine-roblox.on,html[data-palette] #engine-local.on{background:var(--accent)!important;color:var(--bg)}html[data-palette] .sec-label{color:var(--accent)}html[data-palette] .dot.on{background:var(--accent-light);box-shadow:0 0 12px var(--glow)}html[data-palette][data-glow=off] .card,html[data-palette][data-glow=off] .logo{box-shadow:none;text-shadow:none}html[data-palette][data-gradients=off] .hero::after{background:var(--surface)!important}html[data-palette] .act:hover{border-color:var(--accent)!important;box-shadow:0 0 15px var(--glow)}
 
+    /* Fade purple details over the saved theme, including the return transition. */
+    html[data-palette] :is(.hero,.card,#reasoning-level){transition:border-color .42s ease,box-shadow .42s ease}
+    html[data-palette] .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top right,#a879e82e,transparent 70%);z-index:1;pointer-events:none;opacity:0;transition:opacity .42s ease}
+    html[data-palette] .card::before{transition:background-color .42s ease}
     html[data-palette][data-thinking=ultracode] :is(.hero,.card,#reasoning-level){border-color:#a879e8!important}
     html[data-palette][data-thinking=ultracode] .card{box-shadow:0 12px 28px #0004,0 0 20px #a879e826}
-    html[data-palette][data-thinking=ultracode] .hero::after{background:radial-gradient(ellipse at top right,#a879e82e,transparent 70%),var(--bg)!important}
-    html[data-palette][data-thinking=ultracode] .card::before{background:linear-gradient(90deg,#9762df,#d2b5ff)}
-    html[data-palette][data-thinking=ultracode][data-gradients=off] .hero::after{background:var(--surface)!important}
-    html[data-palette][data-thinking=ultracode][data-gradients=off] .card::before{background:#b68af2}
+    html[data-palette][data-thinking=ultracode] .hero::before{opacity:1}
+    html[data-palette][data-thinking=ultracode] .card::before{background:#b68af2}
+    html[data-palette][data-gradients=off] .hero::before{background:none}
     html[data-palette][data-thinking=ultracode][data-glow=off] .card{box-shadow:none}
+    @media(prefers-reduced-motion:reduce){html[data-palette] :is(.hero,.card,#reasoning-level),html[data-palette] :is(.hero,.card)::before{transition:none!important}}
 </style>
 </head>
 <body>
