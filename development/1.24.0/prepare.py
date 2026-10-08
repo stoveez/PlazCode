@@ -18,6 +18,19 @@ for path in (Path(__file__).parent/'overlay').rglob('*'):
   # must have the same line endings on every host. Do not alter binary assets.
   if path.suffix in {".js",".cjs",".rs",".html",".luau",".json",".py",".toml",".lock"}:target.write_bytes(path.read_bytes().replace(b"\r\n",b"\n"))
   else:shutil.copy2(path,target)
+# Keep the supplied third-party reference pack intact and separate from GPL code.
+starter_archive=Path(__file__).with_name('syphodev-starter-skills.zip')
+assert hashlib.sha256(starter_archive.read_bytes()).hexdigest()=='14c07a4db8f28c6cfbd38d6ae1f66f7dcfd94c7ae4a889789729e8e612119250','Starter pack checksum mismatch'
+starter=source/'PlazCode-Extension/starter-skills/syphodev';starter.mkdir(parents=True,exist_ok=True)
+with zipfile.ZipFile(starter_archive) as z:
+ for info in z.infolist():
+  path=Path(info.filename);assert not path.is_absolute() and '..' not in path.parts
+  relative=path.relative_to('roblox-ai-skills-main')
+  assert not relative.as_posix().endswith('/LOCAL.md')
+  if info.is_dir():continue
+  target=starter/relative;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(z.read(info))
+(starter/'PLAZCODE-ADAPTER.md').write_text('SyphoDev Roblox Skills, redistributed free as PlazCode starter references. Source: https://www.youtube.com/@SyphoDev . Original LICENSE.txt applies to this pack; it is not relicensed under PlazCode GPL. Fonts and external tools keep their own terms.\n\nRead full instructions and required references through plazcode_skills read. Resolve relative helper paths against bundle_root. Adapt Claude Code names and sub-agent instructions to actual available PlazCode tools; do not claim unavailable capabilities. Personal LOCAL.md, credentials and generated assets belong in the current project, outside this update-managed pack. Helpers are never automatically executed by importing a skill.\n')
+shutil.copy2(Path(__file__).with_name('font-OFL.txt'),starter/'skills/roblox-ui/references/fonts/OFL.txt')
 # Desktop embeds the nested compatibility extension. Keep both byte-identical.
 for folder in ['core','providers']:
  shutil.copytree(source/folder,source/'PlazCode-Extension'/folder,dirs_exist_ok=True)

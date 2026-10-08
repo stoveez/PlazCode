@@ -9,10 +9,18 @@ use futures::StreamExt;
 #[derive(Clone,Serialize,Deserialize)]
 struct Skill {id:String,title:String,description:String,domain:String,scope:String,steps:Vec<String>,pitfalls:Vec<String>,verification:Vec<String>,confirmed:bool,revision:u64,#[serde(default)]community:bool}
 #[derive(Default,Clone,Serialize,Deserialize)]
-struct Catalog {skills:BTreeMap<String,Skill>}
+struct Catalog {skills:BTreeMap<String,Skill>,#[serde(default)]starter_pack_version:u64}
 struct Store {path:PathBuf,data:Catalog,error:Option<String>}
 impl Store {
- fn load(path:PathBuf)->Self {let (data,error)=match std::fs::read(&path){Ok(bytes)=>match serde_json::from_slice(&bytes){Ok(data)=>(data,None),Err(e)=>(Catalog::default(),Some(e.to_string()))},Err(e) if e.kind()==std::io::ErrorKind::NotFound=>(Catalog::default(),None),Err(e)=>(Catalog::default(),Some(e.to_string()))};Self{path,data,error}}
+ fn load(path:PathBuf)->Self {
+  let (mut data,error): (Catalog,Option<String>)=match std::fs::read(&path){Ok(bytes)=>match serde_json::from_slice(&bytes){Ok(data)=>(data,None),Err(e)=>(Catalog::default(),Some(e.to_string()))},Err(e) if e.kind()==std::io::ErrorKind::NotFound=>(Catalog::default(),None),Err(e)=>(Catalog::default(),Some(e.to_string()))};
+  if error.is_none() && data.starter_pack_version<1 {
+   for value in crate::starter_skills::catalog() {if let Ok(skill)=serde_json::from_value::<Skill>(value){data.skills.entry(skill.id.clone()).or_insert(skill);}}
+   data.starter_pack_version=1;
+  }
+  Self{path,data,error}
+ }
+
  fn persist(&mut self,data:Catalog)->anyhow::Result<()> {
   anyhow::ensure!(self.error.is_none(),"Skills could not be loaded. Existing data was left unchanged; restore a valid backup and restart.");
   anyhow::ensure!(data.skills.len()<=1000,"Skill library limit reached.");
@@ -33,10 +41,12 @@ impl Store {
    return Ok(json!({"ok":true,"skills":hits.into_iter().take(3).map(|(_,skill)|skill).collect::<Vec<_>>() }));
   }
   let id=request["id"].as_str().unwrap_or("");
-  if action=="read"||action=="export" {let skill=self.data.skills.get(id).ok_or_else(||anyhow::anyhow!("Skill not found."))?;return Ok(json!({"ok":true,"skill":if action=="export"{public(skill)}else{serde_json::to_value(skill)?}}));}
+  if action=="read"||action=="export" {let skill=self.data.skills.get(id).ok_or_else(||anyhow::anyhow!("Skill not found."))?;let mut result=json!({"ok":true,"skill":if action=="export"{public(skill)}else{serde_json::to_value(skill)?}});
+   if action=="read" && id.starts_with("starter-syphodev-") {result["bundle"]=crate::starter_skills::read(&crate::platform::installation_root().join("PlazCode-Extension/starter-skills/syphodev"),id,request)?;}
+   return Ok(result);}
   let mut data=self.data.clone();
   match action {
-   "save"=>{let input=&request["skill"];let mut skill:Skill=serde_json::from_value(input.clone())?;validate(&skill)?;anyhow::ensure!(!skill.id.starts_with("global-workflow-"),"Automatic workflow lessons cannot be edited; save an adapted method under a new ID.");let previous=data.skills.get(&skill.id);anyhow::ensure!(request["revision"].as_u64().unwrap_or(0)==previous.map_or(0,|s|s.revision),"Skill changed. Reload before saving.");skill.revision=previous.map_or(1,|s|s.revision+1);skill.community=false;data.skills.insert(skill.id.clone(),skill.clone());self.persist(data)?;return Ok(json!({"ok":true,"skill":skill}));},
+   "save"=>{let input=&request["skill"];let mut skill:Skill=serde_json::from_value(input.clone())?;validate(&skill)?;anyhow::ensure!(!skill.id.starts_with("starter-syphodev-"),"Starter references are read-only; save your adapted method under a new ID.");anyhow::ensure!(!skill.id.starts_with("global-workflow-"),"Automatic workflow lessons cannot be edited; save an adapted method under a new ID.");let previous=data.skills.get(&skill.id);anyhow::ensure!(request["revision"].as_u64().unwrap_or(0)==previous.map_or(0,|s|s.revision),"Skill changed. Reload before saving.");skill.revision=previous.map_or(1,|s|s.revision+1);skill.community=false;data.skills.insert(skill.id.clone(),skill.clone());self.persist(data)?;return Ok(json!({"ok":true,"skill":skill}));},
    "delete"=>{let current=data.skills.get(id).ok_or_else(||anyhow::anyhow!("Skill not found."))?;anyhow::ensure!(request["revision"].as_u64()==Some(current.revision),"Skill changed. Reload before deleting.");data.skills.remove(id);},
    _=>anyhow::bail!("Unknown skill action.")
   }
@@ -105,5 +115,14 @@ pub async fn post(State(state):State<crate::AppState>,Json(request):Json<Value>)
 }
 #[cfg(test)]mod tests{use super::*;
  fn skill()->Skill{Skill{id:"test".into(),title:"Inventory".into(),description:"Inventory menu".into(),domain:"roblox".into(),scope:"project:A".into(),steps:vec!["Inspect existing UI conventions".into()],pitfalls:vec![],verification:vec!["Test open and close".into()],confirmed:true,revision:0,community:false}}
- #[test]fn scope_revision_and_corruption(){let path=std::env::temp_dir().join(format!("plazcode-skills-{}.json",std::process::id()));let _=std::fs::remove_file(&path);let mut store=Store::load(path.clone());let s=skill();store.request(&json!({"action":"save","skill":s,"revision":0})).unwrap();assert!(store.request(&json!({"action":"save","skill":s,"revision":0})).is_err());assert_eq!(store.request(&json!({"action":"match","domain":"roblox","scope":"project:B","query":"inventory"})).unwrap()["skills"].as_array().unwrap().len(),0);assert_eq!(store.request(&json!({"action":"match","domain":"roblox","scope":"project:A","query":"inventory"})).unwrap()["skills"].as_array().unwrap().len(),1);assert_eq!(public(&s)["scope"],"");std::fs::write(&path,b"broken").unwrap();let mut broken=Store::load(path.clone());assert!(broken.request(&json!({"action":"save","skill":s})).is_err());assert_eq!(std::fs::read(&path).unwrap(),b"broken");let _=std::fs::remove_file(path.with_extension("json.backup"));let _=std::fs::remove_file(path);}
+ #[test]fn scope_revision_and_corruption(){let path=std::env::temp_dir().join(format!("plazcode-skills-{}.json",std::process::id()));let _=std::fs::remove_file(&path);let mut store=Store::load(path.clone());let s=skill();store.request(&json!({"action":"save","skill":s,"revision":0})).unwrap();assert!(store.request(&json!({"action":"save","skill":s,"revision":0})).is_err());assert_eq!(store.request(&json!({"action":"match","domain":"roblox","scope":"project:B","query":"inventory"})).unwrap()["skills"].as_array().unwrap().iter().filter(|s|s["id"]=="test").count(),0);assert_eq!(store.request(&json!({"action":"match","domain":"roblox","scope":"project:A","query":"inventory"})).unwrap()["skills"].as_array().unwrap().iter().filter(|s|s["id"]=="test").count(),1);assert_eq!(public(&s)["scope"],"");std::fs::write(&path,b"broken").unwrap();let mut broken=Store::load(path.clone());assert!(broken.request(&json!({"action":"save","skill":s})).is_err());assert_eq!(std::fs::read(&path).unwrap(),b"broken");let _=std::fs::remove_file(path.with_extension("json.backup"));let _=std::fs::remove_file(path);}
+ #[test]fn starter_seed_preserves_user_data_and_deletions(){
+  let path=std::env::temp_dir().join(format!("plazcode-starter-store-{}.json",std::process::id()));let _=std::fs::remove_file(&path);
+  let mut store=Store::load(path.clone());assert_eq!(store.data.skills.len(),11);
+  let s=skill();store.request(&json!({"action":"save","skill":s,"revision":0})).unwrap();
+  store.request(&json!({"action":"delete","id":"starter-syphodev-roblox-code","revision":1})).unwrap();
+  let reloaded=Store::load(path.clone());assert!(reloaded.data.skills.contains_key("test"));assert!(!reloaded.data.skills.contains_key("starter-syphodev-roblox-code"));
+  std::fs::remove_file(path.with_extension("json.backup")).unwrap();std::fs::remove_file(path).unwrap();
+ }
+
 }
