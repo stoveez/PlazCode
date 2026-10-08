@@ -397,7 +397,7 @@ const RSProvider = (() => {
     if (!isAiSurface()) return null;
     const e = findEditorRaw();
     if (!e) return null;
-    const hasCommit = n => controlsIn(n).some(control => sendControlLike(control) || stopControlLike(control));
+    const hasCommit = n => controlsIn(n).some(control => controlAvailable(control) && (sendControlLike(control) || stopControlLike(control)));
     if (_frameEditor === e && _frameCache && safeRead(() => _frameCache.isConnected, false) &&
         safeRead(() => _frameCache.contains(e), false) && hasCommit(_frameCache)) return _frameCache;
     let fallback = safeRead(() => e.parentElement, null), chosen = null;
