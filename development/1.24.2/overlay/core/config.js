@@ -228,7 +228,12 @@ Site: ${siteName}. Use ONLY listed commands with required params. Do NOT use ${s
   function buildSystemPrompt(opts = {}) {
     const creatorPolicy = opts.engine === "local" || typeof PlazCodeChatCreators === "undefined" ? "" : "\n\n" + PlazCodeChatCreators.policy;
     const ultra = typeof PlazCodeUltracode !== "undefined" && typeof window !== "undefined" && window.__rsThinkingLevel?.() === "ultracode" ? "\n\n" + PlazCodeUltracode.build(opts.engine) : "";
-    return buildBaseSystemPrompt(opts) + "\n\n" + mcpUsagePolicy() + creatorPolicy + ultra;
+    const approach = typeof window !== "undefined" && window.__rsShowApproach?.() === true ? "\n\n" + approachSummaryPolicy(true) : "";
+    return buildBaseSystemPrompt(opts) + "\n\n" + mcpUsagePolicy() + creatorPolicy + ultra + approach;
+  }
+  function approachSummaryPolicy(enabled) {
+    if (!enabled) return "SHOW_APPROACH=OFF. Use normal PlazCode reply formatting; no approach paragraph is required.";
+    return "VISIBLE APPROACH SUMMARY — applies only while the latest SYSTEM_STATE says SHOW_APPROACH=ON. Before each task command, write one short standard-text paragraph (1–3 sentences) explaining the intended action and its key decision. Provide a concise public explanation, not private internal reasoning. Then write two newline characters (one blank line) before the existing fenced JSON command. Keep ONE executable command per reply and preserve its exact syntax. For execute_luau, keep the existing fenced ###LUA### markers instead of JSON. This overrides command-only prose restrictions during task work. Startup still follows its exact command-only handshake and readiness acknowledgement. When SHOW_APPROACH=OFF, return to normal PlazCode formatting.";
   }
   function mcpUsagePolicy() {
     return "CONTEXTUAL MCP USE: During real project tasks, proactively use relevant enabled MCP tools without requiring the user to name them. For complex debugging, multi-step design, or difficult tradeoffs, use Sequential Thinking to organize the problem; skip it for simple edits. Use Context7 when implementation depends on current library/API documentation or uncertain syntax, resolving the exact library and version first; do not call it for ordinary formatting or unrelated Roblox APIs. Recall relevant Memory MCP facts before project work, then record only verified, lasting project-scoped facts after a tested bug fix or feature (cause, solution, locations, decisions). Never store secrets, raw chat transcripts, guesses, or duplicate facts; keep existing project memory consistent. Discover available servers with list_mcp_servers when a task needs these capabilities, then obtain each server's list_commands and use only its exact names/parameters and routing. Preserve the startup handshake and engine. If a server is disabled or unavailable, continue with available tools and report a material limitation briefly; never claim a tool was used when it was not.";
@@ -731,6 +736,7 @@ If anything in the image is ambiguous, make the most reasonable interpretation a
     FEEDBACK,
     toolCategory,
     buildSystemPrompt,
+    approachSummaryPolicy,
     compactTools,
     toolsReminder,
     memoryNudge,

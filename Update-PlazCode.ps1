@@ -116,23 +116,24 @@ try {
     Set-UpdaterProgress -1 'Checking release' 'Reading the verified update information.'
     Write-Host 'PlazCode updater' -ForegroundColor Yellow
     $current = [version](Get-Content (Join-Path $extensionRoot 'manifest.json') -Raw | ConvertFrom-Json).version
-    $source = Get-Content (Join-Path $install 'update-source.json') -Raw | ConvertFrom-Json
-    if ($source.feedUrl -eq 'https://raw.githubusercontent.com/stoveez/PlazCodeneww/main/latest.json') { $source.feedUrl='https://raw.githubusercontent.com/stoveez/PlazCode/main/latest.json' }
-    if ($source.feedUrl -eq 'https://raw.githubusercontent.com/stoveez/PlazCodeneww/main/latest-macos.json') { $source.feedUrl='https://raw.githubusercontent.com/stoveez/PlazCode/main/latest-macos.json' }
-    if ($source.feedUrl -eq 'https://raw.githubusercontent.com/stoveez/PlazCode/main/latest-macos.json') { $source.feedUrl='https://raw.githubusercontent.com/stoveez/PlazCode/main/latest.json' }
-    if (!$source.feedUrl) { $source.feedUrl = "https://raw.githubusercontent.com/stoveez/PlazCode/main/latest.json" }
+    $source = if (Test-Path -LiteralPath (Join-Path $install 'update-source.json')) { Get-Content (Join-Path $install 'update-source.json') -Raw | ConvertFrom-Json } else { $null }
+    $feedUrl = [string]$source.feedUrl
+    if ($feedUrl -eq 'https://raw.githubusercontent.com/stoveez/PlazCodeneww/main/latest.json') { $feedUrl='https://raw.githubusercontent.com/stoveez/PlazCode/main/latest.json' }
+    if ($feedUrl -eq 'https://raw.githubusercontent.com/stoveez/PlazCodeneww/main/latest-macos.json') { $feedUrl='https://raw.githubusercontent.com/stoveez/PlazCode/main/latest-macos.json' }
+    if ($feedUrl -eq 'https://raw.githubusercontent.com/stoveez/PlazCode/main/latest-macos.json') { $feedUrl='https://raw.githubusercontent.com/stoveez/PlazCode/main/latest.json' }
+    if (!$feedUrl) { $feedUrl = "https://raw.githubusercontent.com/stoveez/PlazCode/main/latest.json" }
     New-Item $stage -ItemType Directory | Out-Null
-    if (!$ZipPath -and $source.feedUrl) {
-        if ($source.feedUrl -notmatch '^https://') { throw 'The release feed must use HTTPS.' }
+    if (!$ZipPath -and $feedUrl) {
+        if ($feedUrl -notmatch '^https://') { throw 'The release feed must use HTTPS.' }
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        $feedUri = [UriBuilder]$source.feedUrl
+        $feedUri = [UriBuilder]$feedUrl
         $query = $feedUri.Query.TrimStart('?')
         $feedUri.Query = ($query + $(if ($query) { '&' } else { '' }) + 'plazcode_check=' + [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds())
         $release = Invoke-RestMethod -Uri $feedUri.Uri.AbsoluteUri -Headers @{ 'Cache-Control' = 'no-cache, max-age=0' } -TimeoutSec 30
         $latest = [version]$release.version
         if ($latest -le $current) { Write-Host "Already up to date ($current)."; exit 0 }
         if ($release.url -notmatch '^https://' -or $release.sha256 -notmatch '^[a-fA-F0-9]{64}$') { throw 'Invalid release feed: expected version, HTTPS url and SHA256.' }
-        if ($source.feedUrl -eq 'https://raw.githubusercontent.com/stoveez/PlazCode/main/latest.json') {
+        if ($feedUrl -eq 'https://raw.githubusercontent.com/stoveez/PlazCode/main/latest.json') {
             $name = 'PlazCode-' + $release.version + '.zip'
             $assetUrl = 'https://github.com/stoveez/PlazCode/releases/download/v' + $release.version + '/' + $name
             $rawPattern = '^https://raw\.githubusercontent\.com/stoveez/PlazCode/(main|[a-fA-F0-9]{40})/' + [regex]::Escape($name) + '$'
