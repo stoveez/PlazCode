@@ -23,7 +23,7 @@ const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict'),{JS
   assert(startup.length>2500&&startup.length<32768);const ok=await p.typeAndSend(startup);
   if(behavior==='retain'){
    assert(ok,p.sendFailureDetail());assert.equal(sent[0],startup);assert.equal(commits,1);assert(pastes>1);assert.equal(w.document.querySelector('[data-testid=attachment]'),null);
-   const result="Output of 'list_commands':\n"+'read_file {path}\n'.repeat(210);assert(await p.typeAndSend(result),p.sendFailureDetail());assert.equal(sent[1],result);assert.equal(commits,2);
+   const result="Output of 'list_commands':\n"+'read_file {path}\n'.repeat(3000);assert(await p.typeAndSend(result),p.sendFailureDetail());assert.equal(sent[1],result);assert.equal(commits,2);
   }else{assert.equal(ok,false);assert.equal(commits,0);if(behavior==='foreign'){assert.equal(pastes,0);assert(w.document.querySelector('[data-testid=attachment]').isConnected);}if(behavior==='remount')assert.equal(ed.textContent,'User draft');}
   p.setInputLock(false);console.log('PASS Notion small-paste '+behavior+': unavailable native editing/file upload, German composer, exact complete startup/catalogue and no partial or duplicate commit.');
  }finally{w.close();}
