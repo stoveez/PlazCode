@@ -1581,7 +1581,7 @@
       const n = A.toolList.length || 0;
       const bridge = A.bridge || {};
       const connected = bridge.connected === true;
-      let extra = "OFF", plan = "OFF", lvl = "default", wm = "balanced", perm = "sandbox", dbg = "ON", multi = "OFF";
+      let approach = "OFF", extra = "OFF", plan = "OFF", lvl = "default", wm = "balanced", perm = "sandbox", dbg = "ON", multi = "OFF";
       try { if (window.__rsExtraThinking && window.__rsExtraThinking()) extra = "ON"; } catch {}
       try { if (window.__rsPlanMode && window.__rsPlanMode()) plan = "ON"; } catch {}
       try { if (window.__rsAutoDebug && window.__rsAutoDebug() === false) dbg = "OFF"; } catch {}
@@ -1589,6 +1589,7 @@
       try { lvl = (window.__rsThinkingLevel && window.__rsThinkingLevel()) || "default"; } catch {}
       try { wm = (window.__rsWorkMode && window.__rsWorkMode()) || "balanced"; } catch {}
       try { perm = (window.__rsPermMode && window.__rsPermMode()) || "sandbox"; } catch {}
+      try { if (window.__rsShowApproach?.()) approach = "ON"; } catch {}
       const blender = !!bridge.blender;
       let env = "";
       if (local) {
@@ -1598,7 +1599,7 @@
       } else {
         env = connected ? " | STUDIO LINKED" : " | STUDIO UNLINKED";
       }
-      return `[SYSTEM_STATE: ENGINE=${eng} | WORK=${wm} | EXTRA=${extra} | PLAN=${plan} | DEBUG=${dbg} | MULTI=${multi} | THINK=${lvl} | PERM=${perm}${env} | BRIDGE ${connected ? "UP" : "DOWN"} | BLENDER ${blender ? "ON" : "OFF"} | TOOLS ${n}]\nMODE LOCK: stay on ${eng}. Obey WORK/EXTRA/PLAN/THINK/DEBUG/MULTI this turn. ONE command per reply.\n${(RS.FEEDBACK && RS.FEEDBACK.creationFocus) || ""}`;
+      return `[SYSTEM_STATE: ENGINE=${eng} | WORK=${wm} | EXTRA=${extra} | PLAN=${plan} | DEBUG=${dbg} | MULTI=${multi} | THINK=${lvl} | SHOW_APPROACH=${approach} | PERM=${perm}${env} | BRIDGE ${connected ? "UP" : "DOWN"} | BLENDER ${blender ? "ON" : "OFF"} | TOOLS ${n}]\nMODE LOCK: stay on ${eng}. Obey WORK/EXTRA/PLAN/THINK/DEBUG/MULTI this turn. ONE command per reply.\n${(RS.FEEDBACK && RS.FEEDBACK.creationFocus) || ""}\n${RS.approachSummaryPolicy ? RS.approachSummaryPolicy(approach === "ON") : ""}`;
     } catch { return ""; }
   }
   // Is `name` a tool we actually have? The bridge ADVERTISES names that may carry
@@ -2584,6 +2585,7 @@
         multi_agent: multi,
         agent_role: A.agentRole || "",
         thinking_level: lvl,
+        show_approach: !!window.__rsShowApproach?.(),
         permissions: perm,
         bridge_connected: bridge.connected === true,
         blender: !!bridge.blender,
@@ -5632,20 +5634,21 @@
     // All four persist. The loads below restore the user's choices after a
     // reload - they used to silently reset to these defaults on every page
     // refresh because only the setters ever touched chrome.storage.
-    let autoFixEnabled = true, extraThinking = false, planMode = false, forgeMode = false, autoFixStopPlay = true, autoDebugEnabled = true, multiAgent = false;
+    let autoFixEnabled = true, extraThinking = false, showApproach = false, planMode = false, forgeMode = false, autoFixStopPlay = true, autoDebugEnabled = true, multiAgent = false;
     let workMode = "balanced";
-    try { window.__rsWorkMode = () => workMode; } catch {}
+    try { window.__rsWorkMode = () => workMode; window.__rsShowApproach = () => showApproach; } catch {}
     try { window.__rsPlanMode = () => planMode; } catch {}
     try { window.__rsAutoDebug = () => autoDebugEnabled; } catch {}
     try { window.__rsMultiAgent = () => multiAgent; } catch {}
     try {
-      chrome.storage.local.get(["rsAutoFix", "rsExtraThinking", "rsPlanMode", "rsForgeMode", "rsAutoFixStopPlay", "rsWorkMode", "rsAutoDebug", "rsMultiAgent"], (r) => {
+      chrome.storage.local.get(["rsAutoFix", "rsExtraThinking", "rsShowApproach", "rsPlanMode", "rsForgeMode", "rsAutoFixStopPlay", "rsWorkMode", "rsAutoDebug", "rsMultiAgent"], (r) => {
         if (!r) return;
         if (typeof r.rsAutoFix === "boolean") autoFixEnabled = r.rsAutoFix;
         if (typeof r.rsExtraThinking === "boolean") {
           extraThinking = r.rsExtraThinking;
           try { window.__rsExtraThinking = () => extraThinking; } catch {}
         }
+        if (typeof r.rsShowApproach === "boolean") showApproach = r.rsShowApproach;
         if (typeof r.rsPlanMode === "boolean") {
           planMode = r.rsPlanMode;
           try { window.__rsPlanMode = () => planMode; } catch {}
@@ -5706,6 +5709,7 @@
           try { window.__rsPlanMode = () => planMode; } catch {}
           dirty = true;
         }
+        if (changes.rsShowApproach && typeof changes.rsShowApproach.newValue === "boolean") { showApproach = changes.rsShowApproach.newValue; dirty = true; }
         if (changes.rsAutoDebug && typeof changes.rsAutoDebug.newValue === "boolean") {
           autoDebugEnabled = changes.rsAutoDebug.newValue;
           try { window.__rsAutoDebug = () => autoDebugEnabled; } catch {}
@@ -5886,6 +5890,7 @@
         toast("Work mode: " + label + " — Extra Thinking stays " + (extraThinking ? "on" : "off"));
       }
     }
+    function setShowApproach(v){ showApproach=!!v; try{chrome.storage.local.set({rsShowApproach:showApproach});}catch{}; buildMenu(); markModesChanged(); toast(showApproach ? "Approach summaries on" : "Approach summaries off"); }
     function setExtraThinking(v){ extraThinking=!!v; try{chrome.storage.local.set({rsExtraThinking: extraThinking});}catch{}; try{ window.__rsExtraThinking = () => extraThinking; }catch{}; buildMenu(); updateExtraButton(); renderBar(); toast(v ? "Extra Thinking on — the AI will review its own work" : "Extra Thinking off"); markModesChanged(); }
     function setPlanMode(v){ planMode=!!v; try{chrome.storage.local.set({rsPlanMode: planMode});}catch{}; try{ window.__rsPlanMode = () => planMode; }catch{}; buildMenu(); renderBar(); toast(v ? "Plan mode on — the AI writes a plan, then production code" : "Plan mode off"); markModesChanged(); }
     function setAutoDebug(v){ autoDebugEnabled=!!v; try{chrome.storage.local.set({rsAutoDebug: autoDebugEnabled});}catch{}; try{ window.__rsAutoDebug = () => autoDebugEnabled; }catch{}; buildMenu(); toast(v ? "Automatic Debugger on — new Studio errors are sent to the AI" : "Automatic Debugger off"); markModesChanged(); }
@@ -6242,6 +6247,7 @@
               <span class="rs-tgl-sub">The AI reviews its own work and iterates until it is satisfied.</span></span>
               <span class="rs-tgl ${extraThinking ? "on" : ""}"></span>
             </div>
+            <div class="rs-tgl-row" data-mode="approach" role="switch" aria-checked="${showApproach}" tabindex="0"><span class="rs-tgl-info"><span class="rs-tgl-name">Show approach summary</span><span class="rs-tgl-sub">A short explanation, then a blank line before each command. Off by default.</span></span><span class="rs-tgl ${showApproach ? "on" : ""}"></span></div>
             <div class="rs-tgl-row" data-mode="plan" role="switch" aria-checked="${planMode}" tabindex="0">
               <span class="rs-tgl-info"><span class="rs-tgl-name">Plan mode</span>
               <span class="rs-tgl-sub">First a written plan, then production-quality scripts — no stubs, no leftover prints.</span></span>
@@ -6363,6 +6369,7 @@
           else if(m==="autofixstop") setAutoFixStopPlay(!autoFixStopPlay);
           else if(m==="bgmode") setBgMode(!bgMode);
           else if(m==="extra") setExtraThinking(!extraThinking);
+          else if(m==="approach") setShowApproach(!showApproach);
           else if(m==="plan") setPlanMode(!planMode);
           else if(m==="autodebug") setAutoDebug(!autoDebugEnabled);
           else if(m==="multiagent") setMultiAgent(!multiAgent);

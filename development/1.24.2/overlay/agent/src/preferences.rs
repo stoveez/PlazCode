@@ -27,6 +27,8 @@ pub struct DesktopPreferences {
     pub sounds: bool,
     #[serde(rename = "rsExtraThinking")]
     pub extra_thinking: bool,
+    #[serde(rename = "rsShowApproach")]
+    pub show_approach: bool,
     #[serde(rename = "rsPlanMode")]
     pub plan_mode: bool,
     #[serde(rename = "rsThinkingLevel")]
@@ -68,6 +70,7 @@ impl Default for DesktopPreferences {
             stop_mode: "immediate".into(),
             tool_budget:100,task_minutes:30,visual_check:true,continuation_offer:true,command_cooldown:0.0,
             extra_thinking: false,
+            show_approach: false,
             plan_mode: false,
             thinking_level: "default".to_string(),
             forge_mode: true,
@@ -267,6 +270,8 @@ mod tests {
         prefs.perm_mode = "ask".to_string();
         prefs.sounds = false;
         prefs.extra_thinking = true;
+        assert!(!prefs.show_approach);
+        prefs.show_approach = true;
         prefs.plan_mode = true;
         prefs.thinking_level = "max".to_string();
         prefs.forge_mode = false;
@@ -281,6 +286,7 @@ mod tests {
         assert_eq!(reopened.perm_mode, "ask");
         assert!(!reopened.sounds);
         assert!(reopened.extra_thinking);
+        assert!(reopened.show_approach);
         assert!(reopened.plan_mode);
         assert_eq!(reopened.thinking_level, "max");
         assert!(!reopened.forge_mode);

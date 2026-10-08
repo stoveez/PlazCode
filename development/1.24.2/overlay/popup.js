@@ -36,6 +36,7 @@ const settings = {
   permMode: "sandbox",
   theme: "night",
   extra: false,
+  showApproach: false,
   plan: false,
   thinking: "default",
   forge: true,
@@ -90,6 +91,7 @@ function renderSettings() {
   if (reasoning) reasoning.value = settings.thinking;
   const map = [
     ["tgl-extra", settings.extra],
+    ["tgl-approach", settings.showApproach],
     ["tgl-plan", settings.plan],
     ["tgl-autofix", settings.autofix],
     ["tgl-bg", settings.bg],
@@ -106,7 +108,7 @@ function renderSettings() {
 async function loadSettings() {
   try {
     const r = await chrome.storage.local.get([
-      "rsWorkMode", "rsPermMode", "rsTheme", "rsAppearance", "rsSounds", "rsExtraThinking", "rsPlanMode", "rsThinkingLevel", "rsForgeMode", "rsAutoFix", "rsBgMode",
+      "rsWorkMode", "rsPermMode", "rsTheme", "rsAppearance", "rsSounds", "rsExtraThinking", "rsShowApproach", "rsPlanMode", "rsThinkingLevel", "rsForgeMode", "rsAutoFix", "rsBgMode",
     ]);
     if (THINKING_LEVELS.includes(r.rsThinkingLevel)) settings.thinking = r.rsThinkingLevel;
     if (WORK_MODES.includes(r.rsWorkMode)) settings.workMode = r.rsWorkMode;
@@ -116,6 +118,7 @@ async function loadSettings() {
     if (typeof r.rsSounds === "boolean") settings.sounds = r.rsSounds;
     if (typeof r.rsPlanMode === "boolean") settings.plan = r.rsPlanMode;
     if (typeof r.rsExtraThinking === "boolean") settings.extra = r.rsExtraThinking;
+    if (typeof r.rsShowApproach === "boolean") settings.showApproach = r.rsShowApproach;
     if (typeof r.rsForgeMode === "boolean") settings.forge = r.rsForgeMode;
     if (typeof r.rsAutoFix === "boolean") settings.autofix = r.rsAutoFix;
     if (typeof r.rsBgMode === "boolean") settings.bg = r.rsBgMode;
@@ -314,6 +317,7 @@ document.getElementById("reasoning-level")?.addEventListener("change", async (ev
 });
 bindToggle("tgl-plan", "rsPlanMode", "plan");
 bindToggle("tgl-extra", "rsExtraThinking", "extra");
+bindToggle("tgl-approach", "rsShowApproach", "showApproach");
 bindToggle("tgl-autofix", "rsAutoFix", "autofix");
 bindToggle("tgl-bg", "rsBgMode", "bg");
 bindToggle("tgl-sounds", "rsSounds", "sounds");
@@ -329,6 +333,7 @@ try {
     if (changes.rsThinkingLevel && THINKING_LEVELS.includes(changes.rsThinkingLevel.newValue)) settings.thinking = changes.rsThinkingLevel.newValue;
     if (changes.rsPlanMode && typeof changes.rsPlanMode.newValue === "boolean") settings.plan = changes.rsPlanMode.newValue;
     if (changes.rsExtraThinking && typeof changes.rsExtraThinking.newValue === "boolean") settings.extra = changes.rsExtraThinking.newValue;
+    if (changes.rsShowApproach && typeof changes.rsShowApproach.newValue === "boolean") settings.showApproach = changes.rsShowApproach.newValue;
     if (changes.rsForgeMode && typeof changes.rsForgeMode.newValue === "boolean") settings.forge = changes.rsForgeMode.newValue;
     if (changes.rsAutoFix && typeof changes.rsAutoFix.newValue === "boolean") settings.autofix = changes.rsAutoFix.newValue;
     if (changes.rsBgMode && typeof changes.rsBgMode.newValue === "boolean") settings.bg = changes.rsBgMode.newValue;
