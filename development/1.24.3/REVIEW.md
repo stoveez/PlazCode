@@ -10,6 +10,8 @@ Windows packaging excludes the Mac app and Mac launchers, which remain in the se
 
 Notion startup now tries bounded 600-character / 12-line clipboard transactions after rejected native bulk writes. Each prefix and the entire startup/catalogue must survive render verification. This path is limited to locked startup messages under 32 KiB, retains exact text, refuses foreign attachments and changed/remounted drafts, and never submits partial or repeated messages. Co-work no longer captures idle messages due to soft generation grace or an old queue; disconnected Studio retains native chat. These are fixture-verified paths, not live-account verification.
 
+Notion response completion now recognizes localized final-response controls and the previously missed Helpful control, plus the German ready acknowledgement. Current-response scope, 700 ms stability, native Stop and workflow-progress guards remain. This avoids up to roughly eight seconds of soft generation tail on confirmed complete responses; actual provider thinking/network time is unchanged.
+
 Validation: pending exact-source platform CI.
 
 Live signed-in providers and Studio/Blender sessions remain untested. No overall speed or AI benchmark gain is claimed.

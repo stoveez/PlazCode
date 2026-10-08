@@ -15,7 +15,8 @@
     "Collapsed sidebar icons are centered; pages follow the requested order.",
     "Ultracode changes the selected page outline while preserving the theme glow.",
     "Notion startup can use small verified text pastes when native editing and file uploads fail.",
-    "Co-Work leaves idle or disconnected chats available for ordinary messages."
+    "Co-Work leaves idle or disconnected chats available for ordinary messages.",
+    "Notion recognizes localized completion controls to avoid waiting after a reply has finished."
   ],
   "notes": [
     "Automated platform and browser checks passed. Live signed-in providers and Studio sessions remain untested."
@@ -53,7 +54,8 @@
         "title": "🔧 Notion and Co-Work",
         "items": [
           "**Startup:** another verified text-send path when Notion file uploads fail.",
-          "**Normal chat:** idle or disconnected chats no longer turn ordinary messages into queued follow-ups."
+          "**Normal chat:** idle or disconnected chats no longer turn ordinary messages into queued follow-ups.",
+          "**Faster reply detection:** recognize finished responses in more languages, removing avoidable waiting after Notion finishes."
         ]
       }
     ]

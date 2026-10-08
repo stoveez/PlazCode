@@ -1350,11 +1350,10 @@ const RSProvider = (() => {
     return false;
   }
 
-  const FINAL_TURN_ACTION_RE = /regenerate|retry response|good response|bad response|thumbs?\s*(?:up|down)|helpful/i;
-  const FINAL_TURN_ACTION_SEL =
-    "[aria-label*='regenerate' i], [aria-label*='retry response' i], " +
-    "[aria-label*='good response' i], [aria-label*='bad response' i], " +
-    "[aria-label*='thumb' i], [title*='regenerate' i], [title*='retry response' i]";
+  const FINAL_TURN_ACTION_RE = /regenerate|retry response|good response|bad response|thumbs?\s*(?:up|down)|helpful|erneut generieren|neu generieren|antwort erneut|gute antwort|schlechte antwort|hilfreich|daumen|r[ée]g[ée]n[ée]rer|bonne r[ée]ponse|mauvaise r[ée]ponse|regenerar|buena respuesta|mala respuesta|resposta boa|resposta ruim|再生成|重新生成|有帮助|有幫助|다시 생성|좋은 답변|나쁜 답변/i;
+  // Scan labelled controls in this response only. The old English-only selector
+  // discarded otherwise valid Helpful controls and localized completion actions.
+  const FINAL_TURN_ACTION_SEL = "button[aria-label], button[title], [role='button'][aria-label], [role='button'][title]";
   const _finalActionCache = new WeakMap();
   function hasFinalTurnAction(item) {
     if (!item) return false;
@@ -1385,7 +1384,7 @@ const RSProvider = (() => {
   // without shortening a live command or touching Studio's actual tool timeout.
   function softGenerationSettled(item, reply, idleMs) {
     if (!item || stopButton() || activeWorkflowProgress(item)) return false;
-    const readyAcknowledgement = /^(?:PLAZCODE_READY|PlazCode is ready)[.!]?$/i.test(String(reply || "").replace(/[`*#]/g, "").trim());
+    const readyAcknowledgement = /^(?:PLAZCODE_READY|PlazCode is ready|PlazCode ist bereit)[.!]?$/i.test(String(reply || "").replace(/[`*#]/g, "").trim());
     const finalAction = idleMs >= 500 && hasFinalTurnAction(item);
     // A closed, append-only command cannot grow internally after its top-level
     // close token. Plain prose can legitimately continue after a long network
