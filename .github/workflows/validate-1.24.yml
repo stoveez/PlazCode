@@ -9,7 +9,7 @@ permissions:
   contents: read
 concurrency:
   group: plazcode-1.24-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   browsers:
     runs-on: ubuntu-latest
