@@ -5679,12 +5679,12 @@
       chrome.storage.local.get("rsThinkingLevel", (r) => {
         if (r && ["default","low","mid","high","max","ultracode"].includes(r.rsThinkingLevel)) {
           thinkingLevel = r.rsThinkingLevel;
-          try { window.__rsThinkingLevel = () => thinkingLevel; } catch {}
+          try { window.__rsThinkingLevel = () => thinkingLevel; document.documentElement.dataset.rsThinking = thinkingLevel; } catch {}
           if (!menuEl.hidden) buildMenu();
         }
       });
     } catch {}
-    try { window.__rsThinkingLevel = () => thinkingLevel; } catch {}
+    try { window.__rsThinkingLevel = () => thinkingLevel; document.documentElement.dataset.rsThinking = thinkingLevel; } catch {}
     try {
       chrome.storage.onChanged.addListener((changes, area) => {
         if (area !== "local" || !changes) return;
@@ -5735,7 +5735,7 @@
         }
         if (changes.rsThinkingLevel && ["default","low","mid","high","max","ultracode"].includes(changes.rsThinkingLevel.newValue)) {
           thinkingLevel = changes.rsThinkingLevel.newValue;
-          try { window.__rsThinkingLevel = () => thinkingLevel; } catch {}
+          try { window.__rsThinkingLevel = () => thinkingLevel; document.documentElement.dataset.rsThinking = thinkingLevel; } catch {}
           dirty = true;
         }
         if (changes.rsWorkMode && ["fast","balanced","thorough"].includes(changes.rsWorkMode.newValue)) {
@@ -5773,7 +5773,7 @@
       if (!["default","low","mid","high","max","ultracode"].includes(v)) return;
       thinkingLevel = v;
       try{ chrome.storage.local.set({rsThinkingLevel: v}); }catch{}
-      try{ window.__rsThinkingLevel = () => thinkingLevel; }catch{}
+      try{ window.__rsThinkingLevel = () => thinkingLevel; document.documentElement.dataset.rsThinking = thinkingLevel; }catch{}
       buildMenu(); markModesChanged();
       if (v !== "default") toast("Thinking level: " + v.toUpperCase());
     }
@@ -5878,7 +5878,7 @@
       } catch {}
       try {
         window.__rsWorkMode = () => workMode;
-        window.__rsThinkingLevel = () => thinkingLevel;
+        window.__rsThinkingLevel = () => thinkingLevel; document.documentElement.dataset.rsThinking = thinkingLevel;
       } catch {}
       buildMenu(); updateExtraButton(); renderBar(); markModesChanged();
       if (!silent) {

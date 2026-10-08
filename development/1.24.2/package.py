@@ -17,7 +17,7 @@ with zipfile.ZipFile(baseline) as archive:
 package=install/'PlazCode'
 for folder in ['core','providers','PlazCode-Extension']:
  shutil.copytree(source/folder,package/folder,dirs_exist_ok=True)
-for name in ['manifest.json','background.js','launch_studio_mcp.py','Update-PlazCode.bat','Update-PlazCode.ps1','Updater-Progress.cs']:
+for name in ['manifest.json','background.js','popup.js','popup.html','overlay.css','launch_studio_mcp.py','Update-PlazCode.bat','Update-PlazCode.ps1','Updater-Progress.cs']:
  shutil.copy2(source/name,package/name)
 if osname=='Windows':
  shutil.copy2(source/'agent/target/release/PlazCode.exe',package/'PlazCode.exe')

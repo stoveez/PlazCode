@@ -281,6 +281,15 @@ html[data-desktop-gradients=off] .navbtn.active{background-image:none!important;
 .sidebar .nav{flex:1;min-height:0;overflow-y:auto;padding-bottom:12px;scrollbar-width:thin;scrollbar-color:var(--stroke) transparent}.sidebar .side-status{flex-shrink:0}.sidebar .navbtn{flex-shrink:0;height:46px}.sidebar .nav{gap:6px}
 html[data-sidebar-collapsed] .app{grid-template-columns:72px minmax(0,1fr)!important}html[data-sidebar-collapsed] .sidebar{padding:20px 10px!important}html[data-sidebar-collapsed] :is(.navlabel,.brand-copy,.nav-caption,.side-status){display:none}html[data-sidebar-collapsed] .navbtn{justify-content:center;padding:0}html[data-sidebar-collapsed] .brand{justify-content:center}#sidebarCollapse{align-self:flex-start;margin-bottom:16px}
 .explorer-toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px;border:1px solid var(--stroke);background:#0b1017}.explorer-toolbar label{margin-left:auto;white-space:nowrap}.explorer-layout{display:grid;grid-template-columns:280px minmax(0,1fr);height:calc(100vh - 210px);min-height:420px;border:1px solid var(--stroke);background:#0b0f14}.explorer-layout aside{border-right:1px solid var(--stroke);overflow:auto;padding:8px}.explorer-layout input{width:100%;margin-bottom:10px}.explorer-layout section{min-width:0;display:flex;flex-direction:column}.explorer-layout header{padding:10px;border-bottom:1px solid var(--stroke);font-family:monospace}.explorer-node{display:flex;gap:8px;border:0;background:transparent;color:#c9d5e5;text-align:left;width:100%;padding:5px;white-space:nowrap}.explorer-node[aria-selected=true]{background:#292039}.explorer-node span:first-child{width:12px;cursor:pointer}[data-ex=tree] [role=group]{padding-left:16px}.explorer-editor{display:flex;flex:1;overflow:hidden}.explorer-editor pre{width:48px;margin:0;padding:12px 8px;overflow:hidden;text-align:right;color:#536378;font:13px/21px monospace}.explorer-editor textarea{flex:1;resize:none;white-space:pre;overflow:auto;border:0;border-radius:0;background:#0b0f14;color:#d5e4f5;padding:12px;font:13px/21px monospace;tab-size:4;min-width:0}[data-ex=properties]{padding:16px;overflow:auto}.explorer-property{display:grid;grid-template-columns:140px minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid var(--stroke);align-items:center}.explorer-property>div{display:flex;gap:6px;min-width:0}.explorer-property input:not([type=checkbox]){width:100%;min-width:0;margin:0}.explorer-property textarea{width:100%;min-height:70px}.explorer-property input[type=color]{height:30px}.explorer-editor[hidden]{display:none}.explorer-node[hidden]{display:none}@media(max-width:760px){.explorer-layout{grid-template-columns:190px minmax(0,1fr)}}
+
+/* Ultracode layers purple details over the selected palette. */
+html[data-desktop-thinking=ultracode] :is(.hero-agent,.navbtn.active,select[data-pref=rsThinkingLevel]){border-color:#a879e8;box-shadow:0 0 22px #a36aef26}
+html[data-desktop-thinking=ultracode] .hero-agent{background-image:radial-gradient(ellipse at top right,#a879e81c,transparent 68%)}
+html[data-desktop-thinking=ultracode] :is(#homeStartAgent,.navbtn.active){background:linear-gradient(125deg,#d2b5ff,#9762df);color:#21122f;border-color:#c5a1f9}
+html[data-desktop-thinking=ultracode] .page-head:before{background:#b68af2;box-shadow:0 0 16px #a879e84d}
+html[data-desktop-thinking=ultracode][data-desktop-gradients=off] :is(#homeStartAgent,.navbtn.active){background:#c5a1f9}
+html[data-desktop-thinking=ultracode][data-desktop-gradients=off] .hero-agent{background-image:none}
+html[data-desktop-thinking=ultracode][data-desktop-glow=off] :is(.hero-agent,.navbtn.active,select[data-pref=rsThinkingLevel],.page-head:before){box-shadow:none}
 </style>
 </head>
 <body>
@@ -760,6 +769,7 @@ __PLAZCODE_VERSION_UI__
 
   function Rendersettings() {
     var Preferences = State && State.preferences ? State.preferences : {};
+    document.documentElement.dataset.desktopThinking = Preferences.rsThinkingLevel || 'default';
     document.documentElement.toggleAttribute("data-sidebar-collapsed",!!Preferences.rsSidebarCollapsed);
     Byid("sidebarCollapse").setAttribute("aria-expanded",String(!Preferences.rsSidebarCollapsed));
     if (Preferences.rsAppearance && !Appearancepending) Applyappearance(Preferences.rsAppearance);
@@ -788,6 +798,7 @@ __PLAZCODE_VERSION_UI__
   }
 
   function Patchpref(Name, Value) {
+    if (Name === 'rsThinkingLevel') document.documentElement.dataset.desktopThinking = Value;
     if(Name==="rs-engine") return Api("/api/desktop/agent",{method:"POST",body:JSON.stringify({action:"engine-set",prompt:Value,request_id:crypto.randomUUID()})}).then(Refresh).catch(Showerror);
     return Api("/api/desktop/preferences", {
       method: "POST",

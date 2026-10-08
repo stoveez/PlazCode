@@ -66,6 +66,7 @@ function renderEngine(v) {
 }
 
 function renderSettings() {
+  document.documentElement.dataset.thinking = settings.thinking;
   for (const id of WORK_MODES) {
     const el = document.getElementById("work-" + id);
     if (el) el.classList.toggle("on", settings.workMode === id);
