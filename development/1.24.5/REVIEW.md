@@ -1,6 +1,6 @@
 # PlazCode 1.24.5
 
-Validation: local JavaScript and browser checks in progress; exact-source platform CI pending. Release promotion must require all four validation jobs and the real macOS desktop check.
+Validation: all exact-source platform CI jobs passed. See release-validation-1.24.5.
 
 DeepSeek-only Roblox Ultracode adapts the supplied Chinese method into a 3,534-character policy with all thirteen named skills. It follows the latest actual user request’s language while preserving code/API names and exact startup protocol. Large unapproved builds require a short plan and one approval question; already-approved plans and the startup handshake do not repeat that gate. DataStore safety prevents saving defaults after failed loads and requires bounded retries. UI and Luau checks preserve ownership, lifetime, documented signatures and truthful reporting. Luau backtick interpolation is correctly supported by the official syntax reference: https://luau.org/syntax/ . This is a prompt-level method, not a change to model weights or a measured benchmark gain.
 

@@ -1,3 +1,13 @@
+PlazCode 1.24.5 — DeepSeek Ultracode and smoother Notion startup
+
+A focused DeepSeek thinking mode, less repeated work and more reliable Notion startup.
+
+- DeepSeek has its own Ultracode method with 13 context-aware Roblox skills. Replies follow your latest request’s language.
+- DeepSeek Ultracode receives its full method once per confirmed conversation session, then uses short reminders. Other providers keep the existing global Ultracode method.
+- Notion starts with a short handshake and receives the full task rules with the existing tool-list reply. No extra startup round trip is added.
+- Firefox now receives the complete Notion paste payload when the browser creates a separate clipboard transfer.
+- Startup errors stop safely and release the chat lock. The agent only becomes ready after the required handshake succeeds.
+
 PlazCode 1.24.4 — Faster Ultracode and more reliable chat
 
 Less repeated work, easier Settings and fixes for Notion and screenshots.

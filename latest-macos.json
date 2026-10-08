@@ -1,9 +1,54 @@
 {
-  "version": "1.24.4",
-  "desktop_version": "1.24.4",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.4.zip",
-  "sha256": "83f25c4890772c18403d02e39145412dff15623c4d65fcdcfd6bffd5442f626e",
+  "version": "1.24.5",
+  "desktop_version": "1.24.5",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.5.zip",
+  "sha256": "14fae1e9c5d80e8d4a3a163adb3f14513f2d2378cf0b7024f73d8ed2b2759b88",
   "release_notes": [
+    {
+      "version": "1.24.5",
+      "title": "DeepSeek Ultracode and smoother Notion startup",
+      "summary": "A focused DeepSeek thinking mode, less repeated work and more reliable Notion startup.",
+      "added": [
+        "DeepSeek has its own Ultracode method with 13 context-aware Roblox skills. Replies follow your latest request’s language."
+      ],
+      "improved": [
+        "DeepSeek Ultracode receives its full method once per confirmed conversation session, then uses short reminders. Other providers keep the existing global Ultracode method.",
+        "Notion starts with a short handshake and receives the full task rules with the existing tool-list reply. No extra startup round trip is added."
+      ],
+      "fixed": [
+        "Firefox now receives the complete Notion paste payload when the browser creates a separate clipboard transfer.",
+        "Startup errors stop safely and release the chat lock. The agent only becomes ready after the required handshake succeeds."
+      ],
+      "notes": [
+        "Production-code browser fixtures pass in Chromium and Firefox. Live signed-in provider latency and all account-specific behavior have not been verified."
+      ],
+      "github": {
+        "sections": [
+          {
+            "title": "🧠 DeepSeek Ultracode",
+            "items": [
+              "**13 skills:** a focused Roblox method, including safer data saving, UI and API checks. Replies use your language.",
+              "**Less repeated work:** sends the full method once per session, then uses short reminders. Keeps careful checks and asks once before an unapproved large build.",
+              "**Other AIs:** keep the existing Ultracode method."
+            ]
+          },
+          {
+            "title": "⚡ Smoother Notion startup",
+            "items": [
+              "**Shorter first message:** startup uses a small handshake. Full task instructions follow in the existing tool-list reply.",
+              "**Firefox fix:** startup pastes now carry the complete message.",
+              "**Error recovery:** failed startup releases the chat lock. PlazCode only says it is ready after the handshake succeeds."
+            ]
+          },
+          {
+            "title": "✅ Checked before release",
+            "items": [
+              "Chromium, Firefox and platform regression checks, plus the macOS desktop lifetime check. Live signed-in account behavior remains unverified."
+            ]
+          }
+        ]
+      }
+    },
     {
       "version": "1.24.4",
       "title": "Faster Ultracode and more reliable chat",
@@ -220,42 +265,6 @@
         ],
         "notes": [
           "Fixture/platform validation included. Live signed-in provider chats remain untested."
-        ]
-      }
-    },
-    {
-      "version": "1.24.0",
-      "title": "Starter skills, automatic learning and reliable updates",
-      "summary": "Start with 11 Roblox skills, reuse privacy-safe workflow methods automatically and prevent oversized update feeds.",
-      "added": [
-        "Eleven bundled SyphoDev Roblox starter skills, with complete instructions, references and helpers. Relevant skills are matched automatically; users can add their own methods.",
-        "Automatic retrieval and contribution of predefined local edit workflows after recorded test commands. Offline reports queue locally without prompts, code, paths or user identifiers."
-      ],
-      "improved": [
-        "Shared learning is always active; local free-text candidates remain private and separate manual contributions still require review."
-      ],
-      "fixed": [
-        "Fixed “Release feed is too large” for existing installations. Feeds retain five recent entries with a byte budget; the full changelog remains separate.",
-        "macOS background launches apply window state after desktop startup; agent and updater logs stay outside the signed app bundle."
-      ],
-      "notes": [
-        "Workflow reports do not train provider model weights or prove benchmark gains. Unsupported workflows remain local. Live signed-in providers and Studio/Blender are untested; Windows remains unsigned."
-      ],
-      "github": {
-        "summary": "11 Roblox starter skills, automatic privacy-safe workflow reuse and reliable updates.",
-        "added": [
-          "11 SyphoDev Roblox starter skills, full references and helpers; add your own anytime.",
-          "Always-active shared workflows with bounded reports and offline retry."
-        ],
-        "improved": [
-          "Private prompts, code, paths and identifiers stay local."
-        ],
-        "fixed": [
-          "Oversized update feeds blocked older installations; compact feeds now have a release gate.",
-          "macOS background window state and logs outside the signed app bundle."
-        ],
-        "notes": [
-          "Workflow reuse does not train model weights. No benchmark gain claimed. See ZIP validation."
         ]
       }
     }

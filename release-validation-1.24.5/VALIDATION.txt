@@ -1,0 +1,11 @@
+PlazCode 1.24.5 — exact-source validation passed on Linux, Windows and macOS, with Chromium/Firefox UI fixtures and the real macOS desktop lifetime check.
+DeepSeek-only Roblox Ultracode uses thirteen context-aware skills, the user's latest request language, a single large-task approval gate and delivery-confirmed full context followed by short reminders. Global/local/provider isolation tests passed. No measured provider speedup or benchmark gain is claimed.
+Notion compact first handshake, full rules in the existing catalog reply, exact readiness, rejected wrong commands and composer-error cleanup passed in native Chromium and Firefox. Firefox native clipboard transfer payload repair preserves complete literal text and at-most-once submission.
+Existing localized/cold composer, paste/upload retry, Stop, remount/foreign draft, provider preservation, screenshot and workspace UI regression fixtures passed.
+Platform Rust/JavaScript regression suites, starter pack completeness, creator round trips and archive preservation checks passed. Windows installer and update checksum/handoff checks passed. Mac x86_64/arm64 packaging, relaunch modes and 210-second visible process lifetime passed.
+Live signed-in provider accounts, response latency and real Studio/Blender sessions were not tested. Windows binaries are unsigned; Mac uses ad-hoc signing, not notarization.
+Microsoft Defender runner result before assembly:
+Scan starting...
+Scan finished.
+Scanning D:\a\PlazCode\PlazCode\build-src\PlazCode/defender-scan found no threats.
+The scanned checksum and availability are recorded in release-validation-1.24.5.
