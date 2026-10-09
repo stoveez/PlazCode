@@ -109,7 +109,15 @@ jobs:
         working-directory: build-src/PlazCode
       - name: Install real Blender on Linux
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y blender
+        timeout-minutes: 6
+        run: |
+          curl --fail --location --retry 2 --retry-max-time 240 --connect-timeout 20 --max-time 180 \
+            https://download.blender.org/release/Blender4.5/blender-4.5.3-linux-x64.tar.xz \
+            --output "$RUNNER_TEMP/blender.tar.xz"
+          echo '975c58fcb244273838534bba771e64ad87739216b0f9b39a888531a49a72d845  blender.tar.xz' > "$RUNNER_TEMP/blender.sha256"
+          (cd "$RUNNER_TEMP" && sha256sum --check blender.sha256)
+          tar -xJf "$RUNNER_TEMP/blender.tar.xz" -C "$RUNNER_TEMP"
+          echo "PLAZCODE_BLENDER=$RUNNER_TEMP/blender-4.5.3-linux-x64/blender" >> "$GITHUB_ENV"
       - name: Real Blender geometry and primitive regressions
         if: runner.os == 'Linux'
         run: python test-blender-real.py --require

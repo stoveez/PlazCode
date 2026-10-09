@@ -18,8 +18,8 @@ jobs:
     timeout-minutes: 45
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: 5d724035402a10a0d6f59f888ed52f1e35146421
-      VALIDATION_RUN: '37993513685'
+      VALIDATED_SHA: d15c0b7331c4b5a0f4488a30e3c5af2abeabe454
+      VALIDATION_RUN: '37995442705'
     steps:
       - name: Wait for exact-source native validation without occupying a Mac runner
         run: |
@@ -36,8 +36,8 @@ jobs:
     timeout-minutes: 50
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: 5d724035402a10a0d6f59f888ed52f1e35146421
-      VALIDATION_RUN: '37993513685'
+      VALIDATED_SHA: d15c0b7331c4b5a0f4488a30e3c5af2abeabe454
+      VALIDATION_RUN: '37995442705'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -76,8 +76,8 @@ jobs:
     timeout-minutes: 55
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: 5d724035402a10a0d6f59f888ed52f1e35146421
-      VALIDATION_RUN: '37993513685'
+      VALIDATED_SHA: d15c0b7331c4b5a0f4488a30e3c5af2abeabe454
+      VALIDATION_RUN: '37995442705'
     steps:
       - uses: actions/checkout@v4
         with:
