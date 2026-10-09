@@ -14,7 +14,7 @@ const PlazCodeActivity = (() => {
     const short=clean.replace(/[`*]/g,'').replace(/[.!?]+$/,'').trim();
     if(!short)return 'conversation';
     if(/^(?:continue(?: working)?|keep (?:going|working)|resume(?: working)?|go on|carry on|stop|pause)$/i.test(short))return 'control';
-    if(/^(?:hello|hi|hey|hello there|good (?:morning|afternoon|evening)|thanks(?: you)?|thank you|ok(?:ay)?|yes|no|got it|cool|great|nice|are you there|hello again|how are you|hello how are you|hi how are you)(?:\s+(?:plazcode|there|again))?$/i.test(short))return 'conversation';
+    if(/^(?:hello|hi|hey|hello there|good (?:morning|afternoon|evening)|thanks(?: you)?|thank you|ok(?:ay)?|yes|no|got it|cool|great|nice|are you there|hello again|how are you|hello how are you|hi how are you|yo|sup|hey there|nice job|good job|thank you so much|are you ready|can you help me)(?:\s+(?:plazcode|there|again))?$/i.test(short))return 'conversation';
     if(/\b(?:commands?|tools?)\b/i.test(short)&&/^(?:list|show|display|what are|which|tell me|give me|can you (?:list|show)|please (?:list|show))\b/i.test(short)&&! /\b(?:build|fix|create|implement|edit|run|execute|test)\b/i.test(short))return 'quick';
     if(/^(?:list|show|display|what (?:are|is)|which|tell me|give me|can you (?:list|show)|please (?:list|show))\s+(?:(?:me|the|all|available|supported|your|plazcode|a list of)\s+)*(?:commands?|tools?|capabilities|status|help)(?:\s+(?:please|available|you (?:have|support)|are available))?$/i.test(short) || /^(?:help|status|commands|tools)$/i.test(short))return 'quick';
     if(/^(?:[a-z][a-z0-9]*_)+[a-z0-9_]+(?:\s*\([^\n]*\)|\s*\{[\s\S]*\})?$/i.test(short) || /^(?:```(?:json)?\s*)?\{\s*"(?:command|tool|name)"\s*:/i.test(clean))return 'quick';
