@@ -7,6 +7,7 @@ function run(overrides={}){
 }
 let r=run();assert.deepEqual(r.remembered,['thread-one']);assert.equal(r.box.A.started,true);assert.deepEqual(r.states,[true]);
 assert.deepEqual(run({chat:''}).remembered,['thread-one'],'Initial route can acquire a real thread ID');
-for(const overrides of [{userPrompt:true},{payload:'Hello'},{payload:'{"command":"script_read"}'},{generation:1},{chat:'different-thread'},{P:{conversationKey:()=>''}},{A:{sessionGen:2,enhancing:true,started:false}}])assert.deepEqual(run(overrides).remembered,[]);
-assert.deepEqual(run({payload:'⟦RS-SYS⟧ startup'}).remembered,['thread-one']);
+for(const overrides of [{userPrompt:true},{payload:'Hello'},{payload:'{"command":"script_read"}'},{generation:1},{chat:'different-thread'},{P:{conversationKey:()=>''}},{A:{sessionGen:2,enhancing:true,started:false}},{A:{sessionGen:2,starting:true,started:false}}])assert.deepEqual(run(overrides).remembered,[]);
+assert.deepEqual(run({payload:'⟦RS-SYS⟧ reminder'}).remembered,['thread-one']);
+assert.deepEqual(run({payload:'⟦RS-SYS⟧ startup',A:{sessionGen:2,starting:true,started:false}}).remembered,[],'Only the completed startup handshake may mark startup ready');
 console.log('Confirmed internal delivery persists current-session proof despite immediate virtualization; user text, command examples, other chats, Stop generations and enhancement cannot arm a session.');

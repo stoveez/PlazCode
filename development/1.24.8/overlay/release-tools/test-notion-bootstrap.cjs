@@ -1,5 +1,6 @@
 const {chromium,firefox}=require('playwright'),fs=require('fs'),assert=require('node:assert/strict');
 const main=fs.readFileSync('core/main.js','utf8'),start=main.indexOf('  async function startSession('),bootstrap=main.slice(start,main.indexOf('  const SVG =',start));
+const submit=main.slice(main.indexOf('  async function submitCore('),main.indexOf('  async function performSubmitCore('));
 const html='<main><section id="composer" style="min-height:900px"><div><div role="textbox" contenteditable="true" data-placeholder="Frage Notion AI"></div></div><div role="button" data-testid="agent-chat-send-button" aria-label="Nachricht senden">Senden</div></section></main>';
 (async()=>{for(const [name,engine] of [['chromium',chromium],['firefox',firefox]]){
  if(process.env.PLAZCODE_TEST_BROWSER&&process.env.PLAZCODE_TEST_BROWSER!==name)continue;
@@ -20,11 +21,12 @@ const html='<main><section id="composer" style="min-height:900px"><div><div role
    if(scenario==='throwing-composer')P.ensureComposerReady=async()=>{throw new DOMException('Composer changed during startup');};
    window.condoLocked=()=>false;window.diagnostics=[];window.diag=(name,data)=>diagnostics.push({name,data});window.activeEngine=()=> 'local';window.ensureTools=async()=>{};
    window.systemPrompt=()=> '⟦RS-SYS⟧ Full future task rules. Preserve literal paths C:\\Game\\main.lua.\n'+('Keep the current architecture.\n').repeat(100);
-   window.submitAndGetBase=async text=>{const ok=await P.typeAndSend(text);if(!ok)throw new Error(P.sendFailureDetail()||'Send failed');return P.assistantCount();};
+   window.performSubmitCore=async text=>{const ok=await P.typeAndSend(text);if(!ok)throw new Error(P.sendFailureDetail()||'Send failed');return P.assistantCount();};
    window.waitForResponse=async()=>{const response=P.readAssistant(),calls=RSParse.parseToolCalls(response.reply);return calls.length?{kind:'tool',calls,item:response.item}:{kind:'text',text:response.reply,item:response.item};};
    window.decorate={sweep(){},toolBox(){}};window.ui={setStarting:x=>starting=x,inputCover:x=>cover=x,updateStartGate(){},trackCard(){},setStarted(){},toast(){},banner:(...args)=>banners.push(args)};
    window.startupTurnIdentity=()=>({});window.rememberExecuted=()=>{};window.runTool=async()=>{dispatches++;return 'read_file {path}';};window.rememberStartupOutcome=window.rememberSession=window.log=()=>{};window.SendAbortedError=class extends Error{};window.RUN_CMD='run';window.sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   },scenario);
+  await page.addScriptTag({content:submit+';window.submitAndGetBase=text=>submitCore(text);'});
   await page.addScriptTag({content:bootstrap+';window.start=startSession;'});await page.evaluate(()=>start());
   const result=await page.evaluate(()=>({started:!!A.started,starting:!!A.starting,owner:A.startupOwner,cover,sent,dispatches,banners,diagnostics:diagnostics.slice(-8),draft:document.querySelector('[role=textbox]').textContent,editable:document.querySelector('[role=textbox]').getAttribute('contenteditable')}));
   assert.equal(result.starting,false);assert(!result.owner);assert.equal(result.cover,false);assert.equal(result.editable,'true');
