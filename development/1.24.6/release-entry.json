@@ -1,0 +1,43 @@
+{
+  "version": "1.24.6",
+  "title": "Command recovery and updater fixes",
+  "summary": "Fewer stuck commands, better Stop/Continue recovery and more reliable updates.",
+  "added": [],
+  "improved": [
+    "Commands now have a total time limit, including waiting for their helper. Long-running add-on tools keep their existing time allowances.",
+    "A new request after Stop waits for the previous operation to finish safely."
+  ],
+  "fixed": [
+    "Stale thinking indicators and lost extension replies can no longer keep commands waiting forever.",
+    "Windows updates use a fresh built-in helper and can run under a restricted local PowerShell policy without changing the system policy."
+  ],
+  "notes": [
+    "Live signed-in provider accounts and every user installation have not been verified."
+  ],
+  "github": {
+    "sections": [
+      {
+        "title": "🛠️ Commands and recovery",
+        "items": [
+          "**Fewer stuck tools:** fixes waiting loops caused by stale thinking indicators, missing replies and noisy helpers.",
+          "**Stop and continue:** keeps your new request while the previous operation finishes. Commands are not automatically repeated.",
+          "**Long tasks:** add-on tools keep their existing time allowances."
+        ]
+      },
+      {
+        "title": "🔄 More reliable updates",
+        "items": [
+          "**Fresh updater:** uses the helper included with the current build instead of an outdated installed copy.",
+          "**Windows fix:** allows the verified update helper to run without changing your system’s PowerShell policy.",
+          "**Safety checks:** download checksums, backups and rollback stay in place."
+        ]
+      },
+      {
+        "title": "✅ Checked before release",
+        "items": [
+          "Browser and platform regression checks, Windows update tests and the macOS desktop lifetime check. Live account behavior remains unverified."
+        ]
+      }
+    ]
+  }
+}
