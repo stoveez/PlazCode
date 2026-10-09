@@ -68,12 +68,12 @@ for (const path of requiredProviders) {
 }
 
 const manifest = JSON.parse(fs.readFileSync("manifest.json", "utf8"));
-if (manifest.version !== "1.24.7") throw new Error("Expected extension version 1.24.7");
+if (manifest.version !== "1.24.8") throw new Error("Expected extension version 1.24.8");
 
 const cargoToml = fs.readFileSync("agent/Cargo.toml", "utf8");
 const cargoVersion = cargoToml.match(/^version = "([^"]+)"/m)?.[1];
 if (!cargoVersion) throw new Error("Could not read desktop package version from agent/Cargo.toml");
-if (cargoVersion !== "1.24.7") throw new Error("Unexpected desktop version: " + cargoVersion);
+if (cargoVersion !== "1.24.8") throw new Error("Unexpected desktop version: " + cargoVersion);
 // Provider DOM hardening is intentional and covered by differential and preservation suites.
 // Intentional core/main integration is covered by creator/skills regression tests.
 // Other core baselines remain protected; native and extension versions match.
