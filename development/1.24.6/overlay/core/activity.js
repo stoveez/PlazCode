@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 const PlazCodeActivity = (() => {
   function replacesTask(text) {
-    text=String(text||'');
-    if(/\b(?:do not|don't|never)\s+(?:change|replace|reset|clear|drop|forget)\b/i.test(text))return false;
-    return /\b(?:replace|reset|clear|discard|forget|drop|ignore|abandon)\s+(?:(?:the|my|our|all|these|previous|old|current|main)\s+)*(?:tasks?|checklist|plan)\b/i.test(text)||
-      /\b(?:change|rewrite)\s+(?:(?:the|my|our|current|main)\s+)*(?:tasks?|checklist|plan)\s+(?:to|into|completely|instead)\b/i.test(text)||
-      /\b(?:stop|do not|don't)\s+(?:following|follow|working on)\s+(?:(?:the|my|our|previous|old|current)\s+)*(?:tasks?|checklist|plan)\b/i.test(text)||
+    text=String(text||'').replace(/[‘’]/g,"'");
+    if(/\b(?:do not|don't|never)\s+(?:change|replace|reset|clear|drop|forget|discard|ignore|abandon|stop)\b/i.test(text))return false;
+    return /\b(?:replace|reset|clear|discard|forget|drop|ignore|abandon)\s+(?:(?:the|my|our|all|these|those|previous|old|current|main)\s+)*(?:tasks?|checklist|plan)\b/i.test(text)||
+      /\b(?:change|rewrite)\s+(?:(?:the|my|our|current|main|these|those)\s+)*(?:tasks?|checklist|plan)(?:\s+(?:to|into|completely|instead)\b|(?=\s*(?:[.!?]|$)))/i.test(text)||
+      /\b(?:stop|do not|don't)\s+(?:following|follow|working on)\s+(?:(?:the|my|our|previous|old|current|main|these|those)\s+)*(?:tasks?|checklist|plan)\b/i.test(text)||
       /\b(?:start (?:a )?new (?:task|project|plan)|start over)\b/i.test(text);
   }
   function create(changed = () => {}, storage = null) {
