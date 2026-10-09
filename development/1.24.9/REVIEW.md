@@ -7,3 +7,5 @@ Per-command deadlines remain enforced. Overall run limits are off unless enabled
 The original user-provided UltraGUI archive is checksum-verified and preserved with its assets/licenses. Its complete references are loaded only when relevant; the ordinary Ultracode prompt remains compact. Blender helpers are included in both root and extension packages.
 
 Final native, browser, updater and package validation is still required. Do not promote this branch until the exact source commit passes all required jobs.
+
+Desktop Model Builder/UI Creator pages and their runtime scripts are removed. Toolkit and notifications load independently. Final publication requires the exact validated source, successful platform jobs, and packaged macOS desktop/updater checks.
