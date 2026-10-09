@@ -580,7 +580,7 @@ const RSProvider = (() => {
     // and end-aligned wrappers, not every div/style in a long conversation.
     const candidates = safeQueryAll(document,
       '[data-message-role="user"], [data-role="user"], [style*="justify-content"]');
-    const users = [];
+    const users = [], userSet = new WeakSet();
     for (const item of candidates) {
       if (safeClosest(item, "#rs-root") || (frame && safeRead(() => frame.contains(item), false)) ||
           (ed && (item === ed || safeRead(() => item.contains(ed), false))) ||
@@ -589,8 +589,12 @@ const RSProvider = (() => {
       const css = safeStyle(item), align = safeRead(() => item.style.justifyContent, "") || css.justifyContent || "";
       if (!/user|human/i.test(role) && (!(align === "flex-end" || align === "end") || /^column/.test(css.flexDirection || ""))) continue;
       if (!/\S/.test(safeRead(() => item.textContent, "")) && !safeQuery(item, "img")) continue;
-      if (users.some(parent => safeRead(() => parent.contains(item), false))) continue;
-      _blockUserItems.add(item); users.push(item);
+      let nested = false;
+      for (let parent = safeRead(() => item.parentElement, null); parent && parent !== document.body; parent = safeRead(() => parent.parentElement, null)) {
+        if (userSet.has(parent)) { nested = true; break; }
+      }
+      if (nested) continue;
+      _blockUserItems.add(item); userSet.add(item); users.push(item);
     }
     return [...roots, ...users].sort((a, b) => safeRead(() => a.compareDocumentPosition(b) & 2, false) ? 1 : -1);
   }
