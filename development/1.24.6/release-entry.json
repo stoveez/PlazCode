@@ -3,7 +3,8 @@
   "title": "Responsive commands, stable checklists and skill imports",
   "summary": "Recover from stuck command waits, continue safely after Stop, and import your own skills.",
   "added": [
-    "Skills accepts exported JSON files, text files and pasted instructions as new local candidates. Existing skills are preserved."
+    "Skills accepts exported JSON files, text files and pasted instructions as new local candidates. Existing skills are preserved.",
+    "Skills has one instructions box with Save, Import and Export. Explicitly saved guidance is matched to the current project without requiring a separate goal or claiming it was tested."
   ],
   "improved": [
     "Native MCP requests use one deadline across pipe writes, notifications and response reads. Missing extension callbacks resolve with an explicit timeout.",
@@ -15,7 +16,8 @@
     "Automatic updates use the installer helper embedded in the running build. Both automatic and standalone Windows launchers set a process-level execution policy.",
     "Completed tool watchdog timers are cleared and late worker replies cannot settle a request twice.",
     "Checklist labels exclude message timestamp elements, with wider row and header spacing. Literal times inside user instructions remain intact.",
-    "Missed DOM tooltip/style reads and temporary editor cleanup are guarded across supported AI adapters. Deep semantic composer boundaries survive inserted wrappers."
+    "Missed DOM tooltip/style reads and temporary editor cleanup are guarded across supported AI adapters. Deep semantic composer boundaries survive inserted wrappers.",
+    "Debug report is separated from the Settings grid; effort aligns beneath PlazCode and visible desktop, bar and extension version labels include v."
   ],
   "notes": [
     "Automated regression and platform tests are required before release. Live signed-in Claude, ChatGPT, Notion and Studio sessions remain unverified."
@@ -40,13 +42,19 @@
       {
         "title": "📥 Import skills",
         "items": [
-          "**JSON or text:** upload exported JSON/text files or paste instructions. Each import creates a new local candidate for review."
+          "**Simple Skills:** type instructions and Save. Import/Export JSON or text; saved guidance adapts to the current project."
         ]
       },
       {
         "title": "🔧 Windows updater",
         "items": [
           "**Current helper:** automatic updates use the helper embedded in this build. Built-in and manual launchers set a process-level execution policy; checksum and rollback checks stay in place."
+        ]
+      },
+      {
+        "title": "🎨 Interface fixes",
+        "items": [
+          "**Spacing and versions:** separate Debug report cards, align effort under PlazCode and prefix displayed versions with v."
         ]
       },
       {

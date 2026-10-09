@@ -15,11 +15,15 @@ Recover from stuck command waits, continue safely after Stop, and import your ow
 
 ### 📥 Import skills
 
-- **JSON or text:** upload exported JSON/text files or paste instructions. Each import creates a new local candidate for review.
+- **Simple Skills:** type instructions and Save. Import/Export JSON or text; saved guidance adapts to the current project.
 
 ### 🔧 Windows updater
 
 - **Current helper:** automatic updates use the helper embedded in this build. Built-in and manual launchers set a process-level execution policy; checksum and rollback checks stay in place.
+
+### 🎨 Interface fixes
+
+- **Spacing and versions:** separate Debug report cards, align effort under PlazCode and prefix displayed versions with v.
 
 ### ✅ Checked before release
 

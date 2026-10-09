@@ -302,7 +302,7 @@ async fn run(install: bool, background: bool) -> anyhow::Result<()> {
     if background {
         if let Some(wait) = failure_backoff(read_failure(&root).as_ref(), &latest, now_ms()) {
             let mut s=state();s.progress=0;
-            s.message=format!("Update {latest} is ready. The last automatic install failed, so PlazCode retries automatically in about {} minute(s). Choose Update now to retry immediately.", wait.div_ceil(60_000).max(1));
+            s.message=format!("Update v{latest} is ready. The last automatic install failed, so PlazCode retries automatically in about {} minute(s). Choose Update now to retry immediately.", wait.div_ceil(60_000).max(1));
             return Ok(());
         }
     }

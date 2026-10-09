@@ -7,7 +7,7 @@ const baseline = {
   "core/config.js": "c05cf9ef868a586a7941f6dd8b6b5dcad8fc8e10",
   "core/headless-builder.js": "b343a897a17fc05d79ab469aeea55c8abaa8c4e5",
   "core/luau-knowledge.js": "234c1ca2155d3ef5f38927d85893b70fd6bde6e6",
-  "core/main.js": "d0009b644f48e2275134e7bd9669cefb4486165c",
+  "core/main.js": "7a32576e7c3bd0934d4b6f2ae1196c612748b17a",
   "core/motion-interchange.js": "038afa13a5b59c030a809abf7d617a36f2fae82d",
   "core/motion-preview.js": "ae0ab0526fbc762dfbf7cae9c248239e217e7a2f",
   "core/motion-tools.js": "8ac81b4a4a9f634fef9285aeee06db4a15af578e",
@@ -352,7 +352,7 @@ async function runDesktopInteractionRegression() {
   if(elementsById.get("checkUpdates").disabled || elementsById.get("installUpdate").disabled)throw new Error("Automatic checks must keep manual update controls available");
   fakeUpdate.busy=false;fakeUpdate.background=false;window.PlazCodeDesktop.go("updates");await new Promise(resolve=>setTimeout(resolve,0));
   const notes=elementsById.get("updateReleaseNotes").children;
-  if (notes.length !== 1 || notes[0].children[0].textContent !== "PlazCode 1.19.33: Release notes" || notes[0].children[1].textContent !== "Exact <text> stays literal") throw new Error("Release note rendering failed");
+  if (notes.length !== 1 || notes[0].children[0].textContent !== "PlazCode v1.19.33: Release notes" || notes[0].children[1].textContent !== "Exact <text> stays literal") throw new Error("Release note rendering failed");
   const firstNote=notes[0];window.PlazCodeDesktop.go("updates");await new Promise(resolve=>setTimeout(resolve,0));
   if(elementsById.get("updateReleaseNotes").children[0] !== firstNote)throw new Error("Polling reset release expansion");
   elementsById.get("installUpdate").onclick(); await new Promise(resolve => setTimeout(resolve, 0));
