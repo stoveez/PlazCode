@@ -14,6 +14,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   wait-native:
+    if: false # Paused while simplifying the Skills interface.
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
