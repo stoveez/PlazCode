@@ -48,10 +48,14 @@ const PlazCodeClarification = (() => {
     function finish(answer, error) {
       if (!pending) return;
       const current = pending; pending = null;
-      clearInterval(current.timer); current.host.remove();
-      if (current.focus && current.focus.isConnected) try { current.focus.focus(); } catch {}
-      changed(false);
-      if (error) current.reject(error); else current.resolve(answer);
+      try {
+        try { clearInterval(current.timer); } catch {}
+        try { current.host.remove(); } catch {}
+        try { if (current.focus?.isConnected) current.focus.focus(); } catch {}
+        try { changed(false); } catch {}
+      } finally {
+        if (error) current.reject(error); else current.resolve(answer);
+      }
     }
     function cancel(reason = 'Clarification cancelled. No option was selected.') {
       const error = new Error(reason); error.name = 'AbortError'; finish(null, error);
@@ -93,7 +97,8 @@ const PlazCodeClarification = (() => {
       for(const type of ['beforeinput','input','change','paste','keyup','keypress'])shadow.addEventListener(type,event=>event.stopPropagation());
       form.addEventListener('keydown',event=>{event.stopPropagation();if(event.key!=='Tab')return;const controls=[heading,...form.querySelectorAll('input,textarea,button')].filter(node=>!node.disabled);const current=form.ownerDocument===document?shadow.activeElement:form.ownerDocument.activeElement;if(event.shiftKey&&current===controls[0]){event.preventDefault();controls.at(-1).focus();}else if(!event.shiftKey&&current===controls.at(-1)){event.preventDefault();controls[0].focus();}});
       return new Promise((resolve,reject)=>{
-        pending={resolve,reject,host,focus:document.activeElement,timer:setInterval(()=>{if(context()!==key || cancelled())cancel('Task stopped or chat/engine changed. Clarification cancelled.');},500)};
+        pending={resolve,reject,host,focus:document.activeElement,timer:setInterval(()=>{try{if(!host.isConnected || context()!==key || cancelled())cancel('Task stopped, answer panel removed, or chat/engine changed. Clarification cancelled.');}catch(error){finish(null,error);}},500)};
+        try {
         (mount()||document.body).append(host);changed(true);
         // Site capture handlers see a closed-shadow host as a non-editable div.
         // A script-free frame isolates native answers from page keyboard locks.
@@ -102,6 +107,7 @@ const PlazCodeClarification = (() => {
           if(!pending||pending.host!==host)return;
           try{const pane=frame.contentDocument,sheet=style.cloneNode(true);sheet.textContent=sheet.textContent.replace(':host{','html{')+'body{margin:0}';pane.head.append(sheet);for(const key of ['--rs-text','--rs-muted','--rs-bg','--rs-accent','--pc-bg','--pc-accent']){const value=host.style.getPropertyValue(key);if(value)pane.documentElement.style.setProperty(key,value);}pane.body.append(shade);heading.focus();}catch{frame.remove();heading.focus();}
         },{once:true});shadow.append(frame);heading.focus();
+        } catch(error) { finish(null,error); }
       });
     }
     return {request,cancel,isWaiting:()=>!!pending};

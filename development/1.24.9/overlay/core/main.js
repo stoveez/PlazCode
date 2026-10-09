@@ -705,6 +705,51 @@
     toolsAt: 0,
   };
 
+  function createAgentLifecycle(onExit = () => {}) {
+    let phase = 'idle', owner = 'idle', revision = 0;
+    const transition = (next, nextOwner = 'idle') => {
+      if (phase === next && owner === nextOwner) return;
+      const previous = phase;
+      phase = next; owner = nextOwner; revision++;
+      try { onExit(previous, next); } catch (error) { log('Lifecycle cleanup failed', error); }
+    };
+    const active = name => phase === name || phase === 'stopping' && owner === name;
+    return {
+      snapshot: () => ({phase, owner, revision}),
+      active,
+      set(name, enabled) {
+        if (!['starting','running','stopping'].includes(name)) throw Error('Unknown agent phase');
+        if (name === 'stopping') {
+          if (enabled && phase !== 'stopping') transition('stopping', phase);
+          else if (!enabled && phase === 'stopping') transition(owner);
+          return;
+        }
+        if (enabled) {
+          if (active(name)) return;
+          if (phase !== 'idle') throw Error('Agent is '+phase+'; cannot begin '+name+' concurrently');
+          transition(name);
+        } else if (active(name)) {
+          if (phase === 'stopping') transition('stopping','idle');
+          else transition('idle');
+        }
+      }
+    };
+  }
+  const agentLifecycle = createAgentLifecycle((previous, next) => {
+    // Every phase releases its own timestamp. Command/socket deadlines belong
+    // to their in-flight request and remain alive until cancellation settles.
+    if (previous === 'starting') A._startingSince = 0;
+    if (next === 'idle' && !A.injecting && !A.pendingToolSettles) {
+      try { P.setInputLock?.(false); } finally { try { ui.inputCover(false); } catch {} }
+    }
+  });
+  for (const name of ['starting','running','stopping']) Object.defineProperty(A, name, {
+    enumerable:true, configurable:false,
+    get: () => name === 'stopping' ? agentLifecycle.snapshot().phase === 'stopping' : agentLifecycle.active(name),
+    set: value => agentLifecycle.set(name, !!value)
+  });
+  Object.defineProperty(A, 'phase', {get:()=>agentLifecycle.snapshot().phase});
+
   // Provider init must happen after A is defined — diag() reads A.running and
   // copilot's init calls diag() immediately, which would TDZ if init ran before A.
   try { P.init({ diag, isStopped: () => A.stop, isSessionActive: () => A.started || A.running, requestStart: () => startSession() }); } catch {}
@@ -908,7 +953,7 @@
         if (A.stop) break;
         await jitterBeforeSend();
         diag("submit.typeAndSend", { hasImages: !!(images && images.length) });
-        const sendResult = await P.typeAndSend(window.__rsLimitOutgoing(text), images, { userPrompt: userPrompt === true });
+        const sendResult = await P.typeAndSend(typeof window !== "undefined" && typeof window.__rsLimitOutgoing === "function" ? window.__rsLimitOutgoing(text) : text, images, { userPrompt: userPrompt === true });
         if (P.authoritativeSendResult) {
           if (sendResult === true) messageSent = true;
           else if (sendResult === false) {
@@ -1988,87 +2033,87 @@
     return "{" + parts.join(",") + "}";
   }
 
-  function studioMeshLuau(meshes, dest, scale) {
-    const payload = luauLiteral({ meshes: meshes || [], dest: dest || "Workspace", scale: Number(scale) || 20 });
-    return [
-      "local AssetService = game:GetService(\"AssetService\")",
-      "local payload = " + payload,
-      "local meshes = payload.meshes or {}",
-      "local scale = tonumber(payload.scale) or 20",
-      "local destName = tostring(payload.dest or \"Workspace\")",
-      "local parent = workspace",
-      "if destName ~= \"Workspace\" and destName ~= \"workspace\" then",
-      "  local t = workspace:FindFirstChild(destName)",
-      "  if t then parent = t end",
-      "end",
-      "local folder = parent:FindFirstChild(\"PLAZCODE_Imported\")",
-      "if folder then folder:Destroy() end",
-      "folder = Instance.new(\"Model\")",
-      "folder.Name = \"PLAZCODE_Imported\"",
-      "folder.Parent = parent",
-      "local built = 0",
-      "local usedEditable = false",
-      "local function aabb(verts)",
-      "  local minx,miny,minz = math.huge, math.huge, math.huge",
-      "  local maxx,maxy,maxz = -math.huge, -math.huge, -math.huge",
-      "  for _,v in ipairs(verts) do",
-      "    local x,y,z = (v[1] or 0)*scale, (v[2] or 0)*scale, (v[3] or 0)*scale",
-      "    if x<minx then minx=x end if y<miny then miny=y end if z<minz then minz=z end",
-      "    if x>maxx then maxx=x end if y>maxy then maxy=y end if z>maxz then maxz=z end",
-      "  end",
-      "  return Vector3.new((minx+maxx)/2,(miny+maxy)/2,(minz+maxz)/2), Vector3.new(math.max(0.05,maxx-minx), math.max(0.05,maxy-miny), math.max(0.05,maxz-minz))",
-      "end",
-      "local function addTri(em, ids, a, b, c)",
-      "  if not ids[a] or not ids[b] or not ids[c] then return end",
-      "  pcall(function() em:AddTriangle(ids[a], ids[b], ids[c]) end)",
-      "end",
-      "for _,entry in ipairs(meshes) do",
-      "  local verts, faces = entry.verts or {}, entry.faces or {}",
-      "  local name = tostring(entry.name or \"Mesh\")",
-      "  local part",
-      "  local okEm, em = pcall(function() return AssetService:CreateEditableMesh() end)",
-      "  if okEm and em then",
-      "    local ids = {}",
-      "    for i,v in ipairs(verts) do",
-      "      local x,y,z = (v[1] or 0)*scale, (v[2] or 0)*scale, (v[3] or 0)*scale",
-      "      local okv, id = pcall(function() return em:AddVertex(Vector3.new(x,y,z)) end)",
-      "      if okv then ids[i] = id ids[i-1] = id end",
-      "    end",
-      "    for _,f in ipairs(faces) do",
-      "      if #f >= 3 then",
-      "        for i=2,#f-1 do addTri(em, ids, f[1], f[i], f[i+1]) end",
-      "      end",
-      "    end",
-      "    local okPart, mp = pcall(function()",
-      "      if Content and Content.fromObject then return AssetService:CreateMeshPartAsync(Content.fromObject(em)) end",
-      "      return AssetService:CreateMeshPartAsync(em)",
-      "    end)",
-      "    if okPart and mp then part = mp usedEditable = true end",
-      "  end",
-      "  if not part then",
-      "    local cf, size = aabb(verts)",
-      "    part = Instance.new(\"Part\")",
-      "    part.Size = size",
-      "    part.CFrame = CFrame.new(cf)",
-      "    part.Anchored = true",
-      "    part.Material = Enum.Material.SmoothPlastic",
-      "  end",
-      "  part.Name = name",
-      "  part.Anchored = true",
-      "  part.Parent = folder",
-      "  built += 1",
-      "end",
-      "pcall(function() if folder.GetPivot then folder:PivotTo(CFrame.new(0, 3, 0)) end end)",
-      "local how = usedEditable and \"EditableMesh\" or \"bounding-box Parts (EditableMesh unavailable)\"",
-      "return string.format(\"imported %d mesh(es) into Workspace.PLAZCODE_Imported via %s\", built, how)",
-    ].join("\n");
+  function studioMeshLuau(meshes, dest, scale, transfer="single", index=0, count=meshes.length) {
+    const payload = luauLiteral({meshes,dest:dest||"Workspace",scale,transfer,index:index+1,count});
+    return `local payload = ${payload}
+local AssetService = game:GetService("AssetService")
+local staging = game:GetService("ServerStorage")
+local stageName = "_PlazCodeMesh_"..payload.transfer
+local folder = staging:FindFirstChild(stageName)
+if payload.index == 1 then
+ assert(not folder,"Transfer already exists; inspect it before retrying")
+ folder=Instance.new("Model");folder.Name=stageName;folder:SetAttribute("NextMesh",1);folder.Parent=staging
+end
+assert(folder and folder:GetAttribute("NextMesh")==payload.index,"Transfer is missing or out of order; do not replay")
+local editable
+local ok, result=pcall(function()
+ for _,entry in ipairs(payload.meshes) do
+  local vertices,faces=entry.verts,entry.faces
+  assert(#vertices>0 and #vertices<=60000 and #faces>0 and #faces<=20000,"Unsupported mesh size")
+  local minimum=Vector3.new(math.huge,math.huge,math.huge)
+  local maximum=Vector3.new(-math.huge,-math.huge,-math.huge)
+  for _,v in ipairs(vertices) do
+   local point=Vector3.new(v[1],v[2],v[3])*payload.scale
+   minimum=Vector3.new(math.min(minimum.X,point.X),math.min(minimum.Y,point.Y),math.min(minimum.Z,point.Z))
+   maximum=Vector3.new(math.max(maximum.X,point.X),math.max(maximum.Y,point.Y),math.max(maximum.Z,point.Z))
+  end
+  local center=(minimum+maximum)/2
+  editable=AssetService:CreateEditableMesh()
+  assert(editable,"EditableMesh unavailable; check Studio permissions and mesh memory budget")
+  local ids={}
+  for i,v in ipairs(vertices) do ids[i-1]=editable:AddVertex(Vector3.new(v[1],v[2],v[3])*payload.scale-center) end
+  local colors,uvs={},{}
+  for i,face in ipairs(faces) do
+   assert(#face==3 and ids[face[1]] and ids[face[2]] and ids[face[3]],"Invalid triangle indices")
+   local faceId=editable:AddTriangle(ids[face[1]],ids[face[2]],ids[face[3]])
+   local rgba=entry.face_colors and entry.face_colors[i]
+   if rgba then
+    local key=table.concat(rgba,",");local id=colors[key]
+    if not id then id=editable:AddColor(Color3.new(rgba[1],rgba[2],rgba[3]),rgba[4] or 1);colors[key]=id end
+    editable:SetFaceColors(faceId,{id,id,id})
+   end
+   local mapping=entry.face_uvs and entry.face_uvs[i]
+   if mapping then
+    local corners={}
+    for j,uv in ipairs(mapping) do
+     local key=tostring(uv[1])..","..tostring(uv[2]);local id=uvs[key]
+     if not id then id=editable:AddUV(Vector2.new(uv[1],uv[2]));uvs[key]=id end
+     corners[j]=id
+    end
+    editable:SetFaceUVs(faceId,corners)
+   end
+  end
+  local part=AssetService:CreateMeshPartAsync(Content.fromObject(editable))
+  assert(part,"Studio did not create a MeshPart")
+  local size=editable:GetSize();part.Size=Vector3.new(math.max(0.001,size.X),math.max(0.001,size.Y),math.max(0.001,size.Z));part.CFrame=CFrame.new(center);part.Anchored=true;part.Name=entry.name or "Mesh";part.Parent=folder
+  -- The part retains this mesh content. Destroy only unowned meshes on failure.
+  editable=nil
+ end
+ folder:SetAttribute("NextMesh",payload.index+1)
+ if payload.index==payload.count then
+  assert(#folder:GetChildren()==payload.count,"Transfer is incomplete")
+  local parent=workspace
+  local path=string.gsub(payload.dest,"^game%.","");path=string.gsub(path,"^[Ww]orkspace%.?","")
+  for segment in string.gmatch(path,"[^%.]+") do parent=assert(parent:FindFirstChild(segment),"Destination does not exist: "..segment) end
+  folder.Name="PLAZCODE_Imported";folder.Parent=parent
+  return "Imported "..payload.count.." real mesh objects with geometry, UVs and base colors into "..folder:GetFullName()..". External texture images, rigs and animations require separate import."
+ end
+ return "Staged mesh "..payload.index.."/"..payload.count.."; transfer is not published yet"
+end)
+if not ok then
+ if editable then pcall(function() editable:Destroy() end) end
+ pcall(function() folder:Destroy() end)
+ error(tostring(result))
+end
+return result`;
   }
 
   async function runAssetBridgeImport(args) {
     const a = args || {};
     const asset = String(a.asset || a.filepath || a.path || "").trim();
     const dest = String(a.dest || a.parent || "Workspace");
-    const scale = Number(a.scale) || 20;
+    const scale = a.scale===undefined?20:Number(a.scale);
+    if(!Number.isFinite(scale)||scale<=0||scale>100000)return "ERROR in asset_bridge_import: scale must be a finite positive number up to 100000.";
     const assetLower = asset.toLowerCase();
     let assetId = "";
     const prefix = "rbxassetid://";
@@ -2093,7 +2138,7 @@
     if (!(A.bridge && A.bridge.blender)) {
       return "ERROR in asset_bridge_import: Connect Blender first. The addon must still be running so PlazCode can read the mesh.";
     }
-    const dump = await bg({ type: "call_tool", name: "blender_mesh_dump", arguments: { filepath: asset, asset, objects: a.objects }, timeout: 120000 });
+    const dump = Array.isArray(a.meshes)&&a.meshes.length ? {ok:true,text:JSON.stringify({meshes:a.meshes})} : await bg({ type: "call_tool", name: "blender_mesh_dump", arguments: { filepath: asset, asset, objects: a.objects }, timeout: 120000 });
     if (!dump || !dump.ok) {
       return "ERROR in asset_bridge_import: " + ((dump && dump.error) || "could not dump meshes from Blender");
     }
@@ -2116,8 +2161,24 @@
     if (!meshes || !meshes.length) {
       return "ERROR in asset_bridge_import: Blender returned no meshes. Add or select mesh objects, then blender_send_to_studio.\n" + textOut.slice(0, 400);
     }
-    const code = studioMeshLuau(meshes, dest, scale);
-    return await runTool({ tool: "execute_luau", arguments: { code, datamodel_type: "Edit" } });
+    if(meshes.length>128)return "ERROR in asset_bridge_import: transfer at most 128 objects per request.";
+    const finite=value=>typeof value==='number'&&Number.isFinite(value);
+    for(const entry of meshes){
+      if(!Array.isArray(entry.verts)||!entry.verts.length||entry.verts.length>60000||entry.verts.some(v=>!Array.isArray(v)||v.length!==3||!v.every(finite)))return "ERROR in asset_bridge_import: invalid mesh vertices; nothing was imported.";
+      if(!Array.isArray(entry.faces)||!entry.faces.length||entry.faces.length>20000||entry.faces.some(f=>!Array.isArray(f)||f.length!==3||!f.every(v=>Number.isInteger(v)&&v>=0&&v<entry.verts.length)))return "ERROR in asset_bridge_import: invalid mesh triangles; nothing was imported.";
+      if(entry.face_uvs&&(!Array.isArray(entry.face_uvs)||entry.face_uvs.length!==entry.faces.length||entry.face_uvs.some(f=>!Array.isArray(f)||f.length!==3||f.some(uv=>!Array.isArray(uv)||uv.length!==2||!uv.every(finite)))))return "ERROR in asset_bridge_import: invalid UV mapping; nothing was imported.";
+      if(entry.face_colors&&(!Array.isArray(entry.face_colors)||entry.face_colors.length!==entry.faces.length||entry.face_colors.some(color=>!Array.isArray(color)||color.length!==4||!color.every(finite))))return "ERROR in asset_bridge_import: invalid material colors; nothing was imported.";
+    }
+    const transfer=crypto.randomUUID(),owner={chat:P.conversationKey(),engine:activeEngine(),generation:A.sessionGen};
+    const current=()=>!A.stop&&owner.chat===P.conversationKey()&&owner.engine===activeEngine()&&owner.generation===A.sessionGen;
+    let result='';
+    for(let index=0;index<meshes.length;index++){
+      if(!current())return '(stopped by user)';
+      const code=studioMeshLuau([meshes[index]],dest,scale,transfer,index,meshes.length);
+      result=await runTool({tool:'execute_luau',arguments:{code,datamodel_type:'Edit'}});
+      if(!current()||feedbackIsError(result)||/^\(stopped/.test(String(result||'')))return String(result||'')+'\nTransfer '+transfer+' stopped. Inspect ServerStorage._PlazCodeMesh_'+transfer+' before retrying; no command was replayed.';
+    }
+    return result;
   }
 
   function wrapStudioTxn(code, label) {
@@ -2773,33 +2834,36 @@
   }
   // Chrome's async clipboard only accepts image/png, so a jpeg/webp capture is
   // re-encoded through a canvas (which also gives us the pixel size we report).
+  async function boundedImageOperation(operation, ms=15000) {
+    let timer;
+    try { return await Promise.race([operation,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Image operation did not finish. Nothing was retried.')),ms);})]); }
+    finally { clearTimeout(timer); }
+  }
   async function imageToPngBlob(img) {
     const blob = imageToBlob(img);
-    const mime = (img && img.mimeType) || "";
-    if (mime.includes("png")) {
-      try {
-        const bmp = await createImageBitmap(blob);
-        return { blob, width: bmp.width, height: bmp.height };
-      } catch { return { blob, width: 0, height: 0 }; }
-    }
+    let bitmap = null, expired = false;
     try {
-      const bmp = await createImageBitmap(blob);
-      const c = document.createElement("canvas");
-      c.width = bmp.width; c.height = bmp.height;
-      c.getContext("2d").drawImage(bmp, 0, 0);
-      const png = await new Promise((res) => { try { c.toBlob((b) => res(b), "image/png"); } catch { res(null); } });
-      return { blob: png || blob, width: bmp.width, height: bmp.height };
-    } catch {
-      return { blob, width: 0, height: 0 };
-    }
+      const decoding = createImageBitmap(blob);
+      void decoding.then(value=>{if(expired)try{value.close();}catch{}},()=>{});
+      bitmap = await boundedImageOperation(decoding);
+      if (blob.type.includes('png')) return {blob,width:bitmap.width,height:bitmap.height};
+      const canvas = document.createElement('canvas');canvas.width=bitmap.width;canvas.height=bitmap.height;
+      const context=canvas.getContext('2d');if(!context)throw Error('Image conversion canvas is unavailable');context.drawImage(bitmap,0,0);
+      const png=await boundedImageOperation(new Promise((resolve,reject)=>{try{canvas.toBlob(value=>value?resolve(value):reject(Error('Image conversion failed')),'image/png');}catch(error){reject(error);}}));
+      return {blob:png,width:bitmap.width,height:bitmap.height};
+    } catch(error) {
+      if(blob.type.includes('png'))return {blob,width:0,height:0};
+      throw error;
+    } finally { expired=true;if(bitmap)try{bitmap.close();}catch{} }
   }
+
   async function copyImageToClipboard(img) {
     if (!navigator.clipboard || typeof ClipboardItem === "undefined") {
       return { ok: false, error: "this browser exposes no image clipboard API" };
     }
     try {
       const { blob } = await imageToPngBlob(img);
-      await navigator.clipboard.write([new ClipboardItem({ [blob.type || "image/png"]: blob })]);
+      await boundedImageOperation(navigator.clipboard.write([new ClipboardItem({ [blob.type || "image/png"]: blob })]));
       return { ok: true };
     } catch (e) {
       // Chrome demands the tab be focused (and may want a real user gesture) —
@@ -3054,7 +3118,7 @@
         const textOut = r.text && r.text.length ? r.text : "(tool returned an empty result)";
         const autoStudio = bareName === "blender_export_fbx" || bareName === "export_blender_fbx";
         if (autoStudio) {
-          const imported = await runAssetBridgeImport({ source: "blender", asset: r.filepath || args.filepath || args.path || "scene", objects: args.objects, dest: args.dest, scale: args.scale });
+          const imported = await runAssetBridgeImport({ source: "blender", asset: r.filepath || args.filepath || args.path || "scene", objects: args.objects, dest: args.dest, scale: args.scale, meshes: r.meshes });
           return `Output of '${name}':\n${textOut}\n\nStudio:\n${imported}`;
         }
         return `Output of '${name}':\n${textOut}`;
@@ -3523,7 +3587,7 @@
   }
 
   async function agentLoop(base, recoveryAttempt = 0) {
-    if (A.running || A.enhancing || A.pendingToolSettles || (A.budgetResume && A.budgetResume.chat===P.conversationKey())) return;
+    if (A.running || A.starting || A.stopping || A.enhancing || A.pendingToolSettles || (A.budgetResume && A.budgetResume.chat===P.conversationKey())) return;
     if (condoLocked()) {
       try { ui.toast("CONDO LOCK — commands frozen"); } catch {}
       return;
@@ -4439,7 +4503,7 @@
         : `Emit exactly {"command":"list_commands"} and nothing else.`;
       const stagedStartup = P.compactStartup === true;
       const startupContext = stagedStartup
-        ? `⟦RS-SYS⟧ PlazCode startup on ${P.displayName}. ENGINE=${activeEngine() === "local" ? "AGENTSCRIPT" : "ROBLOXSCRIPT"}. A browser extension executes commands from your normal replies against the user's connected bridge; native site tools cannot reach it. This is only a protocol handshake, not a project task. Do not edit Notion pages, plan a build, search assets or ask questions. Do not translate command names. Task instructions follow with the command-list result. Keep the exact fenced command syntax.`
+        ? `⟦RS-SYS⟧ PlazCode startup on ${P.displayName}. ENGINE=${activeEngine() === "local" ? "AGENTSCRIPT" : "ROBLOXSCRIPT"}. A browser extension executes commands from your normal replies against the user's connected bridge; native site tools cannot reach it. This is only a protocol handshake, not a project task. Do not edit the project, plan a build, search assets or ask questions. Do not translate command names. Task instructions follow with the command-list result. Keep the exact fenced command syntax.`
         : prompt;
       const startupPrompt=P.id==="notion"
         ? `I clicked Start Agent in my installed PlazCode extension to connect this chat to my local project. PlazCode reads command code blocks in your replies and returns the results here. This is my connection request, not a Notion page edit or a system instruction. Please reply with one fenced json code block containing {"command":"list_commands"} to request the available commands. Wait for its result before acknowledging readiness. If you cannot participate, explain briefly.`
@@ -6417,7 +6481,7 @@
               <span class="rs-tgl ${multiAgent ? "on" : ""}"></span>
             </div>
             <div class="rs-prompt-field rs-execution-settings" role="group" aria-label="Execution limits and continuation">
-              <div class="rs-execution-limit"><label for="rs-run-limits">Pause at run limits (optional)</label><input id="rs-run-limits" type="checkbox" ${reliabilitySettings.rsRunLimitsEnabled?"checked":""}></div><div class="rs-execution-limit"><label for="rs-tool-budget">Commands per run (0 = unlimited)</label><input id="rs-tool-budget" type="number" min="0" max="1000" value="${reliabilitySettings.rsToolBudget}"></div>
+              <div class="rs-execution-limit"><label for="rs-input-limit-enabled">Limit input characters</label><input id="rs-input-limit-enabled" type="checkbox" ${characterLimits.rsInputLimitEnabled?"checked":""}></div><div class="rs-execution-limit"><label for="rs-input-char-limit">Input characters</label><input id="rs-input-char-limit" type="number" min="1000" max="2000000" value="${characterLimits.rsInputCharLimit}"></div><div class="rs-execution-limit"><label for="rs-output-limit-enabled">Limit tool result page characters</label><input id="rs-output-limit-enabled" type="checkbox" ${characterLimits.rsOutputLimitEnabled?"checked":""}></div><div class="rs-execution-limit"><label for="rs-output-char-limit">Result characters per page</label><input id="rs-output-char-limit" type="number" min="1000" max="2000000" value="${characterLimits.rsOutputCharLimit}"></div><p>Full results are kept and read in pages, without repeating commands. Turn both limits off for unrestricted messages; the AI website may still enforce its own limits.</p><div class="rs-execution-limit"><label for="rs-run-limits">Pause at run limits (optional)</label><input id="rs-run-limits" type="checkbox" ${reliabilitySettings.rsRunLimitsEnabled?"checked":""}></div><div class="rs-execution-limit"><label for="rs-tool-budget">Commands per run (0 = unlimited)</label><input id="rs-tool-budget" type="number" min="0" max="1000" value="${reliabilitySettings.rsToolBudget}"></div>
               <div class="rs-execution-limit"><label for="rs-task-minutes">Minutes per run (0 = unlimited)</label><input id="rs-task-minutes" type="number" min="0" max="240" value="${reliabilitySettings.rsTaskMinutes}"></div>
               <div class="rs-execution-limit"><label for="rs-command-cooldown">Seconds between commands (0 = no pause)</label><input id="rs-command-cooldown" type="number" min="0" max="120" step="0.5" value="${reliabilitySettings.rsCommandCooldown}"></div>
               <small>Commands limit how many AI tool actions run before a pause. Minutes limit elapsed time before the next command. Set either to 0 to remove that limit. Helper calls do not count. Seconds between commands adds a pause before each command result is sent, which helps sites such as DeepSeek that limit fast messages.</small>
@@ -6511,6 +6575,7 @@
         status.textContent = "Saved ✓";
         setTimeout(() => { status.textContent = ""; }, 1600);
       });
+      for(const [id,key] of [["rs-input-limit-enabled","rsInputLimitEnabled"],["rs-input-char-limit","rsInputCharLimit"],["rs-output-limit-enabled","rsOutputLimitEnabled"],["rs-output-char-limit","rsOutputCharLimit"]])menuEl.querySelector("#"+id).onchange=event=>{try{const toggle=key.endsWith('Enabled');if(!toggle&&(event.target.value.trim()===''||!event.target.checkValidity()))return;characterLimits=normalizeCharacterLimits({...characterLimits,[key]:toggle?event.target.checked:Number(event.target.value)});chrome.storage.local.set({[key]:characterLimits[key]});}catch(error){log('Message size setting failed',error);}};
       for(const [id,key] of [["rs-run-limits","rsRunLimitsEnabled"],["rs-tool-budget","rsToolBudget"],["rs-task-minutes","rsTaskMinutes"],["rs-visual-check","rsVisualCheck"],["rs-continuation-offer","rsContinuationOffer"],["rs-command-cooldown","rsCommandCooldown"]])menuEl.querySelector("#"+id).onchange=event=>{const toggle=key==='rsRunLimitsEnabled'||key==='rsVisualCheck'||key==='rsContinuationOffer';if(!toggle && (event.target.value.trim()==='' || !event.target.checkValidity()))return;const value=toggle?event.target.checked:Number(event.target.value);reliabilitySettings=normalizeReliability({...reliabilitySettings,[key]:value});chrome.storage.local.set({[key]:reliabilitySettings[key]});};
       menuEl.querySelector("#rs-save-handoff").onclick=()=>{const value=captureHandoff("User requested continuation");downloadHandoff(value);};
       menuEl.querySelector("#rs-budget-resume").onclick=()=>{const result=desktopAgentAction("budget-resume");if(!result.ok)ui.toast(result.error);};
@@ -9092,59 +9157,73 @@ function renderCards(panel) {
     // in-memory base64 (a data: URL always renders), so it works identically on
     // every provider and never touches the site's DOM. Only the most recent
     // capture is kept - a new one replaces the old.
+    let screenshotCleanup = null;
     function showImages(images, toolName) {
-      root.querySelectorAll(".rs-shot").forEach((e) => e.remove());
+      if (screenshotCleanup) screenshotCleanup();
+      if (!Array.isArray(images) || !images.length) return;
       const wrap = document.createElement("div");
       wrap.className = "rs-shot";
-      const hdr = document.createElement("div");
-      hdr.className = "rs-shot-hdr";
-      const ttl = document.createElement("span");
-      ttl.className = "rs-shot-ttl";
-      ttl.textContent = `${toolName} · ${images.length} image${images.length > 1 ?  "s" : ""}`;
-      const close = document.createElement("button");
-      close.className = "rs-shot-x";
-      close.textContent = "✕";
-      close.addEventListener("click", () => wrap.remove());
-      hdr.appendChild(ttl);
-      hdr.appendChild(close);
-      wrap.appendChild(hdr);
-      const body = document.createElement("div");
-      body.className = "rs-shot-body";
-      for (const img of images) {
-        const el = document.createElement("img");
-        el.className = "rs-shot-img";
-        el.src = `data:${img.mimeType || "image/jpeg"};base64,${img.data}`;
-        body.appendChild(el);
-      }
-      wrap.appendChild(body);
-      // Manual fallbacks for attach_feedback: copying to the system clipboard
-      // needs a user gesture on some builds, and pasting into the composer by
-      // hand is the escape hatch when a site refuses the synthetic upload.
-      const bar = document.createElement("div");
-      bar.className = "rs-shot-bar";
-      const mk = (label, title, fn) => {
-        const b = document.createElement("button");
-        b.className = "rs-shot-btn";
-        b.type = "button";
-        b.textContent = label;
-        b.title = title;
-        b.addEventListener("click", fn);
-        return b;
+      const header = document.createElement("div"); header.className = "rs-shot-hdr";
+      const title = document.createElement("span"); title.className = "rs-shot-ttl";
+      title.textContent = `${toolName} · ${images.length} image${images.length === 1 ? "" : "s"}`;
+      const close = document.createElement("button"); close.type = "button"; close.className = "rs-shot-x";
+      close.textContent = "✕"; close.setAttribute("aria-label", "Close screenshots");
+      header.append(title, close); wrap.append(header);
+      const body = document.createElement("div"); body.className = "rs-shot-body"; wrap.append(body);
+      const bar = document.createElement("div"); bar.className = "rs-shot-bar"; wrap.append(bar);
+      let expanded = false, overlay = null, previousFocus = null, disposed = false;
+      const cleanup = () => {
+        if (disposed) return;
+        disposed = true; window.clearTimeout(expiry);
+        document.removeEventListener("keydown", keyboard, true);
+        overlay?.remove(); wrap.remove();
+        if (previousFocus?.isConnected) { try { previousFocus.focus({preventScroll:true}); } catch {} }
+        if (screenshotCleanup === cleanup) screenshotCleanup = null;
       };
-      bar.appendChild(mk("Copy", "Copy to the system clipboard (guaranteed by the click gesture)", async (e) => {
-        e.target.textContent = "…";
-        const r = await copyImageToClipboard(images[0]);
-        e.target.textContent = r.ok ? "Copied ✓" : "Copy ✗";
-        e.target.title = r.ok ? "Paste it anywhere with Ctrl+V" : r.error;
-        if (r.ok) ui.toast("Screenshot copied — paste it into the AI chat with Ctrl+V", 6000);
-      }));
-      bar.appendChild(mk("Use as feedback", "Attach this shot to the next message PlazCode sends to the AI", () => {
-        A.pendingImages = images.slice();
-        rememberImages(images, "popup");
-        ui.toast("Latest capture will be attached to the next message.", 4000);
-      }));
-      wrap.appendChild(bar);
-      root.appendChild(wrap);
+      const keyboard = event => {
+        if (!expanded) return;
+        if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); cleanup(); }
+        if (event.key === "Tab") {
+          const controls = [close, ...bar.querySelectorAll("button")];
+          const index = controls.indexOf(document.activeElement);
+          const next = (index + (event.shiftKey ? -1 : 1) + controls.length) % controls.length;
+          event.preventDefault(); event.stopPropagation(); controls[next].focus();
+        }
+      };
+      const enlarge = () => {
+        if (expanded || disposed) return;
+        expanded = true; window.clearTimeout(expiry); previousFocus = document.activeElement;
+        overlay = document.createElement("div"); overlay.className = "rs-shot-overlay";
+        overlay.setAttribute("role", "dialog"); overlay.setAttribute("aria-modal", "true"); overlay.setAttribute("aria-label", "Screenshots");
+        const style = document.createElement("style");
+        style.textContent = `.rs-shot-overlay{position:fixed;inset:0;z-index:2147483646;background:#0009;display:flex;align-items:center;justify-content:center;padding:64px 24px 28px;box-sizing:border-box}.rs-shot-overlay .rs-shot{position:relative;inset:auto;width:min(1100px,95vw);max-width:95vw;max-height:88vh;display:flex;flex-direction:column;background:var(--pc-bg,#241f14);color:var(--pc-ink,#fff5df);border:1px solid var(--pc-accent,#e9ba53);border-radius:14px;overflow:visible}.rs-shot-overlay .rs-shot-body{padding:12px;display:flex;gap:16px;flex-direction:column;overflow:auto;min-height:0}.rs-shot-overlay .rs-shot-img{max-width:100%;width:auto;max-height:70vh;object-fit:contain;align-self:center;cursor:default}.rs-shot-overlay .rs-shot-hdr{padding:12px 16px}.rs-shot-overlay .rs-shot-x{position:fixed;top:18px;right:22px;width:42px;height:42px;border-radius:50%;font-size:22px;background:#24221e;color:#fff;border:1px solid #ffffff66;cursor:pointer}.rs-shot-overlay .rs-shot-bar{display:flex;justify-content:center;gap:12px;padding:14px}.rs-shot-overlay .rs-shot-btn{border:1px solid var(--pc-accent,#e9ba53);background:#302919;color:#fff2d2;border-radius:9px;padding:10px 18px;font:600 14px system-ui;cursor:pointer}`;
+        try { const theme = getComputedStyle(root); for (const key of ["--pc-bg", "--pc-accent", "--pc-ink"]) overlay.style.setProperty(key, theme.getPropertyValue(key)); } catch {}
+        overlay.append(style, wrap); document.body.append(overlay);
+        overlay.addEventListener("click", event => { if (event.target === overlay) cleanup(); });
+        document.addEventListener("keydown", keyboard, true); close.focus({preventScroll:true});
+      };
+      close.addEventListener("click", cleanup);
+      for (const img of images) {
+        const el = document.createElement("img"); el.className = "rs-shot-img";
+        el.src = `data:${img.mimeType || "image/jpeg"};base64,${img.data}`; el.alt = "PlazCode screenshot";
+        el.tabIndex = 0; el.setAttribute("role", "button"); el.setAttribute("aria-label", "Enlarge screenshot");
+        el.addEventListener("click", enlarge);
+        el.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); enlarge(); } });
+        body.append(el);
+      }
+      const button = (label, action) => {
+        const el = document.createElement("button"); el.type = "button"; el.className = "rs-shot-btn"; el.textContent = label;
+        el.addEventListener("click", async () => {
+          if (el.disabled) return;
+          el.disabled = true;
+          try { await action(el); } catch (error) { ui.toast(String(error?.message || error), 5000); }
+          finally { el.disabled = false; }
+        }); bar.append(el);
+      };
+      button("Copy image", async el => { const result = await copyImageToClipboard(images[0]); el.textContent = result.ok ? "Copied ✓" : "Copy image"; ui.toast(result.ok ? "Screenshot copied — paste with Ctrl+V." : result.error || "Copy failed.", 5000); });
+      button("Use as feedback", () => { A.pendingImages = images.slice(); rememberImages(images, "popup"); ui.toast("Capture will be attached to the next message.", 4000); });
+      const expiry = window.setTimeout(cleanup, 10000);
+      screenshotCleanup = cleanup; root.append(wrap);
     }
 
     build();

@@ -1929,7 +1929,7 @@ const RSProvider = (() => {
   async function waitLateConfirm(ms) {
     const until = Date.now() + ms;
     if (_lastSend) _lastSend.confirmUntil = Math.max(_lastSend.confirmUntil, until + 1000);
-    while (Date.now() < until) {
+    for (let remaining = Math.ceil(ms / 250); remaining > 0 && Date.now() < until; remaining--) {
       if (isStopped()) return false;
       if (sendLanded()) return true;
       await sleep(250);

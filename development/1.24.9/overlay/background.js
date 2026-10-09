@@ -1591,12 +1591,13 @@ async function blenderPayload(name, args) {
   if (bare === "get_object_info" || bare === "blender_get_object_info") return { type: "get_object_info", params: { name: a.name || a.object_name || "" } };
   if (bare === "execute_blender_code" || bare === "execute_code" || bare === "blender_execute_code") return { type: "execute_code", params: { code: wrapBlenderUserCode(a.code || "") } };
   if (bare === "get_viewport_screenshot" || bare === "blender_screenshot") {
-    let shot = "plazcode_blender_shot.png";
+    const relativeShot = "plazcode_blender_shot_" + crypto.randomUUID() + ".png";
+    let shot = relativeShot;
     const root = await agentWorkspaceRoot();
-    if (root) shot = root.replace(/[\\/]+$/, "") + "/plazcode_blender_shot.png";
+    if (root) shot = root.replace(/[\\/]+$/, "") + "/" + relativeShot;
     // _orShot: the exact path we asked Blender to write, so blenderCall can read
     // the pixels back (see the screenshot branch there) without guessing.
-    return { type: "get_viewport_screenshot", params: { max_size: Number(a.max_size) || 1000, filepath: shot, format: "png" }, _orShot: shot };
+    return { type: "get_viewport_screenshot", params: { max_size: Math.max(64, Math.min(4096, Number(a.max_size) || 1000)), filepath: shot, format: "png" }, _orShot: shot, _orReadShot: relativeShot };
   }
   const mapped = BLENDER_CMD[bare];
   if (mapped) {
@@ -1680,7 +1681,9 @@ async function blenderCall(name, args, timeout) {
       (payload.type === "get_viewport_screenshot" ? "plazcode_blender_shot.png" : "");
     if (shotPath && payload.type === "get_viewport_screenshot") {
       try {
-        const parsed = await localReadBase64(shotPath);
+        // Blender needs an absolute write path; the sandbox read API needs a
+        // relative one. Read our own unique requested file, not an addon path.
+        const parsed = await localReadBase64(payload._orReadShot || shotPath);
         images = [{ mimeType: parsed.mimeType || "image/png", data: parsed.data }];
         if (result && typeof result === "object") result.bytes = parsed.bytes;
       } catch (e) {

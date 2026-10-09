@@ -1077,6 +1077,9 @@ const RSProvider = (() => {
 
   return {
     id: "deepseek",
+    compactStartup: true,
+    startupReplyAsCode: true,
+    settleStartupReply: true,
     displayName: "DeepSeek",
     // DYNAMIC. Since the 2026-09 unification there is ONE model and no picker, so
     // images are allowed on every DeepSeek chat and this is true (see
