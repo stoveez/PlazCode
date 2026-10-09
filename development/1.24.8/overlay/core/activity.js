@@ -15,6 +15,11 @@ const PlazCodeActivity = (() => {
     if(!short)return 'conversation';
     if(/^(?:continue(?: working)?|keep (?:going|working)|resume(?: working)?|go on|carry on|stop|pause)$/i.test(short))return 'control';
     if(/^(?:hello|hi|hey|hello there|good (?:morning|afternoon|evening)|thanks(?: you)?|thank you|ok(?:ay)?|yes|no|got it|cool|great|nice|are you there|hello again|how are you|hello how are you|hi how are you|yo|sup|hey there|nice job|good job|thank you so much|are you ready|can you help me)(?:\s+(?:plazcode|there|again))?$/i.test(short))return 'conversation';
+    if(short.length<=180 && /^(?:thanks|thank you)\b/i.test(short) && !/(?:\b(?:can|could|would|will) you\b|(?:[,;]|\b(?:please|also|now|next|and))\s*(?:please\s+)?(?:build|create|make|add|fix|change|edit|implement|investigate|debug|test|verify|run|execute|optimi[sz]e|continue|resume)\b)/i.test(short))return 'conversation';
+    const workIntent=/\b(?:build|create|make|add|fix|change|edit|implement|investigate|debug|test|verify|run|execute|optimi[sz]e|continue|resume|broken|bug|issue|problem|stuck|hangs?)\b/i.test(short);
+    if(!workIntent && short.length<=180 && /^(?:hello(?!\s+world\b)|hi|hey|thanks|thank you|good morning|good afternoon|good evening)\b/i.test(short))return 'conversation';
+    if(/^(?:awesome|bye|goodbye|sure|alright|understood|sounds good|nice to meet you|see you|you there|are you working|how are things)(?:[.!?\s]|$)/i.test(short)&&!workIntent)return 'conversation';
+    if(!workIntent && /^(?:[a-z][a-z0-9]*_)+[a-z0-9_]+(?:\s|$)/i.test(short))return 'quick';
     if(/\b(?:commands?|tools?)\b/i.test(short)&&/^(?:list|show|display|what are|which|tell me|give me|can you (?:list|show)|please (?:list|show))\b/i.test(short)&&! /\b(?:build|fix|create|implement|edit|run|execute|test)\b/i.test(short))return 'quick';
     if(/^(?:list|show|display|what (?:are|is)|which|tell me|give me|can you (?:list|show)|please (?:list|show))\s+(?:(?:me|the|all|available|supported|your|plazcode|a list of)\s+)*(?:commands?|tools?|capabilities|status|help)(?:\s+(?:please|available|you (?:have|support)|are available))?$/i.test(short) || /^(?:help|status|commands|tools)$/i.test(short))return 'quick';
     if(/^(?:[a-z][a-z0-9]*_)+[a-z0-9_]+(?:\s*\([^\n]*\)|\s*\{[\s\S]*\})?$/i.test(short) || /^(?:```(?:json)?\s*)?\{\s*"(?:command|tool|name)"\s*:/i.test(clean))return 'quick';
