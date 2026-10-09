@@ -42,6 +42,7 @@ jobs:
         run: node release-tools/test-notion-bootstrap.cjs
         working-directory: build-src/PlazCode
       - run: node release-tools/test-notion-block-cards.cjs
+        working-directory: build-src/PlazCode
       - run: node release-tools/test-command-watchers.cjs
         working-directory: build-src/PlazCode
       - run: node release-tools/test-browsers.cjs
