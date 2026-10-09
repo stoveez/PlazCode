@@ -62,7 +62,13 @@ printf '{"version":"%s","sha256":"%s","mode":"%s"}' "$3" "$2" "$5" > "$6/install
   else:assert called['mode']=='background',called
   print('PASS automatic update after initial up-to-date check (installation metadata becomes outdated while app remains open): outdated detection, real published release download, verified SHA256, exact installer version/checksum handoff. GUI installation/relaunch replaced by test helper.')
  finally:
-  p.terminate()
-  try:p.wait(timeout=5)
-  except subprocess.TimeoutExpired:p.kill();p.wait(timeout=5)
-  log.close()
+  try:
+   # The installer inherits stdout. Stop this fixture's owned process tree so
+   # its child cannot retain output.log while TemporaryDirectory removes it.
+   if os.name=='nt' and p.poll() is None:
+    stopped=subprocess.run(['taskkill','/PID',str(p.pid),'/T','/F'],capture_output=True,text=True,timeout=10)
+    if stopped.returncode and p.poll() is None:raise RuntimeError(stopped.stdout+stopped.stderr)
+   elif p.poll() is None:p.terminate()
+   try:p.wait(timeout=5)
+   except subprocess.TimeoutExpired:p.kill();p.wait(timeout=5)
+  finally:log.close()
