@@ -1,3 +1,15 @@
+PlazCode 1.24.8 — Quick replies, clear tasks and Notion fixes
+
+Small requests stay brief, checklists follow your goals, and Notion handles results and connection status more reliably.
+
+- Quick command lists use a shorter reference, without project setup.
+- Real work keeps its project guidance and original goals when you say continue.
+- Greetings, help and command lists no longer become tracked tasks.
+- Command names no longer become checklist steps.
+- Message timestamps no longer run into checklist labels.
+- Notion tool results stay in compact cards instead of showing raw source text.
+- Working Notion chats keep their connection status when messages are redrawn or hidden.
+
 PlazCode 1.24.7 — Name your skills and a clearer Skills layout
 
 Give your skills a name, or let PlazCode name them for you. Learning and library options now have clearer spacing.

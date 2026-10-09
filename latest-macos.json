@@ -1,9 +1,66 @@
 {
-  "version": "1.24.7",
-  "desktop_version": "1.24.7",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.7.zip",
-  "sha256": "4af90e977882bef54d9f1f83516098fd8c1e486947ae77f5dacbc84ae93ac2ac",
+  "version": "1.24.8",
+  "desktop_version": "1.24.8",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.8.zip",
+  "sha256": "705c579bf3aa307f930fcc209031d9065a20b79287775f8fe75eca9bace2f069",
   "release_notes": [
+    {
+      "version": "1.24.8",
+      "title": "Quick replies, clear tasks and Notion fixes",
+      "summary": "Small requests stay brief, checklists follow your goals, and Notion handles results and connection status more reliably.",
+      "added": [],
+      "improved": [
+        "Quick command lists use a shorter reference, without project setup.",
+        "Real work keeps its project guidance and original goals when you say continue."
+      ],
+      "fixed": [
+        "Greetings, help and command lists no longer become tracked tasks.",
+        "Command names no longer become checklist steps.",
+        "Message timestamps no longer run into checklist labels.",
+        "Notion tool results stay in compact cards instead of showing raw source text.",
+        "Working Notion chats keep their connection status when messages are redrawn or hidden."
+      ],
+      "notes": [
+        "Automated regressions cover startup, commands, Studio detection fixtures and updating. Live AI accounts, response speed and real Studio sessions were not tested."
+      ],
+      "github": {
+        "sections": [
+          {
+            "title": "💬 Quick replies for small requests",
+            "items": [
+              "**Greetings stay simple:** hello, thanks, help and quick questions no longer start a project task or checklist.",
+              "**Faster command discovery:** asking to list commands skips project memory, skills, templates and checkpoint setup, and uses a shorter command reference."
+            ]
+          },
+          {
+            "title": "✅ Tasks follow your goal",
+            "items": [
+              "**Meaningful task names:** checklists describe what you want accomplished, rather than tool names such as list_commands. Old command-list entries no longer become the active checklist goal.",
+              "**Continue keeps the plan:** real work retains its original goal and project guidance when you ask to continue."
+            ]
+          },
+          {
+            "title": "🎨 Cleaner checklist text",
+            "items": [
+              "**Readable labels:** chat timestamps no longer get copied against the task name. Times written inside your instructions stay intact."
+            ]
+          },
+          {
+            "title": "🛠️ Notion reliability",
+            "items": [
+              "**Readable results:** tool results show as compact cards instead of raw source text.",
+              "**Accurate connection:** working chats stay connected when Notion redraws or hides older messages."
+            ]
+          },
+          {
+            "title": "🧪 Regression checks",
+            "items": [
+              "Automated checks cover quick requests, task retention, command schemas, startup, Studio detection fixtures, updating and Windows/Mac builds. Live AI accounts, response speed and real Studio sessions were not tested."
+            ]
+          }
+        ]
+      }
+    },
     {
       "version": "1.24.7",
       "title": "Name your skills and a clearer Skills layout",
@@ -209,73 +266,6 @@
             "items": [
               "**Notion:** better send-button detection, including tall composers and delayed startup controls. Large tool replies have a verified text-send fallback.",
               "**Screenshots:** Studio captures use the right bridge. ChatGPT waits for an attachment and sends it once; failed uploads show an error."
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.24.3",
-      "title": "Faster desktop, smaller downloads and a better Explorer",
-      "summary": "Less wasted work, a smaller Windows download and a refreshed workspace.",
-      "added": [
-        "Effort indicators on the desktop and browser bar, with colors from Low through Ultracode."
-      ],
-      "improved": [
-        "Unchanged tool lists and logs stay in place instead of rebuilding every second.",
-        "MCP listings reuse recent data and share simultaneous requests; hidden windows poll less often.",
-        "Explorer has a themed hierarchy, class icons, search and polished script/property panels.",
-        "Windows downloads contain the Windows app; Mac has its own complete download."
-      ],
-      "fixed": [
-        "Collapsed sidebar icons are centered; pages follow the requested order.",
-        "Ultracode changes the selected page outline while preserving the theme glow.",
-        "Notion startup can use small verified text pastes when native editing and file uploads fail.",
-        "Co-Work leaves idle or disconnected chats available for ordinary messages.",
-        "Notion recognizes localized completion controls to avoid waiting after a reply has finished.",
-        "A delayed settings read no longer resets a newly selected AgentScript mode.",
-        "Windows starts without unnecessary process scans and detects stale agents in any display language."
-      ],
-      "notes": [
-        "Automated platform and browser checks passed. Live signed-in providers and Studio sessions remain untested."
-      ],
-      "github": {
-        "sections": [
-          {
-            "title": "⚡ Smoother performance",
-            "items": [
-              "**Less lag:** unchanged tools and logs stay in place. New log lines append without rebuilding the list.",
-              "**Less background work:** fewer repeated requests and refreshes while hidden."
-            ]
-          },
-          {
-            "title": "📦 Smaller downloads",
-            "items": [
-              "**Windows:** no longer bundles the Mac app and Mac memory helpers. Mac keeps its own complete download. Features and starter skills are preserved."
-            ]
-          },
-          {
-            "title": "📁 Better workspace",
-            "items": [
-              "**Explorer:** a cleaner game tree, class icons, search, and script/property panels that match your theme.",
-              "**Navigation:** centered collapsed icons and your requested page order. Updates is in Settings."
-            ]
-          },
-          {
-            "title": "🧠 See your effort level",
-            "items": [
-              "**Desktop and bar:** show your selected effort. Low starts yellow, Max is red, and Ultracode is purple.",
-              "**Ultracode:** selected pages get a purple outline while keeping your theme glow, with a smooth transition."
-            ]
-          },
-          {
-            "title": "🔧 Startup and chat fixes",
-            "items": [
-              "**Windows startup:** skips unnecessary process scans and detects old agents across display languages.",
-              "**Startup:** another verified text-send path when Notion file uploads fail.",
-              "**Normal chat:** idle or disconnected chats no longer turn ordinary messages into queued follow-ups.",
-              "**Faster reply detection:** recognize finished responses in more languages, removing avoidable waiting after Notion finishes.",
-              "**Engine selection:** a delayed settings load no longer overrides your choice of AgentScript."
             ]
           }
         ]
