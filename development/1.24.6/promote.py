@@ -54,6 +54,11 @@ def unpack_package(path):
     for name,(raw,mode) in files.items():
         if name.endswith(notices) or name == 'PlazCode/Update-PlazCode.command':
             files[name]=(raw.replace(b'\r\n',b'\n'),mode)
+        if name == 'PlazCode/Update-PlazCode.command':
+            # copy2 from the extracted source can replace the Mac baseline's
+            # executable mode with 0644. Restore only this known shell helper's
+            # execute bits; its verified contents and native binaries stay intact.
+            files[name]=(files[name][0],mode | (0o111 << 16))
     return files
 
 def main():

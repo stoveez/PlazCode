@@ -101,6 +101,7 @@ jobs:
         run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name plazcode-1.24.6-mac-desktop-validation --dir ci-artifacts/mac-desktop
       - name: Assemble immutable archives and compact feeds
         run: |
+          python3 development/1.24.6/test-promote-permissions.py
           python3 development/1.24.6/promote.py
           python3 test-release-feed.py
           python3 test-release-notes.py
