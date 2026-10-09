@@ -6,6 +6,12 @@ Recover from stuck command waits, continue safely after Stop, and import your ow
 
 - **Bounded waits:** MCP chatter, blocked pipes, missing worker replies and stale generation flags no longer keep these waits alive indefinitely.
 - **Stop → Continue:** the next request waits for cancellation to settle. Partial or uncertain commands are never replayed automatically.
+- **DOM recovery:** safer reads and editor cleanup across AI adapters, with bounded lookups and no extra polling.
+
+### ☑️ Stable task checklist
+
+- **Keep the main tasks:** continue and keep going retain the plan, including after a tab refresh. Change it only when asked; update statuses or append requested work.
+- **Cleaner spacing:** more room between rows, icons and headings; message timestamps are excluded from task labels.
 
 ### 📥 Import skills
 
