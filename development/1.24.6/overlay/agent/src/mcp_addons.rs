@@ -382,8 +382,9 @@ impl AddonRuntime {
 
     async fn notify(&mut self, method: &str, params: serde_json::Value) -> anyhow::Result<()> {
         let line = serde_json::json!({"jsonrpc":"2.0","method":method,"params":params}).to_string() + "\n";
-        self.stdin.as_mut().ok_or_else(|| anyhow::anyhow!("MCP stdin unavailable"))?.write_all(line.as_bytes()).await?;
-        self.stdin.as_mut().ok_or_else(|| anyhow::anyhow!("MCP stdin unavailable"))?.flush().await?;
+        let stdin = self.stdin.as_mut().ok_or_else(|| anyhow::anyhow!("MCP stdin unavailable"))?;
+        tokio::time::timeout(std::time::Duration::from_secs(5), async { stdin.write_all(line.as_bytes()).await?; stdin.flush().await })
+            .await.map_err(|_| anyhow::anyhow!("[{}] MCP notification timed out: {method}", self.id))??;
         Ok(())
     }
 
@@ -399,6 +400,7 @@ impl AddonRuntime {
             .await.map_err(|_| anyhow::anyhow!("[{}] MCP request timed out: {method}", self.id))??;
         let stdout = self.stdout.as_mut().ok_or_else(|| anyhow::anyhow!("MCP stdout unavailable"))?;
         loop {
+            anyhow::ensure!(tokio::time::Instant::now() < deadline, "[{}] MCP request timed out: {method}", self.id);
             let line = tokio::time::timeout_at(deadline, stdout.next_line()).await
                 .map_err(|_| anyhow::anyhow!("[{}] MCP request timed out: {method}", self.id))??
                 .ok_or_else(|| anyhow::anyhow!("[{}] MCP server exited while handling {method}: {}", self.id,

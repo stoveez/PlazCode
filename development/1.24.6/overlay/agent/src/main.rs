@@ -304,7 +304,9 @@ impl McpRuntime {
 
     async fn notify(&mut self, method: &str, params: serde_json::Value) -> anyhow::Result<()> {
         let line = serde_json::json!({"jsonrpc":"2.0", "method":method, "params":params}).to_string() + "\n";
-        self.stdin.as_mut().ok_or_else(|| anyhow::anyhow!("MCP stdin unavailable"))?.write_all(line.as_bytes()).await?;
+        let stdin = self.stdin.as_mut().ok_or_else(|| anyhow::anyhow!("MCP stdin unavailable"))?;
+        tokio::time::timeout(Duration::from_secs(5), async { stdin.write_all(line.as_bytes()).await?; stdin.flush().await })
+            .await.map_err(|_| anyhow::anyhow!("MCP notification timed out: {method}"))??;
         Ok(())
     }
 
@@ -321,6 +323,7 @@ impl McpRuntime {
             .await.map_err(|_| anyhow::anyhow!("MCP request timed out: {method}"))??;
         let stdout = self.stdout.as_mut().ok_or_else(|| anyhow::anyhow!("MCP stdout unavailable"))?;
         loop {
+            anyhow::ensure!(tokio::time::Instant::now() < deadline, "MCP request timed out: {method}");
             let line = tokio::time::timeout_at(deadline, stdout.next_line()).await
                 .map_err(|_| anyhow::anyhow!("MCP request timed out: {method}"))??
                 .ok_or_else(|| anyhow::anyhow!("MCP server exited while handling {method}"))?;
@@ -658,7 +661,7 @@ mod startup_tests {
 
     #[tokio::test]
     async fn mcp_deadline_does_not_restart_for_notifications_or_wrong_ids() {
-        let mut mcp=deadline_fixture("import sys,time,json\nrequest=json.loads(sys.stdin.readline())\nwhile True:\n print('not json');print(json.dumps({'jsonrpc':'2.0','method':'notifications/progress'}));print(json.dumps({'id':999,'result':{}}));time.sleep(.01)").await;
+        let mut mcp=deadline_fixture("import sys,time,json\nrequest=json.loads(sys.stdin.readline())\nwhile True:\n print('not json');print(json.dumps({'jsonrpc':'2.0','method':'notifications/progress'}));print(json.dumps({'id':999,'result':{}}))").await;
         let start=std::time::Instant::now();
         let error=mcp.request_with_timeout("tools/call",serde_json::json!({}),Duration::from_secs(1)).await.unwrap_err();
         assert!(error.to_string().contains("timed out"));assert!(start.elapsed()<Duration::from_secs(3));
