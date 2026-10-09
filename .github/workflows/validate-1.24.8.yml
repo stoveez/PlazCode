@@ -91,6 +91,7 @@ jobs:
           python test-release-feed.py
           python test-release-notes.py
           python build-src/PlazCode/test-update-marker.py
+          python build-src/PlazCode/test-process-cleanup.py
       - run: rustup update stable --no-self-update
       - run: npm ci --prefix release-tools --ignore-scripts
         working-directory: build-src/PlazCode
