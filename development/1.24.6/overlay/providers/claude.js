@@ -478,13 +478,13 @@ const RSProvider = (() => {
       if (relock) ed.setAttribute("contenteditable", "true");
       await typeEditorText(ed, text);
       if (images && images.length) {
-        try { await attachImages(images); } catch {}
-        const t0 = Date.now();
-        while (Date.now() - t0 < 25000) {
-          const b = sendButton();
-          if (b && !safeRead(() => b.disabled, true)) { try { b.click(); } catch {} }
-          if (await waitFor(() => editorText().trim() === "" || !!stopButton(), 1200)) return;
-        }
+        if (!await attachImages(images)) throw new Error("Claude did not confirm the screenshot upload. The message was not submitted.");
+        const ready = await waitFor(() => { const b = sendButton(); return b && !safeRead(() => b.disabled, true); }, 25000);
+        const b = ready && sendButton();
+        if (!b || safeRead(() => b.disabled, true)) throw new Error("Claude is not ready to send the screenshot. The message was not submitted.");
+        // A late receipt cannot authorize another submission of the same command.
+        b.click();
+        await waitFor(() => editorText().trim() === "" || !!stopButton(), 15000);
         return;
       }
       await waitFor(() => !!sendButton(), 2000);

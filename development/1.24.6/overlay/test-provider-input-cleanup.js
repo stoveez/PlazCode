@@ -15,5 +15,13 @@ function functionSource(name,fn){const text=fs.readFileSync('providers/'+name+'.
  }
  // A failing focus must still relock a temporarily enabled DeepSeek rich editor.
  {const editor={tagName:'DIV',getAttribute:()=> 'false',setAttribute(k,v){this.editable=v;},focus(){throw Error('focus fault');},dispatchEvent(){},editable:'false'};const context={window:{},document:{},InputEvent:function(){},safeRead:(fn,f)=>{try{return fn();}catch{return f;}}};vm.createContext(context);vm.runInContext(functionSource('deepseek','setTextareaValue')+';this.write=setTextareaValue;',context);context.write(editor,'text');assert.equal(editor.editable,'false');checks++;}
+ // A delayed screenshot receipt never authorizes another native submission.
+ for(const scenario of ['delayed-receipt','upload-failed','not-ready']){
+  let clicks=0,waits=0;const editor={setAttribute(){},style:{}};
+  const c={getEditor:()=>editor,truncateForSend:x=>x,typeEditorText:async()=>{},attachImages:async()=>scenario!=='upload-failed',waitFor:async()=>++waits===1&&scenario!=='not-ready',sendButton:()=>({disabled:false,click(){clicks++;}}),safeRead:(fn,f)=>{try{return fn();}catch{return f;}},editorText:()=> 'pending',stopButton:()=>null};
+  vm.createContext(c);vm.runInContext('let _locked=false;'+functionSource('claude','typeAndSend')+';this.send=typeAndSend;',c);
+  if(scenario==='delayed-receipt')await c.send('text',[{}]);else await assert.rejects(c.send('text',[{}]),/not (?:confirm|ready)/);
+  assert.equal(clicks,scenario==='delayed-receipt'?1:0,scenario);checks++;
+ }
  console.log('PASS '+checks+' input ownership, visibility and lock cleanup failure scenarios.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
