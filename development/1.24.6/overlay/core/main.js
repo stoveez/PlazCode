@@ -2970,7 +2970,7 @@
       const timeout = /^(?:get_scene_info|blender_get_scene_info)$/.test(bareName) ? 8000 : 120000;
       let capTimer;
       const hardCap = new Promise((res) =>
-        { capTimer = setTimeout(() => res({ ok: false, kind: "timeout", error: "PlazCode did not receive a Blender command result within " + ((timeout + 30000) / 1000) + " seconds. A tool list or MCP process handshake does not verify Blender's addon. Use Test Blender connection in the desktop app to check a real scene response. This command may still have run; inspect Blender before retrying. No automatic replay was attempted." }), bgRequestTimeoutMs(msg)); });
+        { capTimer = setTimeout(() => res({ ok: false, kind: "timeout", error: "PlazCode did not receive a Blender command result within " + ((timeout + 30000) / 1000) + " seconds. A tool list or MCP process handshake does not verify Blender's addon. Use Test Blender connection in the desktop app to check a real scene response. This command may still have run; inspect Blender before retrying. No automatic replay was attempted." }), timeout + 30000); });
       let stopTimer;
       const stopWatch = new Promise((res) => {
         stopTimer = setInterval(() => { if (A.stop && A.stopMode !== "safe") res({ ok: false, kind: "stopped" }); }, 50);
@@ -3043,7 +3043,7 @@
     // gets a definitive result and continues.
     let capTimer;
     const hardCap = new Promise((res) =>
-      { capTimer = setTimeout(() => res({ ok: false, kind: "timeout", error: "no response from the extension worker" }), bgRequestTimeoutMs(msg)); });
+      { capTimer = setTimeout(() => res({ ok: false, kind: "timeout", error: "no response from the extension worker" }), timeout + 30000); });
     // Stop watcher: a blocking tool (e.g. wait_job_finished) would otherwise keep
     // the loop awaiting the bridge for up to minutes, leaving the input locked and
     // the Stop button stuck. When the user halts (A.stop), abandon the wait within
