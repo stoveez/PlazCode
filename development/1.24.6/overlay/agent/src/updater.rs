@@ -35,7 +35,8 @@ fn stage_helper(root: &std::path::Path, stage: &std::path::Path, windows: bool) 
 #[cfg(windows)]
 fn windows_helper_command() -> std::process::Command {
     let mut command=std::process::Command::new("powershell.exe");
-    command.args(["-NoProfile","-ExecutionPolicy","Bypass","-File"]);
+    // Windows PowerShell must build its own built-in module path, not inherit PowerShell 7 modules.
+    command.env_remove("PSModulePath").args(["-NoProfile","-ExecutionPolicy","Bypass","-File"]);
     command
 }
 static STATUS: once_cell::sync::Lazy<Mutex<Status>> = once_cell::sync::Lazy::new(|| Mutex::new(Status { desktop_version: env!("CARGO_PKG_VERSION").into(), desktop_latest: None, installed: installed(), latest: None, available: false, busy: false, progress: 0, message: "Check for the latest published update.".into(), error: None, checked_at: 0, check_error: None, background: false, release_notes: serde_json::from_str(include_str!("../../release-notes.json")).unwrap_or_default() }));
@@ -529,7 +530,7 @@ pub async fn post(Json(value): Json<Value>) -> axum::response::Response {
         let root=std::env::temp_dir().join(format!("PlazCode policy {}",std::process::id()));
         std::fs::create_dir_all(&root).unwrap();
         let script=root.join("policy.ps1");
-        std::fs::write(&script,"if ((Get-ExecutionPolicy -Scope Process) -ne 'Bypass') { exit 17 }; Write-Output 'helper-ran'").unwrap();
+        std::fs::write(&script,"if ((Get-ExecutionPolicy -Scope Process) -ne 'Bypass') { exit 17 }; if (!(Get-FileHash -LiteralPath $PSCommandPath -Algorithm SHA256).Hash) { exit 18 }; Write-Output 'helper-ran'").unwrap();
         let output=super::windows_helper_command().arg(&script).env("PSExecutionPolicyPreference","Restricted").output().unwrap();
         assert!(output.status.success(),"{}",String::from_utf8_lossy(&output.stderr));
         assert!(String::from_utf8_lossy(&output.stdout).contains("helper-ran"));
