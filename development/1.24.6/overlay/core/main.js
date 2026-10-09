@@ -1112,7 +1112,7 @@
       let gen = P.isGenerating() || hardGenerating;
       if (gen) lastActiveAt = Date.now(); // actively generating ⇒ never time out
       let d = P.readAssistant();
-      const progress = (d.reply || "") + "\n" + (d.thinking || "");
+      const progress = ((d.reply || "") + "\n" + (d.thinking || "")).replace(/\s+/g, " ").trim();
       if (progress !== hardProgressText) { hardProgressText = progress; hardProgressAt = Date.now(); }
       if (Date.now() - hardProgressAt >= TIMEOUT) {
         return {kind:"busy_timeout"};
@@ -1508,13 +1508,19 @@
   const isContextInvalidated = (m) =>
     /Extension context invalidated|Receiving end does not exist|message port closed/i.test(m || "");
 
+  function bgRequestTimeoutMs(msg) {
+    if (msg?.type === "call_tool") {
+      const requested = Number(msg.timeout);
+      return (Number.isFinite(requested) && requested > 0 ? Math.min(requested, 640000) : 120000) + 30000;
+    }
+    if (msg?.type === "ollama_chat") return 630000;
+    if (["status","live-status","immediate-stop","release-check"].includes(msg?.type)) return 15000;
+    return 180000;
+  }
   function bg(msg) {
     if ((A.stop || A.pendingToolSettles) && msg && msg.type === "call_tool") return Promise.resolve({ok:false,kind:"stopped",error:"Stopped before tool dispatch."});
     return new Promise((resolve) => {
       const tool = msg?.type === "call_tool", record = {draining:false};
-      const requested = Number(msg?.timeout);
-      const timeout = Number.isFinite(requested) && requested > 0 ? requested :
-        msg?.type === "ollama_chat" ? 600000 : msg?.type === "blender_connect" ? 120000 : 120000;
       let settled = false;
       if (tool) { A.inflightTools ||= new Set(); A.inflightTools.add(record); }
       const finish = value => {
@@ -1526,7 +1532,7 @@
       };
       const timer = setTimeout(() => finish({ok:false,kind:"timeout",error:
         "No reply from the extension worker before the request deadline." +
-        (tool ? " The command may already have run. Inspect current state before retrying; it was not replayed." : "")}), timeout + 30000);
+        (tool ? " The command may already have run. Inspect current state before retrying; it was not replayed." : "")}), bgRequestTimeoutMs(msg));
       const fail = m => finish({ok:false,kind:isContextInvalidated(m)?"stale-extension":"disconnected",error:m});
       try {
         chrome.runtime.sendMessage({...msg, engine: activeEngine()}, resp => {
@@ -1541,22 +1547,15 @@
   // open tab's content script keeps a DEAD chrome.runtime. A cheap status ping
   // detects that within seconds (vs waiting for the user's next command to fail),
   // so the "reload this page" banner appears before they try anything.
-  let staleProbeTimer = null;
+  let staleProbeTimer = null, staleProbePending = false;
   function startStaleProbe() {
     if (staleProbeTimer) return;
     staleProbeTimer = setInterval(() => {
-      try {
-        chrome.runtime.sendMessage({ type: "status" }, (resp) => {
-          const err = chrome.runtime.lastError && chrome.runtime.lastError.message;
-          if (err && isContextInvalidated(err)) {
-            try { ui.staleExtensionAlert(); } catch {}
-          }
-        });
-      } catch (e) {
-        if (isContextInvalidated(String(e && e.message || e))) {
-          try { ui.staleExtensionAlert(); } catch {}
-        }
-      }
+      if(staleProbePending)return;
+      staleProbePending=true;
+      bg({type:"status"}).then(resp=>{
+        if(resp?.kind === "stale-extension")ui.staleExtensionAlert();
+      }).catch(()=>{}).finally(()=>{staleProbePending=false;});
     }, 4000);
   }
   startStaleProbe();
@@ -2971,7 +2970,7 @@
       const timeout = /^(?:get_scene_info|blender_get_scene_info)$/.test(bareName) ? 8000 : 120000;
       let capTimer;
       const hardCap = new Promise((res) =>
-        { capTimer = setTimeout(() => res({ ok: false, kind: "timeout", error: "PlazCode did not receive a Blender command result within " + ((timeout + 30000) / 1000) + " seconds. A tool list or MCP process handshake does not verify Blender's addon. Use Test Blender connection in the desktop app to check a real scene response. This command may still have run; inspect Blender before retrying. No automatic replay was attempted." }), timeout + 30000); });
+        { capTimer = setTimeout(() => res({ ok: false, kind: "timeout", error: "PlazCode did not receive a Blender command result within " + ((timeout + 30000) / 1000) + " seconds. A tool list or MCP process handshake does not verify Blender's addon. Use Test Blender connection in the desktop app to check a real scene response. This command may still have run; inspect Blender before retrying. No automatic replay was attempted." }), bgRequestTimeoutMs(msg)); });
       let stopTimer;
       const stopWatch = new Promise((res) => {
         stopTimer = setInterval(() => { if (A.stop && A.stopMode !== "safe") res({ ok: false, kind: "stopped" }); }, 50);
@@ -3044,7 +3043,7 @@
     // gets a definitive result and continues.
     let capTimer;
     const hardCap = new Promise((res) =>
-      { capTimer = setTimeout(() => res({ ok: false, kind: "timeout", error: "no response from the extension worker" }), timeout + 30000); });
+      { capTimer = setTimeout(() => res({ ok: false, kind: "timeout", error: "no response from the extension worker" }), bgRequestTimeoutMs(msg)); });
     // Stop watcher: a blocking tool (e.g. wait_job_finished) would otherwise keep
     // the loop awaiting the bridge for up to minutes, leaving the input locked and
     // the Stop button stuck. When the user halts (A.stop), abandon the wait within
@@ -10195,7 +10194,7 @@ statusTimer = rsInterval(() => bg({ type: "status" }).then(onStatus), 5000);
       const operation=Promise.resolve(P.writeDraft('',text)).then(cleared=>{if(!cleared || !cleared.ok)ui.toast('Follow-up accepted. Your draft changed, so PlazCode kept the text.');}).finally(()=>{if(A.coworkDraftWrite===operation)A.coworkDraftWrite=null;pumpCowork();});
       A.coworkDraftWrite=operation;return true;
     },
-    isBlocked: () => A.injecting || A.running || A.starting || A.enhancing,
+    isBlocked: () => A.injecting || (A.running && !(A.userStopped && A.stopMode === "immediate")) || A.starting || A.enhancing,
     isStarted: () => A.started,
     onBlockedAttempt: () => ui.nudgeStart(),
     onUserMessage: (base, preSendToken) => {

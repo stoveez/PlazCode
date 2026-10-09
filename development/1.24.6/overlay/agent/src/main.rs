@@ -197,6 +197,7 @@ impl AppState {
 
 /// Persistent stdio client for Roblox Studio's built-in MCP server.
 struct McpRuntime {
+    request_pending: bool,
     child: Option<Child>,
     stdin: Option<ChildStdin>,
     stdout: Option<Lines<BufReader<ChildStdout>>>,
@@ -209,7 +210,7 @@ struct McpRuntime {
 
 impl McpRuntime {
     fn new(alive: Arc<AtomicBool>) -> Self {
-        Self { child: None, stdin: None, stdout: None, next_id: 1, tools: Vec::new(), studio_id: None, studio_checked: None, alive }
+        Self { request_pending: false, child: None, stdin: None, stdout: None, next_id: 1, tools: Vec::new(), studio_id: None, studio_checked: None, alive }
     }
 
     fn launcher() -> anyhow::Result<(String, Vec<String>)> {
@@ -237,22 +238,21 @@ impl McpRuntime {
     }
 
     async fn reset(&mut self) {
-        if self.child.is_some() {
-            info!("MCP runtime reset — killing previous helper process");
-            if let Some(child) = self.child.as_mut() {
-                #[cfg(windows)]
-                if let Some(pid) = child.id() {
-                    let _ = std::process::Command::new("taskkill")
-                        .args(["/F", "/T", "/PID", &pid.to_string()])
-                        .creation_flags(CREATE_NO_WINDOW)
-                        .output();
-                    tokio::time::sleep(Duration::from_millis(150)).await;
-                }
-                let _ = child.kill().await;
-            }
-        }
-        self.child = None; self.stdin = None; self.stdout = None; self.tools.clear(); self.studio_id = None; self.studio_checked = None; self.next_id = 1;
+        self.request_pending=false;
+        let child = self.child.take();
+        self.stdin = None; self.stdout = None; self.tools.clear(); self.studio_id = None; self.studio_checked = None; self.next_id = 1;
         self.alive.store(false, Ordering::Relaxed);
+        if let Some(mut child) = child {
+            info!("MCP runtime reset — closing the owned helper process");
+            #[cfg(windows)]
+            if let Some(pid) = child.id() {
+                let mut killer=Command::new("taskkill");
+                killer.args(["/F","/T","/PID",&pid.to_string()]).creation_flags(CREATE_NO_WINDOW).kill_on_drop(true);
+                let _=tokio::time::timeout(Duration::from_secs(3),killer.output()).await;
+            }
+            let _=child.start_kill();
+            let _=tokio::time::timeout(Duration::from_secs(2),child.wait()).await;
+        }
     }
 
     /// True if the helper process is still running. Uses try_wait so a crashed
@@ -318,20 +318,24 @@ impl McpRuntime {
         let request_id = self.next_id; self.next_id += 1;
         let line = serde_json::json!({"jsonrpc":"2.0", "id":request_id, "method":method, "params":params}).to_string() + "\n";
         let deadline = tokio::time::Instant::now() + budget;
-        let stdin = self.stdin.as_mut().ok_or_else(|| anyhow::anyhow!("MCP stdin unavailable"))?;
-        tokio::time::timeout_at(deadline, async { stdin.write_all(line.as_bytes()).await?; stdin.flush().await })
-            .await.map_err(|_| anyhow::anyhow!("MCP request timed out: {method}"))??;
-        let stdout = self.stdout.as_mut().ok_or_else(|| anyhow::anyhow!("MCP stdout unavailable"))?;
-        loop {
-            anyhow::ensure!(tokio::time::Instant::now() < deadline, "MCP request timed out: {method}");
-            let line = tokio::time::timeout_at(deadline, stdout.next_line()).await
-                .map_err(|_| anyhow::anyhow!("MCP request timed out: {method}"))??
-                .ok_or_else(|| anyhow::anyhow!("MCP server exited while handling {method}"))?;
-            let Ok(message) = serde_json::from_str::<serde_json::Value>(&line) else { continue; };
-            if message.get("id").and_then(|v| v.as_u64()) != Some(request_id) { continue; }
-            if let Some(error) = message.get("error") { anyhow::bail!("MCP {method} failed: {error}"); }
-            return message.get("result").cloned().ok_or_else(|| anyhow::anyhow!("MCP {method} returned no result"));
-        }
+        self.request_pending=true;
+        let exchange = async {
+            let stdin = self.stdin.as_mut().ok_or_else(|| anyhow::anyhow!("MCP stdin unavailable"))?;
+            stdin.write_all(line.as_bytes()).await?;
+            stdin.flush().await?;
+            let stdout = self.stdout.as_mut().ok_or_else(|| anyhow::anyhow!("MCP stdout unavailable"))?;
+            loop {
+                anyhow::ensure!(tokio::time::Instant::now() < deadline, "MCP request timed out: {method}");
+                let line = stdout.next_line().await?.ok_or_else(|| anyhow::anyhow!("MCP server exited while handling {method}"))?;
+                let Ok(message) = serde_json::from_str::<serde_json::Value>(&line) else { continue; };
+                if message.get("id").and_then(|v| v.as_u64()) != Some(request_id) { continue; }
+                if let Some(error) = message.get("error") { anyhow::bail!("MCP {method} failed: {error}"); }
+                return message.get("result").cloned().ok_or_else(|| anyhow::anyhow!("MCP {method} returned no result"));
+            }
+        };
+        let outcome=tokio::time::timeout_at(deadline, exchange).await.map_err(|_| anyhow::anyhow!("MCP request timed out: {method}"));
+        self.request_pending=false;
+        outcome?
     }
 
     async fn list_tools(&mut self) -> anyhow::Result<Vec<serde_json::Value>> {
@@ -684,6 +688,7 @@ mod startup_tests {
         mcp.child.as_mut().unwrap().kill().await.unwrap();
     }
 
+
     #[tokio::test]
     async fn verified_editor_transitions_push_to_all_subscribers_without_locking_tools() {
         let alive = Arc::new(AtomicBool::new(false));
@@ -756,6 +761,46 @@ for line in sys.stdin:
         }
     }
 
+
+    async fn fake_request_runtime(script: &str) -> McpRuntime {
+        let python=if cfg!(windows){"python"}else{"python3"};
+        let mut child=Command::new(python).args(["-u","-c",script]).kill_on_drop(true)
+            .stdin(Stdio::piped()).stdout(Stdio::piped()).spawn().unwrap();
+        let mut mcp=McpRuntime::new(Arc::new(AtomicBool::new(true)));
+        mcp.stdin=child.stdin.take();mcp.stdout=child.stdout.take().map(|s|BufReader::new(s).lines());mcp.child=Some(child);mcp
+    }
+    #[tokio::test]
+    async fn mcp_notification_noise_and_backpressured_writes_have_total_deadlines() {
+        for (script,params) in [
+            ("import sys,time,json\nrequest=json.loads(sys.stdin.readline())\nwhile True:\n print(json.dumps({'method':'notifications/progress','params':{'progress':1}}),flush=True)\n time.sleep(.01)\n",serde_json::json!({})),
+            ("import time\ntime.sleep(60)\n",serde_json::json!({"code":"x".repeat(2*1024*1024)})),
+        ] {
+            let mut mcp=fake_request_runtime(script).await;let started=std::time::Instant::now();
+            let error=mcp.request_with_timeout("tools/call",params,Duration::from_millis(250)).await.unwrap_err();
+            assert!(error.to_string().contains("timed out"));assert!(started.elapsed()<Duration::from_secs(3));
+            mcp.reset().await;assert!(mcp.child.is_none());assert!(!mcp.alive.load(Ordering::Relaxed));
+        }
+    }
+    #[tokio::test]
+    async fn mcp_matching_reply_ignores_unrelated_and_late_ids_without_replay() {
+        let script="import sys,json\nfor line in sys.stdin:\n r=json.loads(line)\n print('not-json',flush=True)\n print(json.dumps({'id':r['id']-1,'result':'stale'}),flush=True)\n print(json.dumps({'id':r['id'],'result':{'echo':r['params']}}),flush=True)\n";
+        let mut mcp=fake_request_runtime(script).await;
+        for value in ["first","second"] {let result=mcp.request_with_timeout("tools/call",serde_json::json!({"value":value}),Duration::from_secs(3)).await.unwrap();assert_eq!(result["echo"]["value"],value);}
+        mcp.reset().await;
+    }
+    #[tokio::test]
+    async fn queued_command_deadline_does_not_reset_another_tasks_helper() {
+        let alive=Arc::new(AtomicBool::new(true));let ui=Arc::new(gui::UiShared::new(alive.clone()));
+        let folder=std::env::temp_dir().join(format!("plazcode-queue-test-{}",std::process::id()));
+        let workspace=Arc::new(workspace::Workspace::new(Some(folder.to_str().unwrap())).unwrap());
+        let state=AppState::new(broadcast::channel(16).0,alive.clone(),Arc::new(AtomicBool::new(false)),workspace,Arc::new("test".into()),Arc::new(preferences::PreferencesStore::load()),ui);
+        let _owned=state.roblox_mcp.lock().await;
+        let error=checkpoint_tool_bounded(&state,"roblox","","script_grep",serde_json::json!({}),Duration::from_millis(50)).await.unwrap_err();
+        assert!(error.to_string().contains("deadline exceeded"));assert!(alive.load(Ordering::Relaxed));assert_eq!(state.mcp_in_flight.load(Ordering::Relaxed),0);
+        assert_eq!(native_tool_timeout("addon__long",None),Duration::from_millis(640000));
+        assert_eq!(native_tool_timeout("execute_luau",Some(20000)),Duration::from_secs(20));
+        let _=std::fs::remove_dir_all(folder);
+    }
 
     #[tokio::test]
     async fn occupied_port_reports_the_exact_endpoint() {
@@ -1256,6 +1301,27 @@ async fn immediate_stop_handler(State(state):State<AppState>,Json(req):Json<serd
     let cancelled=!id.is_empty() && state.cancellation.cancel(id);
     Json(serde_json::json!({"ok":true,"cancelled":cancelled,"message":"Immediate Stop requested. External tools may retain partial effects."}))
 }
+fn native_tool_timeout(name: &str, requested: Option<u64>) -> Duration {
+    Duration::from_millis(requested.unwrap_or(if name.contains("__") { 640000 } else { 120000 }).clamp(1000,640000))
+}
+async fn checkpoint_tool_bounded(state: &AppState, engine: &str, id: &str, name: &str, args: serde_json::Value, budget: Duration) -> anyhow::Result<McpOutput> {
+    match tokio::time::timeout(budget, checkpoint_tool(state,engine,id,name,args)).await {
+        Ok(result)=>result,
+        Err(_)=> {
+            // The timed-out future is dropped before this branch. Never wait for
+            // or reset a helper currently owned by another task.
+            if engine=="roblox" {
+                if name.contains("__") {
+                    if let Ok(mut addons)=state.addons.try_lock(){addons.reset_interrupted_tool(name).await;}
+                } else if let Ok(mut mcp)=state.roblox_mcp.try_lock(){if mcp.request_pending{mcp.reset().await;}}
+            }
+            if !id.is_empty() {
+                if let Ok(mut journal)=checkpoints::STORE.try_lock(){journal.warn(id,"A command exceeded its total deadline. Partial effects may remain; inspect before retrying. The command was not replayed.");let _=journal.save();}
+            }
+            anyhow::bail!("Command deadline exceeded after {} seconds. Partial effects may remain; inspect state before retrying. The command was not replayed.",budget.as_secs())
+        }
+    }
+}
 async fn checkpoint_tool(state: &AppState, engine: &str, id: &str, name: &str, args: serde_json::Value) -> anyhow::Result<McpOutput> {
     let _activity = updater::ActivityGuard::enter();
     if id.is_empty(){return checkpoint_tool_inner(state,engine,id,name,args).await;}
@@ -1270,7 +1336,7 @@ async fn checkpoint_tool(state: &AppState, engine: &str, id: &str, name: &str, a
     // Dropping the local command future kills only its owned shell tree.
     // Recycle the specific helper whose response stream was interrupted.
     if engine=="roblox" {
-        if name.contains("__"){state.addons.lock().await.reset_tool(name).await;}else{state.roblox_mcp.lock().await.reset().await;}
+        if name.contains("__"){if let Ok(mut addons)=state.addons.try_lock(){addons.reset_interrupted_tool(name).await;}}else{if let Ok(mut mcp)=state.roblox_mcp.try_lock(){if mcp.request_pending{mcp.reset().await;}}}
     }
     let mut journal=checkpoints::STORE.lock().await;
     journal.warn(id,"Immediate Stop interrupted a tool. Partial changes or an uncertain external result may remain. Inspect state before retrying; automatic rollback is disabled.");let _=journal.save();
@@ -2001,12 +2067,13 @@ async fn handle_legacy_ws(ws_stream: tokio_tungstenite::WebSocketStream<tokio::n
                     "call_tool" => {
                         let name = val.get("name").and_then(|v| v.as_str()).unwrap_or("unknown").to_string();
                         let args = val.get("arguments").cloned().unwrap_or(serde_json::Value::Null);
+                        let budget = native_tool_timeout(&name,val.get("timeout").and_then(|v|v.as_u64()));
                         let state2 = state.clone();
                         let eng = engine.clone();
                         let checkpoint_id = val.get("checkpoint_id").and_then(|v|v.as_str()).unwrap_or("").to_string();
                         let tx = out_tx.clone();
                         tokio::spawn(async move {
-                            let outcome = checkpoint_tool(&state2, &eng, &checkpoint_id, &name, args).await;
+                            let outcome = checkpoint_tool_bounded(&state2, &eng, &checkpoint_id, &name, args, budget).await;
                             let response = match outcome {
                                 Ok(out) => {
                                     let mut frame = serde_json::json!({"type":"tool_result","id":id,"ok":true,"text":out.text});

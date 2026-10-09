@@ -41,6 +41,8 @@ jobs:
       - name: Notion startup with native Chromium and Firefox clipboard events
         run: node release-tools/test-notion-bootstrap.cjs
         working-directory: build-src/PlazCode
+      - run: node release-tools/test-command-watchers.cjs
+        working-directory: build-src/PlazCode
       - run: node release-tools/test-browsers.cjs
         working-directory: build-src/PlazCode
       - run: node release-tools/test-ultracode-appearance.cjs
@@ -116,6 +118,7 @@ jobs:
           ./test-updater.ps1
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           ./test-updater-policy.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           powershell.exe -NoProfile -File ./test-update-presentation.ps1
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           powershell.exe -NoProfile -File ./test-application-icon.ps1

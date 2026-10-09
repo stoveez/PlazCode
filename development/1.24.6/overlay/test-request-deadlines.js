@@ -5,10 +5,10 @@ function clock(){let now=1000,id=0;const timers=new Map();return {timers,Date:{n
  for(const tool of [false,true]){
   const time=clock(),A={stop:false},callbacks=[];
   const box={...time,A,activeEngine:()=> 'roblox',isContextInvalidated:()=>false,chrome:{runtime:{sendMessage(m,cb){callbacks.push(cb);},lastError:null}}};vm.createContext(box);
-  vm.runInContext(source.slice(source.indexOf('  function bg(msg)'),source.indexOf('\n  // Proactive stale-extension probe'))+'this.bg=bg;',box);
+  vm.runInContext(source.slice(source.indexOf('  function bgRequestTimeoutMs('),source.indexOf('\n  // Proactive stale-extension probe'))+'this.bg=bg;',box);
   const result=box.bg({type:tool?'call_tool':'skills',timeout:1000});
   if(tool){assert.equal(A.inflightTools.size,1);for(const r of A.inflightTools){r.draining=true;A.pendingToolSettles=1;}}
-  time.advance(tool?31000:31000);const value=await result;assert.equal(value.kind,'timeout');
+  time.advance(tool?31000:180000);const value=await result;assert.equal(value.kind,'timeout');
   if(tool){assert.equal(A.pendingToolSettles,0);assert.equal(A.inflightTools.size,0);assert.match(value.error,/not replayed/);}
   callbacks[0]({ok:true,text:'late'});assert.equal((await result).kind,'timeout');assert.equal(time.timers.size,0);
   A.stop=false;const healthy=box.bg({type:'call_tool',timeout:1000});callbacks[1]({ok:true,text:'once'});assert.equal((await healthy).text,'once');assert.equal(time.timers.size,0);

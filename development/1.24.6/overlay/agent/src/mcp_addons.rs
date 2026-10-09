@@ -180,6 +180,7 @@ pub(crate) struct AddonRuntime {
     initialized: bool,
     /// Consecutive tools/call timeouts; the server is recycled only at 2.
     call_timeouts: u32,
+    request_pending: bool,
 }
 
 impl AddonRuntime {
@@ -197,6 +198,7 @@ impl AddonRuntime {
             stderr_task: None,
             initialized: false,
             call_timeouts: 0,
+            request_pending: false,
         }
     }
 
@@ -212,24 +214,15 @@ impl AddonRuntime {
     }
 
     pub(crate) async fn reset(&mut self) {
-        if let Some(child) = self.child.as_mut() {
+        let child=self.child.take();
+        self.request_pending=false;self.initialized=false;self.stdin=None;self.stdout=None;self.tools.clear();self.next_id=1;
+        if let Some(task)=self.stderr_task.take(){task.abort();}
+        self.stderr.lock().unwrap_or_else(|error|error.into_inner()).clear();
+        if let Some(mut child)=child {
             #[cfg(windows)]
-            if let Some(pid) = child.id() {
-                let _ = std::process::Command::new("taskkill")
-                    .args(["/F", "/T", "/PID", &pid.to_string()])
-                    .creation_flags(CREATE_NO_WINDOW)
-                    .output();
-            }
-            let _ = child.kill().await;
+            if let Some(pid)=child.id(){let mut killer=Command::new("taskkill");killer.args(["/F","/T","/PID",&pid.to_string()]).creation_flags(CREATE_NO_WINDOW).kill_on_drop(true);let _=tokio::time::timeout(std::time::Duration::from_secs(3),killer.output()).await;}
+            let _=child.start_kill();let _=tokio::time::timeout(std::time::Duration::from_secs(2),child.wait()).await;
         }
-        if let Some(task) = self.stderr_task.take() { task.abort(); }
-        self.stderr.lock().unwrap_or_else(|error| error.into_inner()).clear();
-        self.initialized = false;
-        self.child = None;
-        self.stdin = None;
-        self.stdout = None;
-        self.tools.clear();
-        self.next_id = 1;
     }
 
     fn inherited_path(&self) -> Option<std::ffi::OsString> {
@@ -389,31 +382,31 @@ impl AddonRuntime {
     }
 
     async fn request(&mut self, method: &str, params: serde_json::Value) -> anyhow::Result<serde_json::Value> {
-        let request_id = self.next_id;
-        self.next_id += 1;
-        let line = serde_json::json!({"jsonrpc":"2.0","id":request_id,"method":method,"params":params}).to_string() + "\n";
         let seconds = if self.id == "blender" && method != "tools/call" { 20 } else if self.id == "blender" && params["name"] == "get_scene_info" { 20 }
             else if method == "tools/call" { call_timeout_secs(&self.spec.args, &params["arguments"]) } else { 120 };
-        let deadline = tokio::time::Instant::now() + std::time::Duration::from_secs(seconds);
-        let stdin = self.stdin.as_mut().ok_or_else(|| anyhow::anyhow!("MCP stdin unavailable"))?;
-        tokio::time::timeout_at(deadline, async { stdin.write_all(line.as_bytes()).await?; stdin.flush().await })
-            .await.map_err(|_| anyhow::anyhow!("[{}] MCP request timed out: {method}", self.id))??;
-        let stdout = self.stdout.as_mut().ok_or_else(|| anyhow::anyhow!("MCP stdout unavailable"))?;
-        loop {
-            anyhow::ensure!(tokio::time::Instant::now() < deadline, "[{}] MCP request timed out: {method}", self.id);
-            let line = tokio::time::timeout_at(deadline, stdout.next_line()).await
-                .map_err(|_| anyhow::anyhow!("[{}] MCP request timed out: {method}", self.id))??
-                .ok_or_else(|| anyhow::anyhow!("[{}] MCP server exited while handling {method}: {}", self.id,
-                    self.stderr.lock().unwrap_or_else(|error| error.into_inner()).iter().cloned().collect::<Vec<_>>().join(" | ")))?;
-            let Ok(message) = serde_json::from_str::<serde_json::Value>(&line) else { continue; };
-            if message.get("id").and_then(|v| v.as_u64()) != Some(request_id) {
-                continue;
+        self.request_with_timeout(method,params,std::time::Duration::from_secs(seconds)).await
+    }
+    async fn request_with_timeout(&mut self, method: &str, params: serde_json::Value, budget: std::time::Duration) -> anyhow::Result<serde_json::Value> {
+        let request_id=self.next_id;self.next_id+=1;
+        let line=serde_json::json!({"jsonrpc":"2.0","id":request_id,"method":method,"params":params}).to_string()+"\n";
+        let deadline=tokio::time::Instant::now()+budget;
+        self.request_pending=true;
+        let exchange=async {
+            let stdin=self.stdin.as_mut().ok_or_else(||anyhow::anyhow!("MCP stdin unavailable"))?;
+            stdin.write_all(line.as_bytes()).await?;stdin.flush().await?;
+            let stdout=self.stdout.as_mut().ok_or_else(||anyhow::anyhow!("MCP stdout unavailable"))?;
+            loop {
+                anyhow::ensure!(tokio::time::Instant::now() < deadline, "[{}] MCP request timed out: {method}", self.id);
+                let line=stdout.next_line().await?.ok_or_else(||anyhow::anyhow!("[{}] MCP server exited while handling {method}",self.id))?;
+                let Ok(message)=serde_json::from_str::<serde_json::Value>(&line) else {continue;};
+                if message.get("id").and_then(|v|v.as_u64())!=Some(request_id){continue;}
+                if let Some(error)=message.get("error"){anyhow::bail!("[{}] {method} failed: {error}",self.id);}
+                return message.get("result").cloned().ok_or_else(||anyhow::anyhow!("[{}] {method} returned no result",self.id));
             }
-            if let Some(error) = message.get("error") {
-                anyhow::bail!("[{}] {method} failed: {error}", self.id);
-            }
-            return message.get("result").cloned().ok_or_else(|| anyhow::anyhow!("[{}] {method} returned no result", self.id));
-        }
+        };
+        let outcome=tokio::time::timeout_at(deadline,exchange).await.map_err(|_|anyhow::anyhow!("[{}] MCP request timed out: {method}",self.id));
+        self.request_pending=false;
+        outcome?
     }
 
     async fn list_tools(&mut self) -> anyhow::Result<Vec<serde_json::Value>> {
@@ -434,7 +427,7 @@ impl AddonRuntime {
                     // Keep the server: a Studio add-on such as robloxstudio-mcp owns the
                     // plugin connection, and killing it mid-playtest disconnects Studio.
                     // Ask it to cancel; a late reply is skipped by request id.
-                    let _ = self.notify("notifications/cancelled", serde_json::json!({"requestId": call_id, "reason": "PlazCode timeout"})).await;
+                    let _ = tokio::time::timeout(std::time::Duration::from_secs(2),self.notify("notifications/cancelled", serde_json::json!({"requestId": call_id, "reason": "PlazCode timeout"}))).await;
                 }
                 return Err(error);
             }
@@ -501,6 +494,9 @@ impl AddonManager {
         }
     }
 
+    pub async fn reset_interrupted_tool(&mut self, advertised: &str) {
+        if let Some((id,_))=advertised.split_once("__") {if let Some(runtime)=self.runtimes.get_mut(id){if runtime.request_pending{runtime.reset().await;runtime.request_pending=false;}}}
+    }
     pub async fn reset_tool(&mut self, advertised: &str) {
         if let Some((id,_))=advertised.split_once("__") { if let Some(runtime)=self.runtimes.get_mut(id) { runtime.reset().await; } }
     }
@@ -610,6 +606,18 @@ mod tests {
             args: vec!["--ignored".into(), "--exact".into(), "mcp_addons::tests::stdio_fixture".into(), "--nocapture".into()],
             env,
         })
+    }
+
+    #[tokio::test]
+    async fn addon_backpressured_stdin_is_bounded_without_cutting_long_call_defaults() {
+        let mut runtime=fixture(false);
+        let python=if cfg!(windows){"python"}else{"python3"};
+        let mut child=Command::new(python).args(["-u","-c","import time;time.sleep(60)"]).kill_on_drop(true).stdin(Stdio::piped()).stdout(Stdio::piped()).spawn().unwrap();
+        runtime.stdin=child.stdin.take();runtime.stdout=child.stdout.take().map(|s|BufReader::new(s).lines());runtime.child=Some(child);
+        let started=std::time::Instant::now();
+        let result=runtime.request_with_timeout("tools/call",serde_json::json!({"code":"x".repeat(2*1024*1024)}),std::time::Duration::from_millis(250)).await;
+        assert!(result.unwrap_err().to_string().contains("MCP request timed out"));assert!(started.elapsed()<std::time::Duration::from_secs(3));
+        runtime.reset().await;assert!(!runtime.child_alive());
     }
 
     #[tokio::test]
