@@ -1,9 +1,77 @@
 {
-  "version": "1.24.5",
-  "desktop_version": "1.24.5",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.5.zip",
-  "sha256": "8ed49d4c8a49170791327ae5b340bcb4822d248bb81c75bf635ee7721b2cba29",
+  "version": "1.24.6",
+  "desktop_version": "1.24.6",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.6.zip",
+  "sha256": "91d0db15bac164446eafc9209d2a19a7cd54cf03cad00f9a87921b0234940e40",
   "release_notes": [
+    {
+      "version": "1.24.6",
+      "title": "Responsive commands, stable checklists and skill imports",
+      "summary": "Recover from stuck command waits, continue safely after Stop, and import your own skills.",
+      "added": [
+        "Skills accepts exported JSON files, text files and pasted instructions as new local candidates. Existing skills are preserved.",
+        "Skills has one instructions box with Save, Import and Export. Explicitly saved guidance is matched to the current project without requiring a separate goal or claiming it was tested."
+      ],
+      "improved": [
+        "Native MCP requests use one deadline across pipe writes, notifications and response reads. Missing extension callbacks resolve with an explicit timeout.",
+        "Fresh native requests wait for the previous loop and pending tool cancellation to settle instead of being discarded.",
+        "Main checklist tasks survive follow-ups and page refreshes in the same tab. Status updates and appended work preserve existing labels; explicit replacement requests can start a new plan."
+      ],
+      "fixed": [
+        "A stale soft generation flag can no longer hold an unfinished command indefinitely. Inactivity ends the wait without running partial commands.",
+        "Automatic updates use the installer helper embedded in the running build. Both automatic and standalone Windows launchers set a process-level execution policy.",
+        "Completed tool watchdog timers are cleared and late worker replies cannot settle a request twice.",
+        "Checklist labels exclude message timestamp elements, with wider row and header spacing. Literal times inside user instructions remain intact.",
+        "Missed DOM tooltip/style reads and temporary editor cleanup are guarded across supported AI adapters. Deep semantic composer boundaries survive inserted wrappers.",
+        "Debug report is separated from the Settings grid; effort aligns beneath PlazCode and visible desktop, bar and extension version labels include v."
+      ],
+      "notes": [
+        "Automated regression and platform tests are required before release. Live signed-in Claude, ChatGPT, Notion and Studio sessions remain unverified."
+      ],
+      "github": {
+        "sections": [
+          {
+            "title": "🛠️ Commands and continuation",
+            "items": [
+              "**Bounded waits:** MCP chatter, blocked pipes, missing worker replies and stale generation flags no longer keep these waits alive indefinitely.",
+              "**Stop → Continue:** the next request waits for cancellation to settle. Partial or uncertain commands are never replayed automatically.",
+              "**DOM recovery:** safer reads and editor cleanup across AI adapters, with bounded lookups and no extra polling."
+            ]
+          },
+          {
+            "title": "☑️ Stable task checklist",
+            "items": [
+              "**Keep the main tasks:** continue and keep going retain the plan, including after a tab refresh. Change it only when asked; update statuses or append requested work.",
+              "**Cleaner spacing:** more room between rows, icons and headings; message timestamps are excluded from task labels."
+            ]
+          },
+          {
+            "title": "📥 Import skills",
+            "items": [
+              "**Simple Skills:** type instructions and Save. Import/Export JSON or text; saved guidance adapts to the current project."
+            ]
+          },
+          {
+            "title": "🔧 Windows updater",
+            "items": [
+              "**Current helper:** automatic updates use the helper embedded in this build. Built-in and manual launchers set a process-level execution policy; checksum and rollback checks stay in place."
+            ]
+          },
+          {
+            "title": "🎨 Interface fixes",
+            "items": [
+              "**Spacing and versions:** separate Debug report cards, align effort under PlazCode and prefix displayed versions with v."
+            ]
+          },
+          {
+            "title": "✅ Checked before release",
+            "items": [
+              "Regression fixtures and native platform checks. Live signed-in AI accounts and Studio behavior remain unverified."
+            ]
+          }
+        ]
+      }
+    },
     {
       "version": "1.24.5",
       "title": "DeepSeek Ultracode and smoother Notion startup",
@@ -230,49 +298,12 @@
           }
         ]
       }
-    },
-    {
-      "version": "1.24.1",
-      "title": "Reliable results and a browsable Skills page",
-      "summary": "Keep repeated tool results flowing, wait for complete ChatGPT replies, and browse, inspect or add adaptable project skills.",
-      "added": [
-        "A searchable desktop Skills menu with readable names, detailed descriptions, method steps and checks for all 11 starter skills and saved methods.",
-        "Add skill and Ask AI to add skill, with generated names for unnamed methods and full paginated starter instructions."
-      ],
-      "improved": [
-        "Skills are applied by inspecting project context, adapting relevant methods and verifying behavior. AI-created candidates stay unverified until checked."
-      ],
-      "fixed": [
-        "Identical results from separate command turns are now delivered independently. Only the same confirmed delivery is deduplicated.",
-        "ChatGPT output pauses no longer finalize a command while the native Stop control is present; a stuck reply pauses safely without auto-stopping the AI.",
-        "CodeMirror command text refreshes after same-length replacements."
-      ],
-      "notes": [
-        "Automated fixtures and platform checks cover these cases; live signed-in provider conversations remain untested. Windows remains unsigned."
-      ],
-      "github": {
-        "summary": "Reliable tool-result delivery and a searchable Skills page.",
-        "added": [
-          "Browse all 11 starter skills and saved methods; click for details and read full starter instructions.",
-          "Add a skill manually or ask AI to name and describe one."
-        ],
-        "improved": [
-          "Adapt skills to the current game’s systems and constraints."
-        ],
-        "fixed": [
-          "Equal results from new commands are delivered; confirmed retries are coalesced.",
-          "Wait for ChatGPT’s native completion; refresh equal-length code edits."
-        ],
-        "notes": [
-          "Fixture/platform validation included. Live signed-in provider chats remain untested."
-        ]
-      }
     }
   ],
   "platforms": {
     "macos": {
-      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.5.zip",
-      "sha256": "14fae1e9c5d80e8d4a3a163adb3f14513f2d2378cf0b7024f73d8ed2b2759b88"
+      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.6.zip",
+      "sha256": "ad6b0f7808ae7f6955d2f81f5c5e1ceb0494a0119e0a4a324e865635959d3ba8"
     }
   }
 }

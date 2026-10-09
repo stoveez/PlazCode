@@ -1,0 +1,12 @@
+PlazCode 1.24.6 — exact-source validation passed on Linux, Windows and macOS, with Chromium/Firefox UI fixtures and the real macOS desktop lifetime check.
+Absolute native MCP deadlines cover stdin writes, noisy notifications and matching response reads. Missing extension callbacks and stale generation flags terminate with a bounded result. Stop/Continue and fresh-send fixtures preserve cancellation draining and no-replay protection.
+One-box Skills Save, automatic naming, explicit saved guidance without false tested status, project matching/scope isolation, JSON export roundtrip, unchanged JSON/text imports, Unicode limits and draft preservation passed. Main checklist retention across follow-ups/refresh, explicit replacement, Markdown protection, timestamp extraction and row/header spacing checks passed. Debug-report separation, left-aligned effort and v-prefixed version labels passed.
+Embedded helper staging and automatic/BAT launch policy tests passed on Windows with a Restricted parent process policy. Checksum, rollback and package installation tests remain intact.
+Existing localized/cold composer, paste/upload retry, Stop, remount/foreign draft, provider preservation, screenshot and workspace UI regression fixtures passed.
+Platform Rust/JavaScript regression suites, starter pack completeness, creator round trips and archive preservation checks passed. Windows installer and update checksum/handoff checks passed. Mac x86_64/arm64 packaging, relaunch modes and 210-second visible process lifetime passed.
+Live signed-in provider accounts, response latency and real Studio/Blender sessions were not tested. Windows binaries are unsigned; Mac uses ad-hoc signing, not notarization.
+Microsoft Defender runner result before assembly:
+Scan starting...
+Scan finished.
+Scanning D:\a\PlazCode\PlazCode\build-src\PlazCode/defender-scan found no threats.
+The scanned checksum and availability are recorded in release-validation-1.24.6.

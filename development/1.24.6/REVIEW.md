@@ -1,6 +1,6 @@
 # PlazCode 1.24.6
 
-Validation: local JavaScript and browser checks in progress; exact-source platform CI pending. Release promotion must require all four validation jobs and the real macOS desktop check.
+Validation: all exact-source platform CI jobs passed. See release-validation-1.24.6.
 
 Changes cover command deadlines, cancellation continuation, updater helper selection/launch policy, Skills importing, checklist retention and targeted provider DOM/input cleanup. Startup protocol, tool parsing, native remote authority, pairing, checksum validation, rollback and user storage remain covered by their existing regression suites.
 

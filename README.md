@@ -1,3 +1,19 @@
+PlazCode 1.24.6 — Responsive commands, stable checklists and skill imports
+
+Recover from stuck command waits, continue safely after Stop, and import your own skills.
+
+- Skills accepts exported JSON files, text files and pasted instructions as new local candidates. Existing skills are preserved.
+- Skills has one instructions box with Save, Import and Export. Explicitly saved guidance is matched to the current project without requiring a separate goal or claiming it was tested.
+- Native MCP requests use one deadline across pipe writes, notifications and response reads. Missing extension callbacks resolve with an explicit timeout.
+- Fresh native requests wait for the previous loop and pending tool cancellation to settle instead of being discarded.
+- Main checklist tasks survive follow-ups and page refreshes in the same tab. Status updates and appended work preserve existing labels; explicit replacement requests can start a new plan.
+- A stale soft generation flag can no longer hold an unfinished command indefinitely. Inactivity ends the wait without running partial commands.
+- Automatic updates use the installer helper embedded in the running build. Both automatic and standalone Windows launchers set a process-level execution policy.
+- Completed tool watchdog timers are cleared and late worker replies cannot settle a request twice.
+- Checklist labels exclude message timestamp elements, with wider row and header spacing. Literal times inside user instructions remain intact.
+- Missed DOM tooltip/style reads and temporary editor cleanup are guarded across supported AI adapters. Deep semantic composer boundaries survive inserted wrappers.
+- Debug report is separated from the Settings grid; effort aligns beneath PlazCode and visible desktop, bar and extension version labels include v.
+
 PlazCode 1.24.5 — DeepSeek Ultracode and smoother Notion startup
 
 A focused DeepSeek thinking mode, less repeated work and more reliable Notion startup.
