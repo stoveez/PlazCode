@@ -126,7 +126,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add PlazCode-1.24.8.zip PlazCode-macOS-1.24.8.zip PlazCode-source-1.24.8.zip PlazCode-Firefox-1.24.8.zip PlazCode-1.24.8.sigstore.json latest.json latest-macos.json release-notes.json release-metadata.json release-description-1.24.8.txt README.md release-validation-1.24.8 development/1.24.8/REVIEW.md
-          git commit -m 'Release PlazCode 1.24.8: quick replies and meaningful task goals'
+          git commit -m 'Release PlazCode 1.24.8: quick replies, genuine goals and cleaner checklist text'
           git push origin HEAD:codex/plazcode-publish-1.24.8
       - name: Publish verified assets before exposing the update feed
         run: |

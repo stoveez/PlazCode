@@ -27,7 +27,7 @@
       {
         "title": "✅ Tasks follow your goal",
         "items": [
-          "**Meaningful task names:** checklists describe what you want accomplished, rather than tool names such as list_commands. Old saved command-list tasks are cleared.",
+          "**Meaningful task names:** checklists describe what you want accomplished, rather than tool names such as list_commands. Old command-list entries no longer become the active checklist goal.",
           "**Continue keeps the plan:** real work retains its original goal and project guidance when you ask to continue."
         ]
       },

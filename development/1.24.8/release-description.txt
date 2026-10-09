@@ -3,7 +3,7 @@
 - **Faster command discovery:** asking to list commands skips project memory, skills, templates and checkpoint setup, and uses a shorter command reference.
 
 ✅ Tasks follow your goal
-- **Meaningful task names:** checklists describe what you want accomplished, rather than tool names such as list_commands. Old saved command-list tasks are cleared.
+- **Meaningful task names:** checklists describe what you want accomplished, rather than tool names such as list_commands. Old command-list entries no longer become the active checklist goal.
 - **Continue keeps the plan:** real work retains its original goal and project guidance when you ask to continue.
 
 🎨 Cleaner checklist text
