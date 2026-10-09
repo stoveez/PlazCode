@@ -172,8 +172,6 @@ jobs:
         if: runner.os == 'macOS'
         working-directory: build-src/PlazCode
         run: |
-          python test-update-launcher.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python test-auto-update-launch.py
           python test-auto-update-after-launch.py
       - name: Package fresh native artifacts

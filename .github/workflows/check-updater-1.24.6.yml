@@ -1,0 +1,18 @@
+name: Check standalone Windows updater launcher
+on:
+  push:
+    branches: [codex/plazcode-1.24.6-command-recovery]
+    paths: [.github/workflows/check-updater-1.24.6.yml, development/1.24.6/overlay/test-update-launcher.py]
+permissions:
+  contents: read
+jobs:
+  launcher:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python development/1.24.6/prepare.py
+      - run: python test-update-launcher.py
+        working-directory: build-src/PlazCode
