@@ -820,7 +820,7 @@
         // virtualizers can remove that turn before the next idle session sweep.
         // Bind proof only to this delivery's conversation and generation.
         const currentChat = P.conversationKey();
-        if (!userPrompt && !A.enhancing && generation === A.sessionGen &&
+        if (!userPrompt && !A.starting && !A.enhancing && generation === A.sessionGen &&
             currentChat && (!chat || currentChat === chat) &&
             (payload.includes(RS.SYS_MARKER) || RSParse.isInjectedFeedback(payload))) {
           rememberSession(currentChat);

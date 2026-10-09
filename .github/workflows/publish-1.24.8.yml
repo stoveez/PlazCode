@@ -14,13 +14,12 @@ concurrency:
   cancel-in-progress: true
 jobs:
   wait-native:
-    if: ${{ false }} # Hold for startup handshake isolation regression.
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: 35f2c512a03172de1440d0da96221bf5762f901e
-      VALIDATION_RUN: '37902499633'
+      VALIDATED_SHA: 7949f7b8fc51cfff087d3b9253480a2c8cc36013
+      VALIDATION_RUN: '37904648666'
     steps:
       - name: Wait for exact-source native validation without occupying a Mac runner
         run: |
@@ -37,8 +36,8 @@ jobs:
     timeout-minutes: 50
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: 35f2c512a03172de1440d0da96221bf5762f901e
-      VALIDATION_RUN: '37902499633'
+      VALIDATED_SHA: 7949f7b8fc51cfff087d3b9253480a2c8cc36013
+      VALIDATION_RUN: '37904648666'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -77,8 +76,8 @@ jobs:
     timeout-minutes: 55
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: 35f2c512a03172de1440d0da96221bf5762f901e
-      VALIDATION_RUN: '37902499633'
+      VALIDATED_SHA: 7949f7b8fc51cfff087d3b9253480a2c8cc36013
+      VALIDATION_RUN: '37904648666'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -127,7 +126,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add PlazCode-1.24.8.zip PlazCode-macOS-1.24.8.zip PlazCode-source-1.24.8.zip PlazCode-Firefox-1.24.8.zip PlazCode-1.24.8.sigstore.json latest.json latest-macos.json release-notes.json release-metadata.json release-description-1.24.8.txt README.md release-validation-1.24.8 development/1.24.8/REVIEW.md
-          git commit -m 'Release PlazCode 1.24.8: quick replies, genuine goals and cleaner checklist text'
+          git commit -m 'Release PlazCode 1.24.8: quick replies, meaningful tasks and Notion reliability'
           git push origin HEAD:codex/plazcode-publish-1.24.8
       - name: Publish verified assets before exposing the update feed
         run: |
