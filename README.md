@@ -1,3 +1,22 @@
+PlazCode 1.24.9 — Reliable chats, simpler skills and Blender fixes
+
+More reliable AI chats, simpler skills, complete tool results and a cleaner desktop.
+
+- Import Markdown skills and remove saved skills.
+- Ultracode uses relevant UltraGUI references for interface work.
+- Choose input and tool-result limits, or turn them off.
+- Enlarge screenshots with Copy and Use as feedback controls.
+- Tasks show the AI’s objective and keep it when you say continue.
+- Desktop UI and model builders are removed. Ask your AI to build UI or use Blender for models.
+- Large tool results can be read in complete pages without repeating commands.
+- Notion startup checks survive editor redraws; DeepSeek uses a smaller first handshake.
+- Question fields accept typing; stopped operations release their input locks.
+- Stalled tool, file, web and stream waits have bounded exits.
+- Skills Save works in the initial editor and keeps its confirmation.
+- Blender primitives, export geometry and screenshot file reads are corrected.
+- One missed reply no longer falsely reports a disconnected Blender addon.
+- Settings header alignment, hidden task styling and the Ultracode label are corrected.
+
 PlazCode 1.24.8 — Quick replies, clear tasks and Notion fixes
 
 Small requests stay brief, checklists follow your goals, and Notion handles results and connection status more reliably.

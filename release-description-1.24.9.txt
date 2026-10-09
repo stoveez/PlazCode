@@ -1,0 +1,37 @@
+## ✨ PlazCode 1.24.9
+
+More reliable AI chats, simpler skills, complete tool results and a cleaner desktop.
+
+### 🛠️ More reliable chats
+
+- **Startup and commands:** Notion draft checks and DeepSeek handshakes are improved. Stalled waits end safely without repeating commands.
+- **Answer boxes:** you can type responses to the AI’s questions.
+
+### 🧩 Skills and Ultracode
+
+- **Simpler skills:** name, write and save; import JSON, text or Markdown; remove skills you no longer need.
+- **UltraGUI:** relevant UI guidance is included with Ultracode, loaded only when needed.
+
+### 🎨 Cleaner desktop
+
+- **Builders removed:** ask your AI to make UI, or use Blender for models.
+- **Clearer tasks:** names describe the AI’s goal; continue keeps the plan. Spacing and Settings alignment are improved.
+- **Screenshots:** click to enlarge, copy or use as feedback. Unopened captures disappear after 10 seconds.
+
+### ⚙️ Large scripts and Blender
+
+- **Complete results:** customize character limits and read large results in pages. Default task time limits are off.
+- **Blender fixes:** corrected primitives, detailed mesh exports and screenshot reads.
+
+### 🧪 Checks
+
+- Platform/browser regressions and real Blender tests passed. Live AI chats, Studio imports and AI response speed were not verified.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.9.zip** for Windows, **PlazCode-macOS-1.24.9.zip** for Mac, or **PlazCode-Firefox-1.24.9.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.
