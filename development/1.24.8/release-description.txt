@@ -9,5 +9,9 @@
 🎨 Cleaner checklist text
 - **Readable labels:** chat timestamps no longer get copied against the task name. Times written inside your instructions stay intact.
 
+🛠️ Notion reliability
+- **Readable results:** tool results show as compact cards instead of raw source text.
+- **Accurate connection:** working chats stay connected when Notion redraws or hides older messages.
+
 🧪 Regression checks
 - Automated checks cover quick requests, task retention, command schemas, startup, Studio detection fixtures, updating and Windows/Mac builds. Live AI accounts, response speed and real Studio sessions were not tested.

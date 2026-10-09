@@ -14,13 +14,12 @@ concurrency:
   cancel-in-progress: true
 jobs:
   wait-native:
-    if: ${{ false }} # Hold publication while the newly reported Notion issues are fixed.
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: cadb510a085a11d75a852abcf0fd6451b23317a8
-      VALIDATION_RUN: '37898995902'
+      VALIDATED_SHA: 40e9f05437fe815bb6b47973502990e3620bc20d
+      VALIDATION_RUN: '37902074890'
     steps:
       - name: Wait for exact-source native validation without occupying a Mac runner
         run: |
@@ -37,8 +36,8 @@ jobs:
     timeout-minutes: 50
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: cadb510a085a11d75a852abcf0fd6451b23317a8
-      VALIDATION_RUN: '37898995902'
+      VALIDATED_SHA: 40e9f05437fe815bb6b47973502990e3620bc20d
+      VALIDATION_RUN: '37902074890'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -77,8 +76,8 @@ jobs:
     timeout-minutes: 55
     env:
       GH_TOKEN: ${{ github.token }}
-      VALIDATED_SHA: cadb510a085a11d75a852abcf0fd6451b23317a8
-      VALIDATION_RUN: '37898995902'
+      VALIDATED_SHA: 40e9f05437fe815bb6b47973502990e3620bc20d
+      VALIDATION_RUN: '37902074890'
     steps:
       - uses: actions/checkout@v4
         with:

@@ -816,6 +816,17 @@
       const base = await delivery.promise;
       if (!A.stop) {
         A.confirmedSubmit = {...delivery,promise:null,base,at:Date.now()};
+        // A confirmed internal result is stronger proof than a visible marker:
+        // virtualizers can remove that turn before the next idle session sweep.
+        // Bind proof only to this delivery's conversation and generation.
+        const currentChat = P.conversationKey();
+        if (!userPrompt && !A.enhancing && generation === A.sessionGen &&
+            currentChat && (!chat || currentChat === chat) &&
+            (payload.includes(RS.SYS_MARKER) || RSParse.isInjectedFeedback(payload))) {
+          rememberSession(currentChat);
+          A.started = true;
+          ui.setStarted(true);
+        }
         if(typeof PlazCodeUltracode!=="undefined"&&PlazCodeUltracode.confirm)PlazCodeUltracode.confirm(payload,activeEngine(),P.id,P.conversationKey()+":"+A.sessionGen);
       }
       return base;

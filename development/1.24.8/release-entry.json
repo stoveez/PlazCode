@@ -1,7 +1,7 @@
 {
   "version": "1.24.8",
-  "title": "Quick replies and meaningful task goals",
-  "summary": "Greetings and quick questions stay brief. Checklists follow real work goals without copying message times.",
+  "title": "Quick replies, clear tasks and Notion fixes",
+  "summary": "Small requests stay brief, checklists follow your goals, and Notion handles results and connection status more reliably.",
   "added": [],
   "improved": [
     "Quick command lists use a shorter reference, without project setup.",
@@ -10,7 +10,9 @@
   "fixed": [
     "Greetings, help and command lists no longer become tracked tasks.",
     "Command names no longer become checklist steps.",
-    "Message timestamps no longer run into checklist labels."
+    "Message timestamps no longer run into checklist labels.",
+    "Notion tool results stay in compact cards instead of showing raw source text.",
+    "Working Notion chats keep their connection status when messages are redrawn or hidden."
   ],
   "notes": [
     "Automated regressions cover startup, commands, Studio detection fixtures and updating. Live AI accounts, response speed and real Studio sessions were not tested."
@@ -35,6 +37,13 @@
         "title": "🎨 Cleaner checklist text",
         "items": [
           "**Readable labels:** chat timestamps no longer get copied against the task name. Times written inside your instructions stay intact."
+        ]
+      },
+      {
+        "title": "🛠️ Notion reliability",
+        "items": [
+          "**Readable results:** tool results show as compact cards instead of raw source text.",
+          "**Accurate connection:** working chats stay connected when Notion redraws or hides older messages."
         ]
       },
       {
