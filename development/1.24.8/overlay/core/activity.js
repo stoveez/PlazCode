@@ -15,7 +15,8 @@ const PlazCodeActivity = (() => {
     if(!short)return 'conversation';
     if(/^(?:continue(?: working)?|keep (?:going|working)|resume(?: working)?|go on|carry on|stop|pause)$/i.test(short))return 'control';
     if(/^(?:hello|hi|hey|hello there|good (?:morning|afternoon|evening)|thanks(?: you)?|thank you|ok(?:ay)?|yes|no|got it|cool|great|nice|are you there|hello again|how are you|hello how are you|hi how are you|yo|sup|hey there|nice job|good job|thank you so much|are you ready|can you help me)(?:\s+(?:plazcode|there|again))?$/i.test(short))return 'conversation';
-    const workIntent=/\b(?:build|create|make|add|fix|change|edit|implement|investigate|debug|test|run|execute|optimi[sz]e|continue|resume|broken|bug|issue|problem|stuck|hangs?)\b/i.test(short);
+    if(short.length<=180 && /^(?:thanks|thank you)\b/i.test(short) && !/(?:\b(?:can|could|would|will) you\b|(?:[,;]|\b(?:please|also|now|next|and))\s*(?:please\s+)?(?:build|create|make|add|fix|change|edit|implement|investigate|debug|test|verify|run|execute|optimi[sz]e|continue|resume)\b)/i.test(short))return 'conversation';
+    const workIntent=/\b(?:build|create|make|add|fix|change|edit|implement|investigate|debug|test|verify|run|execute|optimi[sz]e|continue|resume|broken|bug|issue|problem|stuck|hangs?)\b/i.test(short);
     if(!workIntent && short.length<=180 && /^(?:hello(?!\s+world\b)|hi|hey|thanks|thank you|good morning|good afternoon|good evening)\b/i.test(short))return 'conversation';
     if(/^(?:awesome|bye|goodbye|sure|alright|understood|sounds good|nice to meet you|see you|you there|are you working|how are things)(?:[.!?\s]|$)/i.test(short)&&!workIntent)return 'conversation';
     if(!workIntent && /^(?:[a-z][a-z0-9]*_)+[a-z0-9_]+(?:\s|$)/i.test(short))return 'quick';
