@@ -1,0 +1,49 @@
+{
+  "version": "1.24.6",
+  "title": "Bounded commands, responsive continuation and skill imports",
+  "summary": "Recover from stuck command waits, continue safely after Stop, and import your own skills.",
+  "added": [
+    "Skills accepts exported JSON files, text files and pasted instructions as new local candidates. Existing skills are preserved."
+  ],
+  "improved": [
+    "Native MCP requests use one deadline across pipe writes, notifications and response reads. Missing extension callbacks resolve with an explicit timeout.",
+    "Fresh native requests wait for the previous loop and pending tool cancellation to settle instead of being discarded."
+  ],
+  "fixed": [
+    "A stale soft generation flag can no longer hold an unfinished command indefinitely. Inactivity ends the wait without running partial commands.",
+    "Automatic updates use the installer helper embedded in the running build. Both automatic and standalone Windows launchers set a process-level execution policy.",
+    "Completed tool watchdog timers are cleared and late worker replies cannot settle a request twice."
+  ],
+  "notes": [
+    "Automated regression and platform tests are required before release. Live signed-in Claude, ChatGPT, Notion and Studio sessions remain unverified."
+  ],
+  "github": {
+    "sections": [
+      {
+        "title": "🛠️ Commands and continuation",
+        "items": [
+          "**Bounded waits:** MCP chatter, blocked pipes, missing worker replies and stale generation flags no longer keep these waits alive indefinitely.",
+          "**Stop → Continue:** the next request waits for cancellation to settle. Partial or uncertain commands are never replayed automatically."
+        ]
+      },
+      {
+        "title": "📥 Import skills",
+        "items": [
+          "**JSON or text:** upload exported JSON/text files or paste instructions. Each import creates a new local candidate for review."
+        ]
+      },
+      {
+        "title": "🔧 Windows updater",
+        "items": [
+          "**Current helper:** automatic updates use the helper embedded in this build. Built-in and manual launchers set a process-level execution policy; checksum and rollback checks stay in place."
+        ]
+      },
+      {
+        "title": "✅ Checked before release",
+        "items": [
+          "Regression fixtures and native platform checks. Live signed-in AI accounts and Studio behavior remain unverified."
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+## ✨ PlazCode 1.24.6
+
+Recover from stuck command waits, continue safely after Stop, and import your own skills.
+
+### 🛠️ Commands and continuation
+
+- **Bounded waits:** MCP chatter, blocked pipes, missing worker replies and stale generation flags no longer keep these waits alive indefinitely.
+- **Stop → Continue:** the next request waits for cancellation to settle. Partial or uncertain commands are never replayed automatically.
+
+### 📥 Import skills
+
+- **JSON or text:** upload exported JSON/text files or paste instructions. Each import creates a new local candidate for review.
+
+### 🔧 Windows updater
+
+- **Current helper:** automatic updates use the helper embedded in this build. Built-in and manual launchers set a process-level execution policy; checksum and rollback checks stay in place.
+
+### ✅ Checked before release
+
+- Regression fixtures and native platform checks. Live signed-in AI accounts and Studio behavior remain unverified.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.6.zip** for Windows, **PlazCode-macOS-1.24.6.zip** for Mac, or **PlazCode-Firefox-1.24.6.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.
