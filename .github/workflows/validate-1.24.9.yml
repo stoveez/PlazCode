@@ -28,6 +28,7 @@ jobs:
         run: |
           cmake -S validation-luau -B validation-luau/build -DLUAU_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release
           cmake --build validation-luau/build --target Luau.Repl.CLI -j 4
+      - run: python3 development/1.24.9/test-prepare-overlay.py
       - run: python3 development/1.24.9/prepare.py
       - run: npm ci --prefix release-tools --ignore-scripts
         working-directory: build-src/PlazCode
@@ -88,6 +89,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - run: python development/1.24.9/test-prepare-overlay.py
       - run: python development/1.24.9/prepare.py
       - uses: Swatinem/rust-cache@v2
         with:

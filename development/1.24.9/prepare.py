@@ -13,7 +13,7 @@ assert hashlib.sha256(pack.read_bytes()).hexdigest()=="39613893710a444863b8e4114
 extract(pack,source/'PlazCode-Extension/ultragui')
 for path in (Path(__file__).parent/'overlay').rglob('*'):
  if path.is_file():
-  target=source/path.relative_to(Path(__file__).parent/'overlay');target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(path.read_bytes())
+  target=source/path.relative_to(Path(__file__).parent/'overlay');target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(path.read_bytes().replace(b'\r\n',b'\n'))
 for folder in ['core','providers']:shutil.copytree(source/folder,source/'PlazCode-Extension'/folder,dirs_exist_ok=True)
 for name in ['manifest.json','background.js','popup.js','popup.html','overlay.css','blender_ops.py','blender_once.py','blender_once.ps1']:shutil.copy2(source/name,source/'PlazCode-Extension'/name)
 assert json.loads((source/'manifest.json').read_text())['version']=='1.24.9'
