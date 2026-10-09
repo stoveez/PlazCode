@@ -7,7 +7,7 @@ const baseline = {
   "core/config.js": "f2fec507d69abc55e6874aad7fc3f99fb060669b",
   "core/headless-builder.js": "b343a897a17fc05d79ab469aeea55c8abaa8c4e5",
   "core/luau-knowledge.js": "234c1ca2155d3ef5f38927d85893b70fd6bde6e6",
-  "core/main.js": "127ff39b62cd7e02027684505fafd284b3e97f1d",
+  "core/main.js": "db816b7e8253ea1ba94e99d28471af16a67cc0e0",
   "core/motion-interchange.js": "038afa13a5b59c030a809abf7d617a36f2fae82d",
   "core/motion-preview.js": "ae0ab0526fbc762dfbf7cae9c248239e217e7a2f",
   "core/motion-tools.js": "8ac81b4a4a9f634fef9285aeee06db4a15af578e",
@@ -106,7 +106,9 @@ for (const forbidden of [
 ]) {
   if (desktopHtml.includes(forbidden)) throw new Error("Removed desktop UI content returned: " + forbidden);
 }
-const desktopScript = desktopHtml.match(/<script>([\s\S]*?)<\/script>/)?.[1]?.replace("__PLAZCODE_SKILLS_UI__", fs.readFileSync("core/skills-ui.js", "utf8")).replace("__PLAZCODE_EXPLORER_UI__", fs.readFileSync("core/explorer-ui.js", "utf8")).replace("__PLAZCODE_HEADLESS_CORE__", fs.readFileSync("core/headless-builder.js", "utf8")).replace("__PLAZCODE_CREATOR_CORE__", fs.readFileSync("core/creator.js", "utf8")).replace("__PLAZCODE_CREATOR_UI__", fs.readFileSync("core/creator-ui.js", "utf8")).replace("__PLAZCODE_TEMPLATE_UI__", fs.readFileSync("core/templates.js", "utf8")).replace("__PLAZCODE_TASK_UI__", fs.readFileSync("core/task-center.js", "utf8")).replace("__PLAZCODE_MEDIA_UI__", fs.readFileSync("core/media.js", "utf8")).replace("__PLAZCODE_MEMORY_UI__", fs.readFileSync("core/memory.js", "utf8")).replace("__PLAZCODE_VERSION_UI__", fs.readFileSync("core/version.js", "utf8")).replace(/__PLAZCODE_VERSION__/g, "1.19.33");
+for (const removed of ['Model Builder','UI Creator','modelWorkspace','uiWorkspace','PlazCodeCreatorUI','Mountbuilder','__PLAZCODE_CREATOR','__PLAZCODE_HEADLESS']) if (desktopHtml.includes(removed)) throw Error('Removed desktop creator leaked: '+removed);
+const toolkit=fs.readFileSync('core/toolkit-ui.js','utf8');const originalToolkit=fs.readFileSync('core/creator-ui.js','utf8');if(toolkit.slice(toolkit.indexOf('const PlazCodeToolkitUI='))!==originalToolkit.slice(originalToolkit.indexOf('const PlazCodeToolkitUI=')))throw Error('Toolkit/notifications changed while removing desktop builders');
+const desktopScript = desktopHtml.match(/<script>([\s\S]*?)<\/script>/)?.[1]?.replace("__PLAZCODE_SKILLS_UI__", fs.readFileSync("core/skills-ui.js", "utf8")).replace("__PLAZCODE_EXPLORER_UI__", fs.readFileSync("core/explorer-ui.js", "utf8")).replace("__PLAZCODE_TOOLKIT_UI__", fs.readFileSync("core/toolkit-ui.js", "utf8")).replace("__PLAZCODE_TEMPLATE_UI__", fs.readFileSync("core/templates.js", "utf8")).replace("__PLAZCODE_TASK_UI__", fs.readFileSync("core/task-center.js", "utf8")).replace("__PLAZCODE_MEDIA_UI__", fs.readFileSync("core/media.js", "utf8")).replace("__PLAZCODE_MEMORY_UI__", fs.readFileSync("core/memory.js", "utf8")).replace("__PLAZCODE_VERSION_UI__", fs.readFileSync("core/version.js", "utf8")).replace(/__PLAZCODE_VERSION__/g, "1.19.33");
 if (!desktopScript) throw new Error("Desktop WebView script block missing");
 new Function(desktopScript);
 

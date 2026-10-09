@@ -106,7 +106,7 @@ const PlazCodeClarification = (() => {
         const frame=document.createElement('iframe');frame.title='PlazCode clarification';frame.setAttribute('sandbox','allow-same-origin allow-forms');frame.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent';
         frame.addEventListener('load',()=>{
           if(!pending||pending.host!==host)return;
-          try{const pane=frame.contentDocument,sheet=style.cloneNode(true);sheet.textContent=sheet.textContent.replace(':host{','html{')+'body{margin:0}';pane.head.append(sheet);for(const key of ['--rs-text','--rs-muted','--rs-bg','--rs-accent','--pc-bg','--pc-accent']){const value=host.style.getPropertyValue(key);if(value)pane.documentElement.style.setProperty(key,value);}pane.body.append(shade);heading.focus();}catch{frame.remove();heading.focus();}
+          try{const pane=frame.contentDocument,sheet=style.cloneNode(true);sheet.textContent=sheet.textContent.replace(':host{','html{')+'body{margin:0}';pane.head.append(sheet);for(const key of ['--rs-text','--rs-muted','--rs-bg','--rs-accent','--pc-bg','--pc-accent']){const value=host.style.getPropertyValue(key);if(value)pane.documentElement.style.setProperty(key,value);}pane.body.append(shade);heading.focus();}catch{try{frame.remove();heading.focus();}catch(error){finish(null,error);}}
         },{once:true});shadow.append(frame);heading.focus();
         } catch(error) { finish(null,error); }
       });

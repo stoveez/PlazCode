@@ -3093,7 +3093,7 @@ return result`;
       let r;
       try { r = await Promise.race([bg({ type: "call_tool", name: bareName, arguments: sendArgs, timeout, checkpoint_id:A.checkpointId }), hardCap, stopWatch]); }
       finally { clearInterval(stopTimer); clearTimeout(capTimer); }
-      if (r && !r.ok && /did not answer|did not receive|closed|refused|connect|aborted|fetch/i.test(r.error || "")) {
+      if (r && !r.ok && /not listening|actively refused|connection refused|connection (?:closed|failed)|closed (?:the )?(?:socket|connection)|Blender is not connected|did not answer/i.test(r.error || "")) {
         A.bridge = A.bridge || {}; A.bridge.blender = false;
       }
       if (r && r.kind === "stopped") return "(stopped by user)";

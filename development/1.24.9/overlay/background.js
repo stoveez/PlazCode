@@ -1650,7 +1650,7 @@ async function blenderCall(name, args, timeout) {
     const payload = await blenderPayload(name, args);
     const statusPath = payload._orStatus || "";
     const reply = await blenderRequest({type:payload.type,params:payload.params},payload.type === "get_scene_info" ? 8000 : Math.min(180000,timeout || 120000));
-    if(!reply.ok) {if(/did not answer|closed|refused|connect/i.test(reply.error || ""))setBlender(false,reply.error);return {ok:false,error:reply.error || "Blender command failed."};}
+    if(!reply.ok) {if(/not listening|actively refused|connection refused|connection (?:closed|failed)|closed (?:the )?(?:socket|connection)|Blender is not connected|did not answer/i.test(reply.error || ""))setBlender(false,reply.error);return {ok:false,error:reply.error || "Blender command failed."};}
     const data = reply.data;
     if (data && data.status === "error") {
       const details=[data.message,data.error,data.result?.error,data.result?.message,data.traceback].filter(value=>typeof value==="string"&&value.trim());

@@ -29,6 +29,13 @@ jobs:
           cmake -S validation-luau -B validation-luau/build -DLUAU_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release
           cmake --build validation-luau/build --target Luau.Repl.CLI -j 4
       - run: python3 development/1.24.9/prepare.py
+      - run: npm ci --prefix release-tools --ignore-scripts
+        working-directory: build-src/PlazCode
+      - name: Test production mesh transfer transactions
+        run: python3 test-mesh-import-luau.py
+        working-directory: build-src/PlazCode
+        env:
+          PLAZCODE_LUAU: ${{ github.workspace }}/validation-luau/build/luau
       - name: Test production Explorer Luau transactions
         run: python3 test-explorer-luau.py
         working-directory: build-src/PlazCode
