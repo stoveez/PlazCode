@@ -1,3 +1,12 @@
+PlazCode 1.24.7 — Name your skills and a clearer Skills layout
+
+Give your skills a name, or let PlazCode name them for you. Learning and library options now have clearer spacing.
+
+- An optional Skill name box appears above Skill instructions. Leave it blank and PlazCode creates a short name from your instructions.
+- Release descriptions explain what changes mean for you in plain language.
+- Learning and library options has its own space below the editor. Expanded controls stay on separate rows.
+- Clearing a skill name uses the current instructions to name it, rather than an older description.
+
 PlazCode 1.24.6 — Responsive commands, stable checklists and skill imports
 
 Recover from stuck command waits, continue safely after Stop, and import your own skills.

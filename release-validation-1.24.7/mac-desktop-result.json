@@ -1,0 +1,23 @@
+[
+  {
+    "mode": "foreground",
+    "version": "1.24.7",
+    "alive_seconds": 210,
+    "desktop_ready": true,
+    "window_visible": true
+  },
+  {
+    "mode": "background",
+    "version": "1.24.7",
+    "alive_seconds": 15,
+    "desktop_ready": true,
+    "window_visible": false
+  },
+  {
+    "mode": "restore",
+    "version": "1.24.7",
+    "alive_seconds": 15,
+    "desktop_ready": true,
+    "window_visible": true
+  }
+]

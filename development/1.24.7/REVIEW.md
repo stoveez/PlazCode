@@ -1,6 +1,6 @@
 # PlazCode 1.24.7
 
-Validation: local JavaScript and browser checks in progress; exact-source platform CI pending. Release promotion must require all four validation jobs and the real macOS desktop check.
+Validation: all exact-source platform CI jobs passed. See release-validation-1.24.7.
 
 Focused Skills follow-up: move the existing optional title field above instructions; blank names summarize current instructions instead of stale descriptions. Keep the existing field identifier, handlers, imports, scope, schema and Save semantics. Add scoped flow spacing for the Learning and library card and expanded controls. No extra polling, provider changes or native behavior changes.
 

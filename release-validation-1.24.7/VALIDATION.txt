@@ -1,0 +1,9 @@
+PlazCode 1.24.7 — exact-source validation passed on Linux, Windows and macOS, with Chromium/Firefox UI fixtures and the real macOS desktop lifetime check.
+Optional visible skill naming, automatic title summaries from current instructions, existing-skill editing, Unicode limits and draft retention passed. Chromium/Firefox fixtures verify the name field above instructions, separate learning-card spacing and expanded controls without overlapping at wide and narrow window sizes. JSON/text imports, scope, export and no task dispatch on Save remain covered.
+Existing startup, command watchers, provider resilience, checklist retention, Studio discovery fixtures, authenticated routes and native platform regression suites passed. Installer checksum, rollback, restricted PowerShell launch policy and update handoff checks remain intact. Mac x86_64/arm64 packaging, relaunch modes and 210-second visible process lifetime passed.
+Live signed-in provider accounts, response latency and real Studio/Blender sessions were not tested. Windows binaries are unsigned; Mac uses ad-hoc signing, not notarization.
+Microsoft Defender runner result before assembly:
+Scan starting...
+Scan finished.
+Scanning D:\a\PlazCode\PlazCode\build-src\PlazCode/defender-scan found no threats.
+The scanned checksum and availability are recorded in release-validation-1.24.7.
