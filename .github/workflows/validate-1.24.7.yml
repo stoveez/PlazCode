@@ -88,6 +88,7 @@ jobs:
           python development/1.24.5/test-starter-pack.py
           python test-release-feed.py
           python test-release-notes.py
+          python build-src/PlazCode/test-update-marker.py
       - run: rustup update stable --no-self-update
       - run: npm ci --prefix release-tools --ignore-scripts
         working-directory: build-src/PlazCode
