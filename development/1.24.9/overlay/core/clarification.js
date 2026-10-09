@@ -87,15 +87,16 @@ const PlazCodeClarification = (() => {
       const extraLabel=add('label','');add('span','Additional details or a different approach (optional)',extraLabel);
       const extra=document.createElement('textarea');extra.maxLength=10000;extraLabel.append(extra);
       const actions=add('div','',form,'actions'),stop=add('button','Cancel task',actions),submit=add('button','Submit answer',actions);stop.type='button';submit.type='submit';submit.disabled=true;
+      const guard=handler=>event=>{try{return handler(event);}catch(error){finish(null,error);}};
       const valid=()=>!!(form.querySelector('input:checked') || extra.value.trim()) && answers.every(input=>input.value.trim());
-      form.addEventListener('input',()=>{submit.disabled=!valid();});form.addEventListener('change',()=>{submit.disabled=!valid();});
-      stop.addEventListener('click',()=>{cancel();onCancel();});
-      form.addEventListener('submit',event=>{event.preventDefault();if(!valid() || context()!==key){if(context()!==key)cancel('Chat or engine changed. Clarification cancelled.');return;}
+      form.addEventListener('input',guard(()=>{submit.disabled=!valid();}));form.addEventListener('change',guard(()=>{submit.disabled=!valid();}));
+      stop.addEventListener('click',guard(()=>{cancel();onCancel();}));
+      form.addEventListener('submit',guard(event=>{event.preventDefault();if(!valid() || context()!==key){if(context()!==key)cancel('Chat or engine changed. Clarification cancelled.');return;}
         const selected=form.querySelector('input:checked');
         finish({selected_option:selected ? args.options.find(option=>option.id===selected.value) : null,answers:args.questions.map((question,index)=>({question,answer:answers[index].value})),additional_details:extra.value});
-      });
-      for(const type of ['beforeinput','input','change','paste','keyup','keypress'])shadow.addEventListener(type,event=>event.stopPropagation());
-      form.addEventListener('keydown',event=>{event.stopPropagation();if(event.key!=='Tab')return;const controls=[heading,...form.querySelectorAll('input,textarea,button')].filter(node=>!node.disabled);const current=form.ownerDocument===document?shadow.activeElement:form.ownerDocument.activeElement;if(event.shiftKey&&current===controls[0]){event.preventDefault();controls.at(-1).focus();}else if(!event.shiftKey&&current===controls.at(-1)){event.preventDefault();controls[0].focus();}});
+      }));
+      for(const type of ['beforeinput','input','change','paste','keyup','keypress'])shadow.addEventListener(type,guard(event=>event.stopPropagation()));
+      form.addEventListener('keydown',guard(event=>{event.stopPropagation();if(event.key!=='Tab')return;const controls=[heading,...form.querySelectorAll('input,textarea,button')].filter(node=>!node.disabled);const current=form.ownerDocument===document?shadow.activeElement:form.ownerDocument.activeElement;if(event.shiftKey&&current===controls[0]){event.preventDefault();controls.at(-1).focus();}else if(!event.shiftKey&&current===controls.at(-1)){event.preventDefault();controls[0].focus();}}));
       return new Promise((resolve,reject)=>{
         pending={resolve,reject,host,focus:document.activeElement,timer:setInterval(()=>{try{if(!host.isConnected || context()!==key || cancelled())cancel('Task stopped, answer panel removed, or chat/engine changed. Clarification cancelled.');}catch(error){finish(null,error);}},500)};
         try {

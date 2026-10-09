@@ -73,4 +73,21 @@ mod tests {
         assert!(read(&root,"starter-syphodev-unknown",&json!({})).is_err());
         std::fs::remove_dir_all(root).unwrap();
     }
+    #[test]
+    fn ultragui_pages_and_rejects_unlisted_resources() {
+        let cards=ultragui_catalog();assert_eq!(cards.len(),12);
+        let root=std::env::temp_dir().join(format!("plazcode-ultragui-{}",std::process::id()));
+        std::fs::create_dir_all(root.join("skills")).unwrap();
+        std::fs::write(root.join("skills/gui-layout.md"),"abc😀def").unwrap();
+        let first=read_ultragui(&root,"bundled-ultragui-gui-layout",&json!({"limit":4})).unwrap();
+        assert_eq!(first["content"],"abc😀");assert_eq!(first["next_offset"],4);
+        let next=read_ultragui(&root,"bundled-ultragui-gui-layout",&json!({"offset":4})).unwrap();
+        assert_eq!(next["content"],"def");assert!(next["next_offset"].is_null());
+        assert_eq!(next["resource_index"],"resources.json");
+        assert!(read_ultragui(&root,"bundled-ultragui-gui-layout",&json!({"resource":"../../private"})).is_err());
+        assert!(read_ultragui(&root,"bundled-ultragui-unknown",&json!({})).is_err());
+        assert!(read_ultragui(&root,"bundled-ultragui-gui-layout",&json!({"resource":"skills/missing.md"})).is_err());
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
 }

@@ -2125,13 +2125,7 @@ return result`;
         "local id = " + id,
         "local ok, res = pcall(function() return game:GetService(\"InsertService\"):LoadAsset(id) end)",
         "if ok and res then res.Name = \"PLAZCODE_Imported\"; res.Parent = workspace; return \"inserted rbxassetid://\"..id..\" as Workspace.PLAZCODE_Imported\" end",
-        "local p = Instance.new(\"MeshPart\")",
-        "p.Name = \"PLAZCODE_Imported\"",
-        "p.Size = Vector3.new(4,4,4)",
-        "p.Anchored = true",
-        "pcall(function() p.MeshId = \"rbxassetid://\"..id end)",
-        "p.Parent = workspace",
-        "return \"created MeshPart with MeshId rbxassetid://\"..id..\" (LoadAsset: \"..tostring(res)..\")\"",
+        "error(\"Asset import failed; no replacement object was created: \"..tostring(res))",
       ].join("\n");
       return await runTool({ tool: "execute_luau", arguments: { code, datamodel_type: "Edit" } });
     }

@@ -19,7 +19,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
   if(behavior==='retain'){
    assert(ok);assert.equal(sent[0],startup);assert.equal(edits,1);assert.equal(commits,1);assert.equal(w.document.querySelector('[data-testid=attachment]'),null);
    const catalog="Output of 'list_commands':\n"+'read_file {path}\n'.repeat(400);assert(await p.typeAndSend(catalog));assert.equal(sent[1],catalog);assert.equal(edits,2);assert.equal(commits,2);
-  }else{assert.equal(ok,false);assert.equal(commits,0);assert(p.sendFailureDetail().includes('complete PlazCode draft'));assert(ed.textContent.includes(behavior==='partial'?'Unexpected':'Preserved'));}
+  }else{assert.equal(ok,false);assert.equal(commits,0);assert(p.sendFailureDetail().includes('complete contents could be verified'));assert(ed.textContent.includes(behavior==='partial'?'Unexpected':'Preserved'));}
   p.setInputLock(false);console.log('PASS Notion '+engine+' '+behavior+': verified complete native startup/catalogue, one commit, changed/remounted drafts never submitted.');
  }finally{w.close();}
 }})().catch(e=>{console.error(e);process.exitCode=1;});

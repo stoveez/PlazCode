@@ -471,6 +471,7 @@ def cmd_dump():
         "objects": [m["name"] for m in meshes],
         "mesh_count": len(meshes),
         "mesh_file": mesh_path,
+        "meshes": meshes,
         "tris": sum(m["tris"] for m in meshes),
     })
 

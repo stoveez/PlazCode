@@ -1099,12 +1099,25 @@ function webHeaders(extra, referer) {
 // timeout of its own, so an endpoint that never answers used to spin the tool
 // forever. AbortController gives every request a hard deadline.
 async function fetchWithTimeout(url, opts, ms) {
-  const ctrl = typeof AbortController === "function" ? new AbortController() : null;
-  const timer = ctrl ? setTimeout(() => { try { ctrl.abort(); } catch {} }, ms || WEB_FETCH_TIMEOUT) : null;
+  const controller = new AbortController();
+  const callerSignal = opts && opts.signal;
+  const cancel = () => { try { controller.abort(callerSignal.reason); } catch {} };
+  if (callerSignal) { if (callerSignal.aborted) cancel(); else callerSignal.addEventListener("abort", cancel, { once: true }); }
+  let timer;
   try {
-    return await fetch(url, Object.assign({ redirect: "follow" }, opts || {}, ctrl ? { signal: ctrl.signal } : {}));
+    return await Promise.race([
+      (async () => {
+        const response = await fetch(url, Object.assign({ redirect: "follow" }, opts || {}, { signal: controller.signal }));
+        // Keep the same deadline through the body. Headers alone are not a
+        // completed request: a server can stop sending immediately afterward.
+        const body = await response.text();
+        return { ok: response.ok, status: response.status, headers: response.headers, url: response.url, text: async () => body };
+      })(),
+      new Promise((_, reject) => { timer = setTimeout(() => { controller.abort(); reject(new Error("Web request timed out before its complete response arrived")); }, ms || WEB_FETCH_TIMEOUT); }),
+    ]);
   } finally {
-    if (timer) clearTimeout(timer);
+    clearTimeout(timer);
+    if (callerSignal) callerSignal.removeEventListener("abort", cancel);
   }
 }
 
@@ -1355,9 +1368,18 @@ async function sendLocalEngine(obj, timeout = 25000) {
 }
 
 async function extText(name) {
-  const r = await fetch(chrome.runtime.getURL(name));
-  if (!r.ok) throw new Error("extension file missing: " + name);
-  return await r.text();
+  let timer;
+  const controller = new AbortController();
+  try {
+    return await Promise.race([
+      (async () => {
+        const response = await fetch(chrome.runtime.getURL(name), { signal: controller.signal });
+        if (!response.ok) throw new Error("extension file missing: " + name);
+        return await response.text();
+      })(),
+      new Promise((_, reject) => { timer=setTimeout(() => { controller.abort(); reject(new Error("Extension file read timed out: " + name)); }, 15000); }),
+    ]);
+  } finally { clearTimeout(timer); }
 }
 
 async function localWrite(path, content) {
@@ -1705,7 +1727,7 @@ async function blenderCall(name, args, timeout) {
   try { return await run(); }
   catch (error) {
     const message = String(error.message || error);
-    setBlender(false, message);
+    if (/not listening|closed|actively refused|10061|Connection refused|did not answer|connection timed out/i.test(message)) setBlender(false, message);
     return { ok: false, error: message + " The command was not automatically repeated; inspect Blender before retrying." };
   }
   finally { blenderCallRunning = false; }
@@ -2316,12 +2338,14 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         try {
           const windowId = (_sender.tab && _sender.tab.windowId) || undefined;
           const dataUrl = await new Promise((resolve, reject) => {
+            let settled=false;
+            const timer=setTimeout(()=>done(new Error("Browser did not finish the screen capture")),15000);
+            const done=(error,value)=>{if(settled)return;settled=true;clearTimeout(timer);if(error)reject(error);else resolve(value);};
             try {
               chrome.tabs.captureVisibleTab(windowId, { format: "png" }, (url) => {
-                if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
-                else resolve(url);
+                try { if (chrome.runtime.lastError) done(new Error(chrome.runtime.lastError.message)); else done(null,url); } catch(error) { done(error); }
               });
-            } catch (e) { reject(e); }
+            } catch (e) { done(e); }
           });
           const m = String(dataUrl || "").match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
           if (!m) {
@@ -2341,23 +2365,27 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
           const [res] = await chrome.scripting.executeScript({
             target: { tabId: tab.id },
             func: () => {
-              const isVisible = (el) => {
+              const safeRead=(read,fallback)=>{try{return read();}catch{return fallback;}};
+              const safeQueryAll=(selector)=>safeRead(()=>Array.from(document.querySelectorAll(selector)),[]);
+              const isVisible = (el) => safeRead(() => {
                 const r = el.getBoundingClientRect();
                 const s = getComputedStyle(el);
                 return r.width > 0 && r.height > 0 && s.visibility !== "hidden" && s.display !== "none" && r.bottom > 0 && r.top < innerHeight;
-              };
-              const text = (document.body && document.body.innerText || "").replace(/\n{3,}/g, "\n\n").slice(0, 6000);
+              },false);
+              const text = safeRead(()=>document.body && document.body.innerText || "", "").replace(/\n{3,}/g, "\n\n").slice(0, 6000);
               const clickable = [];
-              const els = document.querySelectorAll("a, button, input, [role=button], [onclick], summary, select, textarea");
+              const els = safeQueryAll("a, button, input, [role=button], [onclick], summary, select, textarea");
               let i = 0;
               for (const el of els) {
                 if (!isVisible(el)) continue;
+                try {
                 const label = (el.innerText || el.value || el.getAttribute("aria-label") || el.getAttribute("placeholder") || el.getAttribute("title") || el.name || "").trim().replace(/\s+/g, " ").slice(0, 80);
                 clickable.push({ i, tag: el.tagName.toLowerCase(), type: el.type || "", label, id: el.id || "", cls: (el.className && String(el.className).slice(0, 60)) || "" });
                 i++;
                 if (i >= 120) break;
+                } catch { /* A virtualized row was removed while reading it. */ }
               }
-              return { url: location.href, title: document.title, text, clickable };
+              return { url: safeRead(()=>location.href,""), title: safeRead(()=>document.title,""), text, clickable };
             },
           });
           sendResponse({ ok: true, tab: { id: tab.id, url: tab.url, title: tab.title }, page: res.result });
@@ -2372,18 +2400,24 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
             target: { tabId: tab.id },
             args: [String(msg.selector || ""), String(msg.text || "")],
             func: (selector, text) => {
+              const safeRead=(read,fallback)=>{try{return read();}catch{return fallback;}};
+              const safeQuery=(value)=>safeRead(()=>document.querySelector(value),null);
+              const safeQueryAll=(value)=>safeRead(()=>Array.from(document.querySelectorAll(value)),[]);
               let el = null;
-              if (selector) el = document.querySelector(selector);
+              if (selector) el = safeQuery(selector);
               if (!el && text) {
                 const t = text.toLowerCase();
-                const cands = Array.from(document.querySelectorAll("a, button, input, [role=button], [onclick], summary, select, textarea, label"));
-                el = cands.find((c) => ((c.innerText || c.value || c.getAttribute("aria-label") || c.getAttribute("placeholder") || "").toLowerCase().includes(t)));
+                const cands = safeQueryAll("a, button, input, [role=button], [onclick], summary, select, textarea, label");
+                el = cands.find((c) => safeRead(() => ((c.innerText || c.value || c.getAttribute("aria-label") || c.getAttribute("placeholder") || "").toLowerCase().includes(t)),false));
               }
               if (!el) return { clicked: false, error: "element not found" };
+              try {
+              const receipt={ clicked:true,tag:el.tagName.toLowerCase(),label:(el.innerText || el.value || "").trim().slice(0,60) };
               el.scrollIntoView({ block: "center" });
               el.focus && el.focus();
               el.click();
-              return { clicked: true, tag: el.tagName.toLowerCase(), label: (el.innerText || el.value || "").trim().slice(0, 60) };
+              return receipt;
+              } catch(error) { return {clicked:false,error:String(error.message || error),note:"The click was not repeated; inspect the page before retrying."}; }
             },
           });
           sendResponse({ ok: true, result: res.result });
@@ -2398,7 +2432,9 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
             target: { tabId: tab.id },
             args: [String(msg.selector || ""), String(msg.text || ""), !!msg.submit],
             func: (selector, text, submit) => {
-              const el = selector ? document.querySelector(selector) : document.activeElement;
+              let el;
+              try { el=selector ? document.querySelector(selector) : document.activeElement; } catch { return {typed:false,error:"Invalid selector or unavailable field"}; }
+              try {
               if (!el) return { typed: false, error: "no field (pass selector)" };
               el.focus();
               if ("value" in el) {
@@ -2414,6 +2450,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
                 if (el.form && el.form.requestSubmit) el.form.requestSubmit();
               }
               return { typed: true, tag: el.tagName.toLowerCase() };
+              } catch(error) { return {typed:false,error:String(error.message || error),note:"The write was not repeated; inspect the field before retrying."}; }
             },
           });
           sendResponse({ ok: true, result: res.result });

@@ -139,7 +139,8 @@ pub async fn post(State(state):State<crate::AppState>,Json(request):Json<Value>)
   let mut store=Store::load(path.clone());assert_eq!(store.data.skills.len(),23);
   let s=skill();store.request(&json!({"action":"save","skill":s,"revision":0})).unwrap();
   store.request(&json!({"action":"delete","id":"starter-syphodev-roblox-code","revision":1})).unwrap();
-  let reloaded=Store::load(path.clone());assert!(reloaded.data.skills.contains_key("test"));assert!(!reloaded.data.skills.contains_key("starter-syphodev-roblox-code"));
+  store.request(&json!({"action":"delete","id":"bundled-ultragui-gui-layout","revision":1})).unwrap();
+  let reloaded=Store::load(path.clone());assert!(!reloaded.data.skills.contains_key("bundled-ultragui-gui-layout"));assert_eq!(reloaded.data.ultragui_pack_version,1);assert!(reloaded.data.skills.contains_key("test"));assert!(!reloaded.data.skills.contains_key("starter-syphodev-roblox-code"));
   std::fs::remove_file(path.with_extension("json.backup")).unwrap();std::fs::remove_file(path).unwrap();
  }
 
