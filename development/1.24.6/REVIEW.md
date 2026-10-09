@@ -8,7 +8,7 @@ Extension bridge callbacks have operation-specific deadlines, settle once and ne
 
 Native MCP exchanges use one absolute deadline for stdin writes, flush and stdout reads. Notifications and unrelated IDs cannot reset it. Whole tool deadlines include queueing and checkpoint work. An interrupted owned helper is reset, while another task's busy helper is left alone. Process cleanup is asynchronous and bounded. Add-on tools retain their existing long execution budgets.
 
-The updater stages the current embedded helper for standard installations, preserving explicitly custom helpers. Windows launches the helper with a process-scoped execution-policy bypass; it does not change system policy. Official release proof, archive version checks, SHA256 verification, backups and rollback remain required. Automatic launch and post-launch integration tests run with a Restricted PowerShell policy.
+The updater stages the current embedded helper for standard installations, preserving explicitly custom helpers. Both the built-in Windows updater and standalone batch launcher launch the helper with a process-scoped execution-policy bypass; it does not change system policy. Official release proof, archive version checks, SHA256 verification, backups and rollback remain required. The real batch launcher, automatic launch and post-launch integration tests run with a Restricted PowerShell policy.
 
 Production-code Chromium/Firefox fixtures cover ChatGPT and Claude command completion, native generation pauses, stale soft generation and Stop. Native child-process tests cover notification noise, blocked stdin, unrelated response IDs and queued cancellation without replay. Existing startup, Notion, creation, provider preservation and UI suites remain required.
 
