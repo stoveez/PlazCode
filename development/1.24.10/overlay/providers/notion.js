@@ -421,7 +421,20 @@ const RSProvider = (() => {
   const edText = (e) => {
     if (!e) return "";
     if (isTextControl(e)) return safeRead(() => e.value, "") || "";
-    return safeRead(() => e.textContent, "") || "";
+    // Notion renders emoji as <img class="notion-emoji" alt="✅">, which textContent
+    // silently omits (live Oct 2026: every emoji vanished from the read-back, so a
+    // fully written draft looked truncated and Start aborted leaving it in the
+    // composer). Read the alt text back in document order.
+    return safeRead(() => {
+      if (!e.querySelector || !e.querySelector("img.notion-emoji")) return e.textContent || "";
+      let out = "";
+      const walker = document.createTreeWalker(e, 5); // SHOW_ELEMENT | SHOW_TEXT
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        if (n.nodeType === 3) out += n.nodeValue;
+        else if (n.tagName === "IMG" && n.classList && n.classList.contains("notion-emoji")) out += n.getAttribute("alt") || "";
+      }
+      return out;
+    }, "") || "";
   };
   const editorText = (el) => edText(el || findEditorRaw());
   function composerFrame() {
@@ -1922,7 +1935,7 @@ const RSProvider = (() => {
   }
   function normalizedDraft(text) {
     return String(text || "")
-      .replace(/[\u200B-\u200D\u2060\uFEFF]/g, "")
+      .replace(/[\u200B-\u200D\u2060\uFEFF\uFE0E\uFE0F]/g, "")
       .replace(/\r\n?/g, "\n")
       .replace(/\u00a0/g, " ")
       .replace(/\s+/g, " ")

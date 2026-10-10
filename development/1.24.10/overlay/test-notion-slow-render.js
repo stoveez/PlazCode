@@ -4,24 +4,25 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),{JSDOM}=require('jsdom');
 (async()=>{for(const behavior of ['late','prefix','foreign','pasteLate','pasteIgnored']){
  const dom=new JSDOM('<main><section id="composer"><div role="textbox" contenteditable="true" data-placeholder="Ask Notion AI"></div><div role="button" data-testid="agent-chat-send-button" aria-label="Submit AI message">Send</div></section></main>',{url:'https://app.notion.com/ai',runScripts:'outside-only',pretendToBeVisual:true});
- const w=dom.window,ed=w.document.querySelector('[role=textbox]');let model='',edits=0,commits=0,pastes=0;const sent=[];
+ const w=dom.window,ed=w.document.querySelector('[role=textbox]');const render=m=>{ed.textContent='';for(const part of m.split(/(\p{Extended_Pictographic}\uFE0F?)/u)){if(!part)continue;if(/^\p{Extended_Pictographic}/u.test(part)){const i=w.document.createElement('img');i.className='notion-emoji';i.setAttribute('alt',part);ed.append(i);}else ed.append(w.document.createTextNode(part));}};/* Notion renders emoji as <img alt>, invisible to textContent */
+ let model='',edits=0,commits=0,pastes=0;const sent=[];
  w.HTMLElement.prototype.getBoundingClientRect=function(){return {left:200,top:600,width:650,height:this===ed?40:100,right:850,bottom:700};};
  w.DataTransfer=class{constructor(){this.d={};}setData(k,v){this.d[k]=v;}getData(k){return this.d[k]||'';}};
  w.ClipboardEvent=class extends w.Event{constructor(t,o){super(t,o);this.clipboardData=o.clipboardData;}};
  ed.addEventListener('paste',e=>{pastes++;const sel=w.getSelection();const add=e.clipboardData.getData('text/plain'),base=(sel&&sel.isCollapsed?model:'');
   if(behavior==='pasteIgnored'&&pastes===8)return;/* Notion drops one paste; editor stays at the previous prefix */
-  if(behavior==='pasteLate'&&pastes===8){setTimeout(()=>{model=base+add;ed.textContent=model;},900);return;}/* applied late */
-  model=base+add;ed.textContent=model;});
- const startup='⟦RS-SYS⟧ ROBLOXSCRIPT\n'+Array.from({length:700},(_,i)=>'cmd_'+i+' {"a":"'+'x'.repeat(30)+'"}').join('\n')+'\nEmit list_commands first.';
+  if(behavior==='pasteLate'&&pastes===8){setTimeout(()=>{model=base+add;render(model);},900);return;}/* applied late */
+  model=base+add;render(model);});
+ const startup='⟦RS-SYS⟧ ROBLOXSCRIPT\n'+Array.from({length:700},(_,i)=>'cmd_'+i+' ✅ {"a":"'+'x'.repeat(30)+'"} ⚠️ 🔧 ©').join('\n')+'\nEmit list_commands first.';
  w.document.execCommand=(cmd,_,text)=>{
-  if(cmd==='delete'){model='';ed.textContent='';return true;}
-  if(!text){model='';ed.textContent='';return true;}
+  if(cmd==='delete'){model='';render('');return true;}
+  if(!text){model='';render('');return true;}
   edits++;const cut=Math.floor(text.length*0.98);
-  if(behavior==='late'){model=text.slice(0,cut);ed.textContent=model;setTimeout(()=>{model=text;ed.textContent=text;},900);}
-  else if(behavior==='prefix'||behavior.startsWith('paste')){model=text.slice(0,cut);ed.textContent=model;}
-  else{model='Unexpected changed draft';ed.textContent=model;}
+  if(behavior==='late'){model=text.slice(0,cut);render(model);setTimeout(()=>{model=text;render(text);},900);}
+  else if(behavior==='prefix'||behavior.startsWith('paste')){model=text.slice(0,cut);render(model);}
+  else{model='Unexpected changed draft';render(model);}
   return true;};
- w.document.querySelector('[role=button]').addEventListener('click',()=>{commits++;sent.push(model);model='';ed.textContent='';
+ w.document.querySelector('[role=button]').addEventListener('click',()=>{commits++;sent.push(model);model='';render('');
   const row=w.document.createElement('div');row.setAttribute('data-agent-service-scroll-anchor','user-'+commits);row.style.justifyContent='flex-end';row.textContent=sent.at(-1);w.document.body.append(row);w.provider.invalidateItems();w.history.replaceState({},'','/chat?t=native');});
  try{
   vm.runInContext(fs.readFileSync('providers/notion.js','utf8')+';globalThis.provider=RSProvider;',dom.getInternalVMContext());const p=w.provider;p.init({isStopped:()=>false});p.setInputLock(true);
