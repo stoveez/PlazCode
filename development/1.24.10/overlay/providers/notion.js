@@ -1772,7 +1772,9 @@ const RSProvider = (() => {
     const current = edText(ed);
     if (!current.trim()) return true;
     const have = draftProfile(current).compact, want = draftProfile(text).compact;
-    if (!have || !want.startsWith(have)) return false;
+    // 1.24.10: Notion can also rewrite our Markdown-like startup lines into
+    // blocks; a draft recognisably transformed from this exact text is ours too.
+    if ((!have || !want.startsWith(have)) && !ownTransformedDraft(current, text)) return false;
     for (let attempt = 0; attempt < 3 && !isStopped(); attempt++) {
       ed = findEditorRaw();
       if (!ed) return false;
@@ -1961,6 +1963,34 @@ const RSProvider = (() => {
     const normalized = normalizedDraft(raw);
     return { raw, normalized, compact: normalized.replace(/\s+/g, "") };
   }
+  // Markdown-insensitive compact form: Notion renders/inserts list markers,
+  // emphasis and code marks as formatting, so those characters can vanish.
+  const looseCompact = (text) => String(text || "").replace(/[\s\u200B-\u200D\u2060\uFEFF*_`#>~|\\-]/g, "");
+  // True when `actual` is recognisably the extension's own write of `intended`
+  // with only formatting characters consumed: same opening, an in-order
+  // subsequence of the intended text, few foreign characters and most content.
+  function ownTransformedDraft(actual, intended) {
+    const a = looseCompact(actual), i = looseCompact(intended);
+    if (a.length < 16 || i.length < 16 || a.slice(0, 16) !== i.slice(0, 16)) return false;
+    let at = 0, extra = 0;
+    for (const ch of a) {
+      const hit = i.indexOf(ch, at);
+      if (hit < 0 || hit - at > 64) { if (++extra > Math.max(8, a.length / 100)) return false; continue; }
+      at = hit + 1;
+    }
+    return a.length >= i.length * 0.6;
+  }
+  function receiptMatchesSend(receiptText, sentText) {
+    if (receiptText === sentText || (sentText.length >= 32 && receiptText.includes(sentText))) return true;
+    // Notion shows each line as its own block (textContent has no separator)
+    // and renders Markdown, so compare without whitespace/formatting marks.
+    const r = looseCompact(receiptText), s = looseCompact(sentText);
+    if (s.length < 16) return false;
+    if (r === s || (s.length >= 32 && r.includes(s))) return true;
+    // Long messages can be collapsed in the bubble; a matching opening of a new
+    // row is enough (old rows are excluded by their pre-send receipt keys).
+    return s.length >= 400 && r.length >= 160 && s.startsWith(r.slice(0, 160)) && r.startsWith(s.slice(0, 160));
+  }
   function draftLooksWritten(actual, intended, intendedProfile, actualProfile) {
     const a = String(actual || ""), i = String(intended || "");
     if (a === i) return true;
@@ -2146,8 +2176,7 @@ const RSProvider = (() => {
     // definitive proof of acceptance even while no editor exists for a moment.
     if (_lastSend.route !== routeKey() && isAiThread()) return true;
     const receipts = userReceipts();
-    if (receipts.some((receipt) => !_lastSend.receipts.has(receipt.key) &&
-        (receipt.text === _lastSend.text || (_lastSend.text.length >= 32 && receipt.text.includes(_lastSend.text))))) return true;
+    if (receipts.some((receipt) => !_lastSend.receipts.has(receipt.key) && receiptMatchesSend(receipt.text, _lastSend.text))) return true;
     // Virtualized transcripts need not increase their user-row count. Like the
     // other chat providers, recognize a consumed draft and a new reply/Stop
     // state. A disappearing editor or a hydration-cleared draft alone is not

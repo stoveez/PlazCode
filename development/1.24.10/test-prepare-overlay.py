@@ -5,7 +5,7 @@ root=Path(__file__).resolve().parents[2]
 with tempfile.TemporaryDirectory(prefix='plazcode-overlay-') as temporary:
  work=Path(temporary);dev=work/'development/1.24.10';dev.mkdir(parents=True)
  shutil.copy2(root/'PlazCode-source-1.24.9.zip',work/'PlazCode-source-1.24.9.zip')
- shutil.copy2(Path(__file__).parent/'prepare.py',dev/'prepare.py')
+ for name in ['prepare.py','edits.py','edits.json']:shutil.copy2(Path(__file__).parent/name,dev/name)
  for path in (Path(__file__).parent/'overlay').rglob('*'):
   if path.is_file():
    raw=path.read_bytes();raw.decode('utf-8')
