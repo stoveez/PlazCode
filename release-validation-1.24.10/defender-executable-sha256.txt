@@ -1,0 +1,5 @@
+
+Algorithm : SHA256
+Hash      : 9F05E6B34ECF9F78BF3C3CC8FDE1D9B0AFA720DEA6E92E67DCE06F34387E924E
+Path      : D:\a\PlazCode\PlazCode\build-src\PlazCode\PlazCode.exe
+

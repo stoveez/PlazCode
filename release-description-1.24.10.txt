@@ -1,0 +1,34 @@
+## ✨ PlazCode 1.24.10
+
+Start Agent works again in Notion AI, the AI keeps going after plans, and task checklists show real progress.
+
+### 🛠️ Notion Start Agent fixed
+
+- **Startup:** the command list sends itself instead of staying in the chat box, even when Notion reformats it.
+- **New Notion layout:** the /ai page, chat threads and New chat button are recognised again.
+- **Sends recognised:** emoji, curly quotes and formatting changes no longer make commands look unsent.
+- **Startup loop fixed:** a short extra line after “PlazCode is ready.” is accepted.
+
+### 🧠 Plans and tasks
+
+- **Keeps going:** in Plan Mode and Ultracode the AI starts building after writing its plan.
+- **Working checklist:** numbered steps from your request and the AI’s plan, with progress.
+- **Clean results:** skill notes are sent once per task instead of replacing command results.
+
+### ⚙️ Tools
+
+- **Addons:** the AI is told when Blender is connected.
+- **Prompt enhancer:** only runs before creation saves and never blocks a command.
+
+### 🧪 Checks
+
+- Platform/browser regressions passed. Start Agent was confirmed on a live Notion account; the later fixes were tested automatically only.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.10.zip** for Windows, **PlazCode-macOS-1.24.10.zip** for Mac, or **PlazCode-Firefox-1.24.10.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.

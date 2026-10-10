@@ -1,3 +1,22 @@
+PlazCode 1.24.10 — Notion Start Agent, plans and task checklist fixes
+
+Start Agent works again in Notion AI, the AI keeps going after plans, and task checklists show real progress.
+
+- Task checklists build numbered steps from your request and the AI’s plan, with a goal header and “x of y done” progress.
+- Each Notion chat thread is tracked separately, so new chats no longer reuse an older chat's session.
+- Large Notion startup messages are written safely without freezing the tab, with a chunked fallback for slow editors.
+- In Plan Mode and Ultracode, the AI is reminded once to start building after it writes a plan instead of stopping.
+- The command list tells the AI which addons, such as Blender, are connected.
+- The automatic prompt enhancer only runs before creation saves and never blocks the original command.
+- Notion Start Agent sends the startup command list automatically instead of leaving it in the chat box, including when Notion reformats it.
+- Notion's new /ai landing page and New chat button are recognised again.
+- Notion draft checks read emoji and smart quotes the way Notion displays them.
+- Sent Notion messages are recognised even when Notion changes spacing or formatting, so commands are no longer reported as not run.
+- PlazCode finds Notion's send button even when its label changes, and never overwrites text you typed yourself.
+- A short extra line after “PlazCode is ready.” no longer causes a startup handshake failure loop.
+- Skill and reference notes are sent once per task instead of replacing every command result.
+- Task checklists no longer stay at 0% or “Waiting for the AI…”.
+
 PlazCode 1.24.9 — Reliable chats, simpler skills and Blender fixes
 
 More reliable AI chats, simpler skills, complete tool results and a cleaner desktop.

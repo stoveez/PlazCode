@@ -1,9 +1,72 @@
 {
-  "version": "1.24.9",
-  "desktop_version": "1.24.9",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.9.zip",
-  "sha256": "4d806e62f5cefed13dff5590b3b933e2d8db4762160540369ba3f7697f4c0843",
+  "version": "1.24.10",
+  "desktop_version": "1.24.10",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.10.zip",
+  "sha256": "2e18c32c1602cb76b68f3ce2f20a4a6a20f4adb25a7fae7a940bda6c5cff502d",
   "release_notes": [
+    {
+      "version": "1.24.10",
+      "title": "Notion Start Agent, plans and task checklist fixes",
+      "summary": "Start Agent works again in Notion AI, the AI keeps going after plans, and task checklists show real progress.",
+      "added": [
+        "Task checklists build numbered steps from your request and the AI’s plan, with a goal header and “x of y done” progress."
+      ],
+      "improved": [
+        "Each Notion chat thread is tracked separately, so new chats no longer reuse an older chat's session.",
+        "Large Notion startup messages are written safely without freezing the tab, with a chunked fallback for slow editors.",
+        "In Plan Mode and Ultracode, the AI is reminded once to start building after it writes a plan instead of stopping.",
+        "The command list tells the AI which addons, such as Blender, are connected.",
+        "The automatic prompt enhancer only runs before creation saves and never blocks the original command."
+      ],
+      "fixed": [
+        "Notion Start Agent sends the startup command list automatically instead of leaving it in the chat box, including when Notion reformats it.",
+        "Notion's new /ai landing page and New chat button are recognised again.",
+        "Notion draft checks read emoji and smart quotes the way Notion displays them.",
+        "Sent Notion messages are recognised even when Notion changes spacing or formatting, so commands are no longer reported as not run.",
+        "PlazCode finds Notion's send button even when its label changes, and never overwrites text you typed yourself.",
+        "A short extra line after “PlazCode is ready.” no longer causes a startup handshake failure loop.",
+        "Skill and reference notes are sent once per task instead of replacing every command result.",
+        "Task checklists no longer stay at 0% or “Waiting for the AI…”."
+      ],
+      "notes": [
+        "Start Agent was confirmed on a live Notion account (Windows, Chrome, AgentScript) before the plan, checklist and reformatted-draft fixes were added; those later fixes passed automated tests only.",
+        "Automated platform/browser regressions passed. Live Roblox Studio imports and the Blender addon connection were not re-tested."
+      ],
+      "github": {
+        "sections": [
+          {
+            "title": "🛠️ Notion Start Agent fixed",
+            "items": [
+              "**Startup:** the command list sends itself instead of staying in the chat box, even when Notion reformats it.",
+              "**New Notion layout:** the /ai page, chat threads and New chat button are recognised again.",
+              "**Sends recognised:** emoji, curly quotes and formatting changes no longer make commands look unsent.",
+              "**Startup loop fixed:** a short extra line after “PlazCode is ready.” is accepted."
+            ]
+          },
+          {
+            "title": "🧠 Plans and tasks",
+            "items": [
+              "**Keeps going:** in Plan Mode and Ultracode the AI starts building after writing its plan.",
+              "**Working checklist:** numbered steps from your request and the AI’s plan, with progress.",
+              "**Clean results:** skill notes are sent once per task instead of replacing command results."
+            ]
+          },
+          {
+            "title": "⚙️ Tools",
+            "items": [
+              "**Addons:** the AI is told when Blender is connected.",
+              "**Prompt enhancer:** only runs before creation saves and never blocks a command."
+            ]
+          },
+          {
+            "title": "🧪 Checks",
+            "items": [
+              "Platform/browser regressions passed. Start Agent was confirmed on a live Notion account; the later fixes were tested automatically only."
+            ]
+          }
+        ]
+      }
+    },
     {
       "version": "1.24.9",
       "title": "Reliable chats, simpler skills and Blender fixes",
@@ -244,57 +307,12 @@
           }
         ]
       }
-    },
-    {
-      "version": "1.24.5",
-      "title": "DeepSeek Ultracode and smoother Notion startup",
-      "summary": "A focused DeepSeek thinking mode, less repeated work and more reliable Notion startup.",
-      "added": [
-        "DeepSeek has its own Ultracode method with 13 context-aware Roblox skills. Replies follow your latest request’s language."
-      ],
-      "improved": [
-        "DeepSeek Ultracode receives its full method once per confirmed conversation session, then uses short reminders. Other providers keep the existing global Ultracode method.",
-        "Notion starts with a short handshake and receives the full task rules with the existing tool-list reply. No extra startup round trip is added."
-      ],
-      "fixed": [
-        "Firefox now receives the complete Notion paste payload when the browser creates a separate clipboard transfer.",
-        "Startup errors stop safely and release the chat lock. The agent only becomes ready after the required handshake succeeds."
-      ],
-      "notes": [
-        "Production-code browser fixtures pass in Chromium and Firefox. Live signed-in provider latency and all account-specific behavior have not been verified."
-      ],
-      "github": {
-        "sections": [
-          {
-            "title": "🧠 DeepSeek Ultracode",
-            "items": [
-              "**13 skills:** a focused Roblox method, including safer data saving, UI and API checks. Replies use your language.",
-              "**Less repeated work:** sends the full method once per session, then uses short reminders. Keeps careful checks and asks once before an unapproved large build.",
-              "**Other AIs:** keep the existing Ultracode method."
-            ]
-          },
-          {
-            "title": "⚡ Smoother Notion startup",
-            "items": [
-              "**Shorter first message:** startup uses a small handshake. Full task instructions follow in the existing tool-list reply.",
-              "**Firefox fix:** startup pastes now carry the complete message.",
-              "**Error recovery:** failed startup releases the chat lock. PlazCode only says it is ready after the handshake succeeds."
-            ]
-          },
-          {
-            "title": "✅ Checked before release",
-            "items": [
-              "Chromium, Firefox and platform regression checks, plus the macOS desktop lifetime check. Live signed-in account behavior remains unverified."
-            ]
-          }
-        ]
-      }
     }
   ],
   "platforms": {
     "macos": {
-      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.9.zip",
-      "sha256": "41a97ed8ee8beb8a44e7201ba74954b29004bf96e8274f789c78adde8d123f5a"
+      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.10.zip",
+      "sha256": "2a77f610f956bc6bf1918778c69058b1fb75a6b0768901d1700cddfd4fd27fad"
     }
   }
 }
