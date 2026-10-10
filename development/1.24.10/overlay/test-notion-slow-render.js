@@ -2,20 +2,23 @@
 // 38,089 characters visible at the first checks). A late-completing draft must be accepted; a stuck own-prefix
 // must be cleared and re-sent by bounded pastes; a foreign/changed draft must never be overwritten or sent.
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),{JSDOM}=require('jsdom');
-(async()=>{for(const behavior of ['late','prefix','foreign']){
+(async()=>{for(const behavior of ['late','prefix','foreign','pasteLate','pasteIgnored']){
  const dom=new JSDOM('<main><section id="composer"><div role="textbox" contenteditable="true" data-placeholder="Ask Notion AI"></div><div role="button" data-testid="agent-chat-send-button" aria-label="Submit AI message">Send</div></section></main>',{url:'https://app.notion.com/ai',runScripts:'outside-only',pretendToBeVisual:true});
  const w=dom.window,ed=w.document.querySelector('[role=textbox]');let model='',edits=0,commits=0,pastes=0;const sent=[];
  w.HTMLElement.prototype.getBoundingClientRect=function(){return {left:200,top:600,width:650,height:this===ed?40:100,right:850,bottom:700};};
  w.DataTransfer=class{constructor(){this.d={};}setData(k,v){this.d[k]=v;}getData(k){return this.d[k]||'';}};
  w.ClipboardEvent=class extends w.Event{constructor(t,o){super(t,o);this.clipboardData=o.clipboardData;}};
- ed.addEventListener('paste',e=>{pastes++;const sel=w.getSelection();model=(sel&&sel.isCollapsed?model:'')+e.clipboardData.getData('text/plain');ed.textContent=model;});
+ ed.addEventListener('paste',e=>{pastes++;const sel=w.getSelection();const add=e.clipboardData.getData('text/plain'),base=(sel&&sel.isCollapsed?model:'');
+  if(behavior==='pasteIgnored'&&pastes===8)return;/* Notion drops one paste; editor stays at the previous prefix */
+  if(behavior==='pasteLate'&&pastes===8){setTimeout(()=>{model=base+add;ed.textContent=model;},900);return;}/* applied late */
+  model=base+add;ed.textContent=model;});
  const startup='⟦RS-SYS⟧ ROBLOXSCRIPT\n'+Array.from({length:700},(_,i)=>'cmd_'+i+' {"a":"'+'x'.repeat(30)+'"}').join('\n')+'\nEmit list_commands first.';
  w.document.execCommand=(cmd,_,text)=>{
   if(cmd==='delete'){model='';ed.textContent='';return true;}
   if(!text){model='';ed.textContent='';return true;}
   edits++;const cut=Math.floor(text.length*0.98);
   if(behavior==='late'){model=text.slice(0,cut);ed.textContent=model;setTimeout(()=>{model=text;ed.textContent=text;},900);}
-  else if(behavior==='prefix'){model=text.slice(0,cut);ed.textContent=model;}
+  else if(behavior==='prefix'||behavior.startsWith('paste')){model=text.slice(0,cut);ed.textContent=model;}
   else{model='Unexpected changed draft';ed.textContent=model;}
   return true;};
  w.document.querySelector('[role=button]').addEventListener('click',()=>{commits++;sent.push(model);model='';ed.textContent='';
@@ -26,7 +29,9 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
   const ok=await p.typeAndSend(text);
   if(behavior==='foreign'){assert.equal(ok,false);assert.equal(commits,0);assert.equal(pastes,0,'a changed draft is never overwritten');assert.equal(ed.textContent,'Unexpected changed draft');}
   else{assert(ok,behavior);assert.equal(commits,1);assert.equal(sent[0],text.replace(/\n/g,'\n'));assert.equal(edits,1,'one native attempt');
-   if(behavior==='late')assert.equal(pastes,0,'late render needs no fallback');else assert(pastes>3,'partial own draft was cleared and re-sent by bounded pastes');}
+   if(behavior==='late')assert.equal(pastes,0,'late render needs no fallback');else assert(pastes>3,'partial own draft was cleared and re-sent by bounded pastes');
+   if(behavior==='pasteIgnored')assert.equal(sent[0],text,'ignored chunk re-sent exactly once, no duplicate');
+   if(behavior==='pasteLate')assert.equal(sent[0],text,'late chunk accepted without re-paste');}
   p.setInputLock(false);console.log('PASS Notion slow render '+behavior);
  }finally{w.close();}
 }})().catch(e=>{console.error(e);process.exitCode=1;});

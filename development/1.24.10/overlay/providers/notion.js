@@ -1773,7 +1773,7 @@ const RSProvider = (() => {
     const escaped = String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     return '<pre><code>' + escaped + '</code></pre>';
   }
-  async function pasteRichText(el, value, literal = true, append = false, expected = value, delay = 200) {
+  async function pasteRichText(el, value, literal = true, append = false, expected = value, delay = 200, settle = 0) {
     const route=safeRead(() => window.location.href, "");
     // Let the controlled editor's paste handler update its document model.
     // DOM-only writes can be reverted by the next Notion React render.
@@ -1807,12 +1807,28 @@ const RSProvider = (() => {
     } catch { return false; }
     finally { _selfWrite = false; }
     // Check after renders, not just synchronously after the DOM changes.
-    await sleep(delay);
-    const current=findEditorRaw();
-    const first=!!safeRead(() => current.isConnected,false) && draftLooksWritten(edText(current),expected);
-    await sleep(delay);
-    const live=findEditorRaw();
-    const accepted=!!first && !isStopped() && safeRead(() => window.location.href, "")===route && !!safeRead(() => live.isConnected,false) && draftLooksWritten(edText(live),expected);
+    let accepted = false;
+    if (settle > 0) {
+      // Slow editors apply a paste late (a loaded Notion tab can take seconds to
+      // reconcile). Poll until the complete expected text is visible on two
+      // consecutive reads, up to the settle budget, instead of two fixed checks.
+      const until = Date.now() + settle;
+      let hits = 0;
+      while (Date.now() < until && !isStopped()) {
+        await sleep(delay);
+        const live = findEditorRaw();
+        if (safeRead(() => window.location.href, "") !== route) break;
+        hits = !!safeRead(() => live.isConnected, false) && draftLooksWritten(edText(live), expected) ? hits + 1 : 0;
+        if (hits >= 2) { accepted = true; break; }
+      }
+    } else {
+      await sleep(delay);
+      const current=findEditorRaw();
+      const first=!!safeRead(() => current.isConnected,false) && draftLooksWritten(edText(current),expected);
+      await sleep(delay);
+      const live=findEditorRaw();
+      accepted=!!first && !isStopped() && safeRead(() => window.location.href, "")===route && !!safeRead(() => live.isConnected,false) && draftLooksWritten(edText(live),expected);
+    }
     diag(accepted ? "notion.write.pasteAccepted" : "notion.write.pasteRejected", {
       expectedChars: value.length, retainedChars: edText(el).length, connected: safeRead(() => el.isConnected, false),
       sameEditor: findEditorRaw() === el, literal,
@@ -1831,8 +1847,19 @@ const RSProvider = (() => {
       let end=Math.min(value.length,offset+600),lines=0;
       for(let at=offset;at<end;at++)if(value[at]==='\n'&&++lines>=12){end=at+1;break;}
       if(end<value.length&&/[\uD800-\uDBFF]/.test(value[end-1]))end--;
-      const chunk=value.slice(offset,end);prefix+=chunk;
-      if(!await pasteRichText(el,chunk,true,offset>0,prefix,40)){
+      const chunk=value.slice(offset,end),before=prefix;prefix+=chunk;
+      let ok=await pasteRichText(el,chunk,true,offset>0,prefix,40,3000);
+      if(!ok&&!isStopped()&&Date.now()<deadline){
+        // A paste Notion ignored leaves the editor exactly at the previous prefix.
+        // Re-send that one chunk once; any other state (late/partial/changed) is not
+        // retried, so text can never be appended twice.
+        const cur=findEditorRaw();
+        if(cur&&safeRead(() => cur.isConnected,false)&&(offset===0?!edText(cur).trim():draftProfile(edText(cur)).compact===draftProfile(before).compact)){
+          diag('notion.write.pasteRetry',{offset,chunkChars:chunk.length});
+          el=cur;ok=await pasteRichText(el,chunk,true,offset>0,prefix,40,3000);
+        }
+      }
+      if(!ok){
         const actual=edText(el);if(actual&&draftLooksWritten(actual,prefix))setRichText(el,'');
         diag('notion.write.smallPasteRejected',{offset,chars:value.length,retainedChars:edText(el).length});return false;
       }
