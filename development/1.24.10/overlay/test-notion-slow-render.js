@@ -4,7 +4,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict'),{JSDOM}=require('jsdom');
 (async()=>{for(const behavior of ['late','prefix','foreign','pasteLate','pasteIgnored']){
  const dom=new JSDOM('<main><section id="composer"><div role="textbox" contenteditable="true" data-placeholder="Ask Notion AI"></div><div role="button" data-testid="agent-chat-send-button" aria-label="Submit AI message">Send</div></section></main>',{url:'https://app.notion.com/ai',runScripts:'outside-only',pretendToBeVisual:true});
- const w=dom.window,ed=w.document.querySelector('[role=textbox]');const render=m=>{ed.textContent='';for(const part of m.split(/(\p{Extended_Pictographic}\uFE0F?)/u)){if(!part)continue;if(/^\p{Extended_Pictographic}/u.test(part)){const i=w.document.createElement('img');i.className='notion-emoji';i.setAttribute('alt',part);ed.append(i);}else ed.append(w.document.createTextNode(part));}};/* Notion renders emoji as <img alt>, invisible to textContent */
+ const w=dom.window,ed=w.document.querySelector('[role=textbox]');const render=m=>{if(m.endsWith('"'))m=m.slice(0,-1)+'\u201D';/* Notion smart-quotes a final quote */ed.textContent='';for(const part of m.split(/(\p{Extended_Pictographic}\uFE0F?)/u)){if(!part)continue;if(/^\p{Extended_Pictographic}/u.test(part)){const i=w.document.createElement('img');i.className='notion-emoji';i.setAttribute('alt',part);ed.append(i);}else ed.append(w.document.createTextNode(part));}};/* Notion renders emoji as <img alt>, invisible to textContent */
  let model='',edits=0,commits=0,pastes=0;const sent=[];
  w.HTMLElement.prototype.getBoundingClientRect=function(){return {left:200,top:600,width:650,height:this===ed?40:100,right:850,bottom:700};};
  w.DataTransfer=class{constructor(){this.d={};}setData(k,v){this.d[k]=v;}getData(k){return this.d[k]||'';}};
@@ -13,7 +13,7 @@ const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/st
   if(behavior==='pasteIgnored'&&pastes===8)return;/* Notion drops one paste; editor stays at the previous prefix */
   if(behavior==='pasteLate'&&pastes===8){setTimeout(()=>{model=base+add;render(model);},900);return;}/* applied late */
   model=base+add;render(model);});
- const startup='⟦RS-SYS⟧ ROBLOXSCRIPT\n'+Array.from({length:700},(_,i)=>'cmd_'+i+' ✅ {"a":"'+'x'.repeat(30)+'"} ⚠️ 🔧 ©').join('\n')+'\nEmit list_commands first.';
+ const startup='⟦RS-SYS⟧ ROBLOXSCRIPT\n'+Array.from({length:700},(_,i)=>'cmd_'+i+' ✅ {"a":"'+'x'.repeat(30)+'"} ⚠️ 🔧 ©').join('\n')+'\nEmit list_commands first. Reply with "PlazCode is ready."';
  w.document.execCommand=(cmd,_,text)=>{
   if(cmd==='delete'){model='';render('');return true;}
   if(!text){model='';render('');return true;}

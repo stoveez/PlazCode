@@ -1749,8 +1749,18 @@ const RSProvider = (() => {
         if (Date.now() - lastChangeAt >= stableMs) break;
       }
     } catch {}
-    diag("notion.write.native", { retained, expectedChars: value.length, retainedChars: finalChars || edText(el).length,
-      polls, ms: Date.now() - started });
+    const info = { retained, expectedChars: value.length, retainedChars: finalChars || edText(el).length,
+      polls, ms: Date.now() - started };
+    if (!retained) {
+      // Show WHERE Notion's read-back first differs so a rewritten character is
+      // identifiable from a single debug report.
+      try {
+        const a = intendedProfile.compact, b = draftProfile(edText(findEditorRaw() || el)).compact;
+        let i = 0; while (i < a.length && a[i] === b[i]) i++;
+        info.firstDiff = i; info.want = a.slice(Math.max(0, i - 12), i + 12); info.got = b.slice(Math.max(0, i - 12), i + 12);
+      } catch {}
+    }
+    diag("notion.write.native", info);
     return retained;
   }
   // True only for an editor that is empty or holds a strict prefix of the draft we
@@ -1938,6 +1948,11 @@ const RSProvider = (() => {
       .replace(/[\u200B-\u200D\u2060\uFEFF\uFE0E\uFE0F]/g, "")
       .replace(/\r\n?/g, "\n")
       .replace(/\u00a0/g, " ")
+      // Notion's composer smart-quotes a typed quote (live Oct 2026: the final
+      // `."` of the startup digest read back as `.”`). Fold typographic quotes so
+      // that representation-only change never reads as a corrupted draft.
+      .replace(/[\u201C\u201D\u201E\u201F\u2033]/g, '"')
+      .replace(/[\u2018\u2019\u201A\u201B\u2032]/g, "'")
       .replace(/\s+/g, " ")
       .trim();
   }
