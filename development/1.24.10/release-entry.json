@@ -1,0 +1,39 @@
+{
+  "version": "1.24.10",
+  "title": "Notion Start Agent fix",
+  "summary": "Start Agent works again in Notion AI after Notion's latest site update.",
+  "added": [],
+  "improved": [
+    "Each Notion chat thread is tracked separately, so new chats no longer reuse an older chat's session.",
+    "Large Notion startup messages are written safely without freezing the tab, with a chunked fallback for slow editors."
+  ],
+  "fixed": [
+    "Notion Start Agent sends the startup command list automatically instead of leaving it in the chat box.",
+    "Notion's new /ai landing page and New chat button are recognised again.",
+    "Notion draft checks read emoji and smart quotes the way Notion displays them.",
+    "PlazCode finds Notion's send button even when its label changes, and never overwrites text you typed yourself."
+  ],
+  "notes": [
+    "Start Agent was confirmed on a live Notion account (Windows, Chrome, AgentScript). Other AI sites are unchanged.",
+    "Automated platform/browser regressions passed. Live Roblox Studio imports were not re-tested."
+  ],
+  "github": {
+    "sections": [
+      {
+        "title": "🛠️ Notion Start Agent fixed",
+        "items": [
+          "**Startup:** the command list now sends itself after Start Agent instead of staying in the chat box.",
+          "**New Notion layout:** the /ai page, chat threads and New chat button are recognised again.",
+          "**Draft checks:** emoji and curly quotes no longer make a complete message look changed.",
+          "**Safer writing:** large messages no longer freeze the tab, and text you typed is never overwritten."
+        ]
+      },
+      {
+        "title": "🧪 Checks",
+        "items": [
+          "Start Agent was confirmed on a live Notion account. Platform/browser regressions passed. Other AI sites are unchanged."
+        ]
+      }
+    ]
+  }
+}
