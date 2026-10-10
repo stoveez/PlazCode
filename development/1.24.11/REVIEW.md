@@ -1,6 +1,6 @@
 # PlazCode 1.24.11 review
 
-Validation: pending exact-source platform CI and the packaged macOS desktop check.
+Validation: all exact-source platform CI jobs and the packaged macOS desktop check passed. See release-validation-1.24.11.
 
 Scope: Notion AI provider only (`providers/notion.js`), its regression test and the 1.24.11 version bump. Built from the published `PlazCode-source-1.24.10.zip` with the `overlay/` files applied by `prepare.py`.
 

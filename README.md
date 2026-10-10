@@ -1,3 +1,11 @@
+PlazCode 1.24.11 — Notion startup send fix
+
+Fixes Notion startup getting stuck with a half-written command list in the chat box, which then left every command as not run.
+
+- If Notion stops accepting a long startup message part-way, PlazCode switches to sending it as a file straight away instead of waiting again.
+- Notion no longer leaves part of PlazCode's command list in the chat box with “Message was not confirmed” after Start Agent.
+- Commands no longer stay “not run” after that startup failure, because PlazCode clears its own leftover draft.
+
 PlazCode 1.24.10 — Notion Start Agent, plans and task checklist fixes
 
 Start Agent works again in Notion AI, the AI keeps going after plans, and task checklists show real progress.

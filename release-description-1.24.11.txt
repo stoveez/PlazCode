@@ -1,0 +1,22 @@
+## ✨ PlazCode 1.24.11
+
+Fixes Notion startup getting stuck with a half-written command list in the chat box, which then left every command as not run.
+
+### 🛠️ Notion startup fixed
+
+- **No half-written drafts:** if Notion stops accepting the long startup message, PlazCode clears its own leftover text and sends the full message as a file.
+- **Commands run again:** the leftover draft no longer blocks every later command.
+- **Less waiting:** after one stalled attempt, later long messages go straight to the file method.
+
+### 🧪 Checks
+
+- Platform/browser regressions passed. Text you typed is never cleared. Not yet tested on a live Notion account.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.11.zip** for Windows, **PlazCode-macOS-1.24.11.zip** for Mac, or **PlazCode-Firefox-1.24.11.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.

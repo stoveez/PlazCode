@@ -1,0 +1,10 @@
+PlazCode 1.24.11 — exact-source validation passed on Linux, Windows and macOS, with Chromium/Firefox fixtures and the packaged macOS desktop lifetime check.
+Notion AI: when a chunked startup/tool-result paste stops part-way (Notion accepted the first chunks and ignored an appended chunk), the remaining opening of PlazCode's own locked draft is recognised, cleared and the complete message is delivered through the protocol-file path instead of being stranded in the composer. Later sends in the same tab skip the stalled chunked path. Foreign drafts are still preserved. Covered by test-1.24.11-fixes.js, which reproduces the reported "Notion changed the message before its complete contents could be verified" failure on 1.24.10 and passes on 1.24.11.
+Startup/catalogue delivery, Stop/Continue recovery, input ownership, guarded provider DOM access, result pagination, editable clarification fields, Skills, Studio detection fixtures and authenticated native routes passed automated regressions. Studio mesh transactions ran in the official Luau VM with mocked services. Packaged Blender helpers ran in real Blender 4.5.3 LTS in CI.
+Installer checksums, rollback, restricted Windows PowerShell policy, startup/update handoff, Mac x86_64/arm64 packaging, relaunch modes and 210-second visible desktop lifetime passed their platform checks.
+This fix was not tested on a live signed-in Notion account; live provider accounts and real Roblox Studio imports were not tested in this release. Windows binaries are unsigned; Mac uses ad-hoc signing, not notarization.
+Microsoft Defender runner result before assembly:
+Scan starting...
+Scan finished.
+Scanning D:\a\PlazCode\PlazCode\build-src\PlazCode/defender-scan found no threats.
+The scanned checksum and availability are recorded in release-validation-1.24.11.
