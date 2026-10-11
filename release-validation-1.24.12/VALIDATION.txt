@@ -1,0 +1,10 @@
+PlazCode 1.24.12 — exact-source validation passed on Linux, Windows and macOS, with Chromium/Firefox fixtures and the packaged macOS desktop lifetime check.
+Fixes: memory note paste/import, one-time task reference appended after the real command result, Notion-plain startup preferences with tolerant own-draft matching, plan-then-stop continuation, Notion session URL aliases, ambiguous Notion sends that landed no longer stop the turn, screenshot text-only fallback, plain request-file wording, Blender busy-wait/reconnect and timeout handling, new UltraGUI skill pack and a desktop automatic-updates switch.
+Startup/catalogue delivery, Stop/Continue recovery, input ownership, guarded provider DOM access, result pagination, editable clarification fields, Skills, Studio detection fixtures and authenticated native routes passed automated regressions. Studio mesh transactions ran in the official Luau VM with mocked services. Packaged Blender helpers ran in real Blender 4.5.3 LTS in CI.
+Installer checksums, rollback, restricted Windows PowerShell policy, startup/update handoff, Mac x86_64/arm64 packaging, relaunch modes and 210-second visible desktop lifetime passed their platform checks.
+These fixes were not tested on a live signed-in Notion account, real Roblox Studio or live Blender; live provider accounts and real Roblox Studio imports were not tested in this release. Windows binaries are unsigned; Mac uses ad-hoc signing, not notarization.
+Microsoft Defender runner result before assembly:
+Scan starting...
+Scan finished.
+Scanning D:\a\PlazCode\PlazCode\build-src\PlazCode/defender-scan found no threats.
+The scanned checksum and availability are recorded in release-validation-1.24.12.

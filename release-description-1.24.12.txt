@@ -1,0 +1,34 @@
+## ✨ PlazCode 1.24.12
+
+Fixes memory notes that could not be pasted into, Notion startup freezes, plans that stopped without starting, false "Not connected" bars and Blender commands failing while busy. UltraGUI is replaced with the new GUI skill pack, and the desktop app gets an automatic-updates switch.
+
+### 🧠 Memory
+
+- **Paste works:** typing and pasting into notes no longer gets swallowed.
+- **Import:** add .md, .json or .txt files as notes, as-is.
+
+### 🛠️ Agent fixes
+
+- **Notion:** startup no longer freezes on formatted preferences; no false "Not connected" bar; screenshot fallback.
+- **Plans continue:** "Shall I proceed?" no longer stops Plan Mode/Ultracode.
+- **References:** task reference now comes after the real command result.
+- **Blender:** waits for a busy command and survives slow answers.
+- **Notion:** an accepted tool result is no longer reported as "Message was not confirmed".
+
+### ✨ New
+
+- **UltraGUI:** new GUI skill pack, GUI-only and faster.
+- **Auto-update switch** in the desktop app.
+
+### 🧪 Checks
+
+- Automated regressions passed. Not yet tested live in Notion, Studio or Blender.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.12.zip** for Windows, **PlazCode-macOS-1.24.12.zip** for Mac, or **PlazCode-Firefox-1.24.12.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.

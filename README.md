@@ -1,3 +1,21 @@
+PlazCode 1.24.12 — Memory, Notion and Blender fixes + new UltraGUI
+
+Fixes memory notes that could not be pasted into, Notion startup freezes, plans that stopped without starting, false "Not connected" bars and Blender commands failing while busy. UltraGUI is replaced with the new GUI skill pack, and the desktop app gets an automatic-updates switch.
+
+- Memory: Paste button and import of .md, .json or .txt files, each saved as its own note.
+- Desktop app: Settings → Updates switch to turn automatic updates off (manual Update still works).
+- UltraGUI replaced with the new 8-skill GUI pack, used only for ScreenGui, BillboardGui and SurfaceGui work, with fewer repeated checks.
+- Blender: a command waits for one that is already running instead of failing, and reconnects after a short drop.
+- Long messages sent as a file now describe themselves plainly.
+- Typing and pasting into memory notes works again.
+- One-time task reference no longer makes the AI think its command had not run.
+- Notion startup no longer freezes or stays unsent when preferences contain formatting.
+- Plans that end with "Shall I proceed?" continue in Plan Mode/Ultracode instead of stopping.
+- No more false "Not connected" bar in a running Notion chat.
+- If Notion does not take a screenshot, PlazCode sends the text once and points to the capture viewer.
+- Slow Blender answers no longer mark Blender as disconnected.
+- Notion: a tool result that landed in the chat but could not be matched no longer stops the turn with "Message was not confirmed".
+
 PlazCode 1.24.11 — Notion startup send fix
 
 Fixes Notion startup getting stuck with a half-written command list in the chat box, which then left every command as not run.

@@ -1,9 +1,70 @@
 {
-  "version": "1.24.11",
-  "desktop_version": "1.24.11",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.11.zip",
-  "sha256": "17c9e9ae08a987a9d58efeb25996f113877e77e1b604c0cc3ce4f4611a692871",
+  "version": "1.24.12",
+  "desktop_version": "1.24.12",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.12.zip",
+  "sha256": "b19730d164db12dd03090529ea4539497185dc550e60fe02a26ac070d3718ff7",
   "release_notes": [
+    {
+      "version": "1.24.12",
+      "title": "Memory, Notion and Blender fixes + new UltraGUI",
+      "summary": "Fixes memory notes that could not be pasted into, Notion startup freezes, plans that stopped without starting, false \"Not connected\" bars and Blender commands failing while busy. UltraGUI is replaced with the new GUI skill pack, and the desktop app gets an automatic-updates switch.",
+      "added": [
+        "Memory: Paste button and import of .md, .json or .txt files, each saved as its own note.",
+        "Desktop app: Settings → Updates switch to turn automatic updates off (manual Update still works)."
+      ],
+      "improved": [
+        "UltraGUI replaced with the new 8-skill GUI pack, used only for ScreenGui, BillboardGui and SurfaceGui work, with fewer repeated checks.",
+        "Blender: a command waits for one that is already running instead of failing, and reconnects after a short drop.",
+        "Long messages sent as a file now describe themselves plainly."
+      ],
+      "fixed": [
+        "Typing and pasting into memory notes works again.",
+        "One-time task reference no longer makes the AI think its command had not run.",
+        "Notion startup no longer freezes or stays unsent when preferences contain formatting.",
+        "Plans that end with \"Shall I proceed?\" continue in Plan Mode/Ultracode instead of stopping.",
+        "No more false \"Not connected\" bar in a running Notion chat.",
+        "If Notion does not take a screenshot, PlazCode sends the text once and points to the capture viewer.",
+        "Slow Blender answers no longer mark Blender as disconnected.",
+        "Notion: a tool result that landed in the chat but could not be matched no longer stops the turn with \"Message was not confirmed\"."
+      ],
+      "notes": [
+        "Automated regressions passed. Not yet tested live in Notion, Roblox Studio or Blender."
+      ],
+      "github": {
+        "sections": [
+          {
+            "title": "🧠 Memory",
+            "items": [
+              "**Paste works:** typing and pasting into notes no longer gets swallowed.",
+              "**Import:** add .md, .json or .txt files as notes, as-is."
+            ]
+          },
+          {
+            "title": "🛠️ Agent fixes",
+            "items": [
+              "**Notion:** startup no longer freezes on formatted preferences; no false \"Not connected\" bar; screenshot fallback.",
+              "**Plans continue:** \"Shall I proceed?\" no longer stops Plan Mode/Ultracode.",
+              "**References:** task reference now comes after the real command result.",
+              "**Blender:** waits for a busy command and survives slow answers.",
+              "**Notion:** an accepted tool result is no longer reported as \"Message was not confirmed\"."
+            ]
+          },
+          {
+            "title": "✨ New",
+            "items": [
+              "**UltraGUI:** new GUI skill pack, GUI-only and faster.",
+              "**Auto-update switch** in the desktop app."
+            ]
+          },
+          {
+            "title": "🧪 Checks",
+            "items": [
+              "Automated regressions passed. Not yet tested live in Notion, Studio or Blender."
+            ]
+          }
+        ]
+      }
+    },
     {
       "version": "1.24.11",
       "title": "Notion startup send fix",
@@ -222,54 +283,6 @@
             "title": "🧪 Regression checks",
             "items": [
               "Automated checks cover quick requests, task retention, command schemas, startup, Studio detection fixtures, updating and Windows/Mac builds. Live AI accounts, response speed and real Studio sessions were not tested."
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.24.7",
-      "title": "Name your skills and a clearer Skills layout",
-      "summary": "Give your skills a name, or let PlazCode name them for you. Learning and library options now have clearer spacing.",
-      "added": [
-        "An optional Skill name box appears above Skill instructions. Leave it blank and PlazCode creates a short name from your instructions."
-      ],
-      "improved": [
-        "Release descriptions explain what changes mean for you in plain language."
-      ],
-      "fixed": [
-        "Learning and library options has its own space below the editor. Expanded controls stay on separate rows.",
-        "Clearing a skill name uses the current instructions to name it, rather than an older description."
-      ],
-      "notes": [
-        "Automated tests cover existing startup, tools and updating. Live signed-in AI accounts and real Studio sessions were not tested."
-      ],
-      "github": {
-        "sections": [
-          {
-            "title": "✏️ Name your skills",
-            "items": [
-              "**Choose a name:** a new optional name box sits above Skill instructions.",
-              "**Automatic naming:** leave the name blank and PlazCode makes a short name from what you wrote. You can rename saved skills too."
-            ]
-          },
-          {
-            "title": "🎨 Clearer Skills layout",
-            "items": [
-              "**More breathing room:** Learning and library options is separated from the editor. Opening it keeps its buttons and settings from crowding each other.",
-              "**Keep your workflow:** saving, project scope, importing JSON or text, and exporting JSON work as before."
-            ]
-          },
-          {
-            "title": "📝 Easier release notes",
-            "items": [
-              "**Plain language:** update descriptions explain what changed and how it helps, without requiring scripting knowledge."
-            ]
-          },
-          {
-            "title": "✅ Checked before release",
-            "items": [
-              "Automated checks cover Skills, startup, commands, updating and Windows/Mac builds. Live AI accounts and real Studio sessions were not tested."
             ]
           }
         ]

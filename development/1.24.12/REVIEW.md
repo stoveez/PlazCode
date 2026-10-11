@@ -1,6 +1,6 @@
 # PlazCode 1.24.12 review
 
-Validation: pending — private development build only. Not published; feeds unchanged.
+Validation: all exact-source platform CI jobs and the packaged macOS desktop check passed. See release-validation-1.24.12.
 
 Built from the published `PlazCode-source-1.24.11.zip` with `overlay/` applied by `prepare.py`. Retired UltraGUI files are removed; new UltraGUI images are restored byte-exact from `binary/` base64 chunks.
 
