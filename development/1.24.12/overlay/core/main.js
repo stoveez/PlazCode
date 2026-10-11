@@ -956,7 +956,15 @@
         const sendResult = await P.typeAndSend(typeof window !== "undefined" && typeof window.__rsLimitOutgoing === "function" ? window.__rsLimitOutgoing(text) : text, images, { userPrompt: userPrompt === true });
         if (P.authoritativeSendResult) {
           if (sendResult === true) messageSent = true;
-          else if (sendResult === false) {
+          else if (sendResult === false && !A.stop && !(images && images.length) && typeof P.sendFailureAmbiguous === "function" &&
+                   P.sendFailureAmbiguous() === true && landed()) {
+            // 1.24.12: the provider could not match the new row's text (the result
+            // row is reformatted into a chip), but the click was ambiguous AND a new
+            // user/assistant turn appeared. The message landed: continue, never
+            // stop the turn with "Message was not confirmed" and never resend.
+            diag("send.ambiguousLanded", { provider: P.id });
+            messageSent = true;
+          } else if (sendResult === false) {
             // Safe automatic recovery (1.19.39): when the provider proves it gave
             // up BEFORE its single commit (nothing reached the site), wait a beat
             // and deliver once more instead of stopping the whole task. Ambiguous

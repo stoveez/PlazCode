@@ -54,4 +54,7 @@ for(const id of [...ultra.matchAll(/bundled-ultragui-([a-z-]+)/g)].map(m=>m[1]))
 const html=fs.readFileSync('agent/src/desktop.html','utf8');
 assert(/data-pref="rsAutoUpdate"/.test(html));
 assert(/fn auto_updates_enabled\(/.test(fs.readFileSync('agent/src/updater.rs','utf8')));
+// Ambiguous Notion send that visibly landed continues instead of stopping the turn.
+assert(/send\.ambiguousLanded/.test(main)&&/P\.sendFailureAmbiguous\(\) === true && landed\(\)/.test(main));
+const iA=main.indexOf('send.ambiguousLanded'),iB=main.indexOf('send.providerUnconfirmed');assert(iA>0&&iA<iB,'landed check precedes the banner');
 console.log('1.24.12 fixes: ok');

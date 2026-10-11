@@ -18,7 +18,8 @@
     "Plans that end with \"Shall I proceed?\" continue in Plan Mode/Ultracode instead of stopping.",
     "No more false \"Not connected\" bar in a running Notion chat.",
     "If Notion does not take a screenshot, PlazCode sends the text once and points to the capture viewer.",
-    "Slow Blender answers no longer mark Blender as disconnected."
+    "Slow Blender answers no longer mark Blender as disconnected.",
+    "Notion: a tool result that landed in the chat but could not be matched no longer stops the turn with \"Message was not confirmed\"."
   ],
   "notes": [
     "Automated regressions passed. Not yet tested live in Notion, Roblox Studio or Blender."
@@ -38,7 +39,8 @@
           "**Notion:** startup no longer freezes on formatted preferences; no false \"Not connected\" bar; screenshot fallback.",
           "**Plans continue:** \"Shall I proceed?\" no longer stops Plan Mode/Ultracode.",
           "**References:** task reference now comes after the real command result.",
-          "**Blender:** waits for a busy command and survives slow answers."
+          "**Blender:** waits for a busy command and survives slow answers.",
+          "**Notion:** an accepted tool result is no longer reported as \"Message was not confirmed\"."
         ]
       },
       {
