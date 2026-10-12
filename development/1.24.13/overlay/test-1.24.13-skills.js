@@ -50,9 +50,9 @@ const fs=require('fs'),assert=require('node:assert/strict'),{JSDOM}=require('jsd
  card('skill-style').querySelector('[data-sk-favorite]').click();await flush();assert.equal(card('skill-style').querySelector('[data-sk-favorite]').getAttribute('aria-pressed'),'false');
  // AI side: suggestions instead of silent saving, no duplicate cards, genre-aware use.
  const main=fs.readFileSync('core/main.js','utf8'),config=fs.readFileSync('core/config.js','utf8'),rust=fs.readFileSync('agent/src/skills.rs','utf8');
- assert.match(main,/ask in one short line whether to save it as a skill/);assert.match(main,/user_approved:\{type:'boolean'/);assert.match(main,/enabled:args\.user_approved===true\|\|!!previous\?\.enabled/);
+ assert.match(main,/call action suggest once/);assert.match(main,/user_approved:\{type:'boolean'/);assert.match(main,/enabled:args\.user_approved===true\|\|!!previous\?\.enabled/);
  assert.match(main,/already exists \(id "\+twin\.id/);assert.match(main,/simulator and a battlegrounds game need different structure/);
- assert.match(config,/briefly ask whether to save it as a skill; save only after I agree/);
- assert.match(rust,/auto_candidate_skip\(&store\.data/);assert.match(rust,/MAX_PENDING_CANDIDATES:usize=10/);assert.match(rust,/"delete_all"=>/);assert.match(rust,/"favorite"=>/);
+ assert.match(config,/offer it once with plazcode_skills action suggest/);
+ assert.match(rust,/automatic task candidates are off/);assert.match(rust,/"delete_all"=>/);assert.match(rust,/"favorite"=>/);
  console.log('1.24.13 skills: favourites, delete, delete all and candidate limits pass');
 })().catch(error=>{console.error(error);process.exit(1);});

@@ -56,7 +56,7 @@ impl Store {
   if action=="match" {
    let query=request["query"].as_str().unwrap_or("").to_lowercase();let domain=request["domain"].as_str().unwrap_or("");let scope=request["scope"].as_str().unwrap_or("");
    let mut terms=query.split(|c:char|!c.is_alphanumeric()).filter(|s|s.len()>2&&!STOPWORDS.contains(s)).take(80).collect::<Vec<_>>();terms.sort_unstable();terms.dedup();
-   let mut hits=self.data.skills.values().filter(|s|(s.confirmed||s.enabled)&&(s.scope.is_empty()||s.scope==scope)&&(s.domain=="all"||s.domain==domain||(domain=="roblox"&&matches!(s.domain.as_str(),"model"|"ui"))||(domain=="local"&&s.domain=="blender"))).filter_map(|s|{let title=s.title.to_lowercase();let hay=format!("{} {} {}",title,s.description,s.steps.join(" ")).to_lowercase();let score=terms.iter().filter(|word|hay.contains(**word)).count()+terms.iter().filter(|word|title.contains(**word)).count();(score>0||s.enabled).then_some((score+if s.scope.is_empty(){0}else{3}+if s.enabled{8}else{0},s))}).collect::<Vec<_>>();hits.sort_by_key(|(score,_)|std::cmp::Reverse(*score));
+   let mut hits=self.data.skills.values().filter(|s|(s.confirmed||s.enabled||s.favorite)&&(s.scope.is_empty()||s.scope==scope)&&(s.domain=="all"||s.domain==domain||(domain=="roblox"&&matches!(s.domain.as_str(),"model"|"ui"))||(domain=="local"&&s.domain=="blender"))).filter_map(|s|{let title=s.title.to_lowercase();let hay=format!("{} {} {}",title,s.description,s.steps.join(" ")).to_lowercase();let score=terms.iter().filter(|word|hay.contains(**word)).count()+terms.iter().filter(|word|title.contains(**word)).count();(score>0||s.enabled).then_some((score+if s.scope.is_empty(){0}else{3}+if s.enabled{8}else{0}+if s.favorite{6}else{0},s))}).collect::<Vec<_>>();hits.sort_by_key(|(score,_)|std::cmp::Reverse(*score));
    return Ok(json!({"ok":true,"skills":hits.into_iter().take(3).map(|(_,skill)|skill).collect::<Vec<_>>() }));
   }
   let id=request["id"].as_str().unwrap_or("");
@@ -84,7 +84,6 @@ fn validate(s:&Skill)->anyhow::Result<()> {
  anyhow::ensure!(!s.confirmed||!s.verification.is_empty(),"Add verification before marking a skill tested.");Ok(())
 }
 const CANDIDATE_TEXT:&str="Candidate from observable tool steps. Edit into a reusable method, add checks and confirm it worked before reuse.";
-const MAX_PENDING_CANDIDATES:usize=10;
 const STOPWORDS:&[&str]=&["the","and","for","with","that","this","from","into","onto","you","your","are","was","were","can","could","should","would","will","please","make","add","use","using","all","any","its","not","but","then","than","also","just","now","get","set","new","our","out","has","have","had","him","her","them","they","what","when","where","which","who","how","why","there","here","some","more","most","very","one","two","about","over","like","want","need","game","roblox"];
 fn normal_title(title:&str)->String{title.to_lowercase().split(|c:char|!c.is_alphanumeric()).filter(|s|!s.is_empty()).collect::<Vec<_>>().join(" ")}
 /// Titles the task tracker uses before the AI names the goal. They never
@@ -93,16 +92,6 @@ fn placeholder_title(title:&str)->bool{let t=normal_title(title);t.is_empty()||m
 /// An automatic candidate the user never edited, tested, enabled or starred.
 fn untouched_auto_candidate(s:&Skill)->bool{s.id.starts_with("task-")&&s.revision<=1&&!s.confirmed&&!s.enabled&&!s.favorite&&!s.community&&s.description==CANDIDATE_TEXT}
 fn kept_by_delete_all(id:&str)->bool{id.starts_with("starter-syphodev-")||id.starts_with("bundled-ultragui-")||id.starts_with("global-workflow-")}
-/// Why an automatic candidate should not be saved, if it should not.
-fn auto_candidate_skip(data:&Catalog,title:&str,domain:&str,steps:&[String])->Option<&'static str>{
- if placeholder_title(title){return Some("placeholder title");}
- let distinct=steps.iter().map(|s|s.trim().to_lowercase()).filter(|s|!s.is_empty()).collect::<std::collections::BTreeSet<_>>();
- if steps.len()<3||distinct.len()<2{return Some("too few tool steps to describe a method");}
- let wanted=normal_title(title);
- if data.skills.values().any(|s|normal_title(&s.title)==wanted&&(s.domain==domain||s.domain=="all")){return Some("a skill with this title already exists");}
- if data.skills.values().filter(|s|untouched_auto_candidate(s)).count()>=MAX_PENDING_CANDIDATES{return Some("review or delete the pending candidates first");}
- None
-}
 fn public(skill:&Skill)->Value {json!({"id":skill.id,"title":skill.title,"description":skill.description,"domain":skill.domain,"scope":"","steps":skill.steps,"pitfalls":skill.pitfalls,"verification":skill.verification,"confirmed":skill.confirmed,"revision":1,"community":true})}
 static STORE:once_cell::sync::Lazy<tokio::sync::Mutex<Store>>=once_cell::sync::Lazy::new(||{let base=std::env::var_os("LOCALAPPDATA").or_else(||std::env::var_os("XDG_CONFIG_HOME")).map(PathBuf::from).unwrap_or_else(||PathBuf::from(std::env::var_os("HOME").unwrap_or_default()).join(".config"));tokio::sync::Mutex::new(Store::load(base.join("PlazCode/skills.json")))});
 fn repository()->anyhow::Result<String>{let value=std::env::var("PLAZCODE_LEARNING_REPOSITORY").unwrap_or_else(|_|"stoveez/PlazCode".into());let parts=value.split('/').collect::<Vec<_>>();anyhow::ensure!(parts.len()==2&&parts.iter().all(|s|!s.is_empty()&&s.len()<=100&&s.bytes().all(|b|b.is_ascii_alphanumeric()||b"_- .".contains(&b))&&!s.contains(' ')),"Learning repository must be owner/repository on GitHub.");Ok(value)}
@@ -150,7 +139,9 @@ pub async fn post(State(state):State<crate::AppState>,Json(request):Json<Value>)
  let result:anyhow::Result<Value>=async {
   match request["action"].as_str().unwrap_or("list") {
    "sync"|"publish"=>{if request["action"]=="sync"{let count=refresh_global(true).await;let mut result=sync().await?;result["count"]=json!(result["count"].as_u64().unwrap_or(0)+count as u64);Ok(result)}else{publish(&request).await}},
-   "checkpoint"=>{if !state.preferences.snapshot().skill_auto_learn&&request["manual"]!=true{return Ok(json!({"ok":true,"skipped":true}));}let journal=crate::checkpoints::STORE.lock().await;let task=journal.task(request["checkpoint"].as_str().unwrap_or(""))?;anyhow::ensure!(task.status=="worked","Finish the task before saving a candidate.");let project=journal.project(&task.chat);let scope=if project.is_empty(){format!("chat:{}",task.chat)}else{format!("project:{project}")};let id=format!("task-{}",task.id);let manual=request["manual"]==true;let skill=Skill{id:id.clone(),title:task.label.chars().take(50).collect(),description:CANDIDATE_TEXT.into(),domain:task.engine.clone(),scope,steps:if task.steps.is_empty(){vec!["Describe the method that solved this task.".into()]}else{task.steps.iter().take(30).cloned().collect()},pitfalls:task.warnings.iter().take(20).map(|s|s.chars().take(1000).collect()).collect(),verification:vec![],confirmed:false,enabled:false,revision:0,community:false,favorite:false};drop(journal);let mut store=STORE.lock().await;if store.data.skills.contains_key(&id){return Ok(json!({"ok":true,"id":id}));}if !manual{if let Some(reason)=auto_candidate_skip(&store.data,&skill.title,&skill.domain,&skill.steps){return Ok(json!({"ok":true,"skipped":true,"reason":reason}));}}else{anyhow::ensure!(!placeholder_title(&skill.title),"This task has no descriptive name yet. Add the skill manually with a clear title.");}store.request(&json!({"action":"save","skill":skill,"revision":0})).map(|mut result|{result["id"]=id.into();result})},
+   // 1.24.13: automatic task candidates are off; they filled the library with
+   // near-identical cards. Only the explicit "Save candidate" action remains.
+   "checkpoint"=>{let _=&state;if request["manual"]!=true{return Ok(json!({"ok":true,"skipped":true,"reason":"automatic task candidates are off"}));}let journal=crate::checkpoints::STORE.lock().await;let task=journal.task(request["checkpoint"].as_str().unwrap_or(""))?;anyhow::ensure!(task.status=="worked","Finish the task before saving a candidate.");let project=journal.project(&task.chat);let scope=if project.is_empty(){format!("chat:{}",task.chat)}else{format!("project:{project}")};let id=format!("task-{}",task.id);let manual=request["manual"]==true;let skill=Skill{id:id.clone(),title:task.label.chars().take(50).collect(),description:CANDIDATE_TEXT.into(),domain:task.engine.clone(),scope,steps:if task.steps.is_empty(){vec!["Describe the method that solved this task.".into()]}else{task.steps.iter().take(30).cloned().collect()},pitfalls:task.warnings.iter().take(20).map(|s|s.chars().take(1000).collect()).collect(),verification:vec![],confirmed:false,enabled:false,revision:0,community:false,favorite:false};drop(journal);let mut store=STORE.lock().await;if store.data.skills.contains_key(&id){return Ok(json!({"ok":true,"id":id}));}anyhow::ensure!(manual&&!placeholder_title(&skill.title),"This task has no descriptive name yet. Add the skill manually with a clear title.");store.request(&json!({"action":"save","skill":skill,"revision":0})).map(|mut result|{result["id"]=id.into();result})},
    _=>STORE.lock().await.request(&request)
   }
  }.await;
@@ -195,20 +186,6 @@ pub async fn post(State(state):State<crate::AppState>,Json(request):Json<Value>)
  }
 
  fn auto(id:&str,title:&str)->Skill{Skill{id:id.into(),title:title.into(),description:CANDIDATE_TEXT.into(),domain:"roblox".into(),scope:"chat:x".into(),steps:vec!["execute_luau".into(),"get_children".into(),"execute_luau".into()],pitfalls:vec![],verification:vec![],confirmed:false,enabled:false,revision:1,community:false,favorite:false}}
- #[test]fn automatic_candidates_are_deduplicated_gated_and_capped(){
-  let mut data=Catalog::default();let steps=vec!["execute_luau".to_string(),"get_children".into(),"execute_luau".into()];
-  assert_eq!(auto_candidate_skip(&data,"Planning project work","roblox",&steps),Some("placeholder title"));
-  assert_eq!(auto_candidate_skip(&data,"Continue","roblox",&steps),Some("placeholder title"));
-  assert!(auto_candidate_skip(&data,"Build a sword shop","roblox",&["execute_luau".into(),"execute_luau".into(),"execute_luau".into()]).is_some());
-  assert!(auto_candidate_skip(&data,"Build a sword shop","roblox",&["execute_luau".into()]).is_some());
-  assert_eq!(auto_candidate_skip(&data,"Back up the full current map, terrain and lighting","roblox",&steps),None);
-  let first=auto("task-1","Back up the full current map, terrain and lighting");data.skills.insert(first.id.clone(),first);
-  assert_eq!(auto_candidate_skip(&data,"back up the FULL current map - terrain and lighting!","roblox",&steps),Some("a skill with this title already exists"),"the same task label in another chat is still a duplicate");
-  for n in 2..=10 {let s=auto(&format!("task-{n}"),&format!("Distinct task {n}"));data.skills.insert(s.id.clone(),s);}
-  assert_eq!(auto_candidate_skip(&data,"Another new method","roblox",&steps),Some("review or delete the pending candidates first"));
-  data.skills.get_mut("task-2").unwrap().enabled=true;
-  assert_eq!(auto_candidate_skip(&data,"Another new method","roblox",&steps),None,"edited/enabled cards no longer count as pending");
- }
  #[test]fn cleanup_collapses_untouched_duplicates_once(){
   let path=std::env::temp_dir().join(format!("plazcode-candidate-cleanup-{}.json",std::process::id()));let _=std::fs::remove_file(&path);
   let mut catalog=Catalog{starter_pack_version:1,ultragui_pack_version:2,..Default::default()};
@@ -248,6 +225,21 @@ pub async fn post(State(state):State<crate::AppState>,Json(request):Json<Value>)
   assert!(!hit["skills"].as_array().unwrap().iter().any(|s|s["id"]=="shop"),"filler words alone never match");
   let hit=store.request(&json!({"action":"match","query":"add a shop","domain":"roblox","scope":""})).unwrap();
   assert!(hit["skills"].as_array().unwrap().iter().any(|s|s["id"]=="shop"));
+  let _=std::fs::remove_file(path.with_extension("json.backup"));std::fs::remove_file(path).unwrap();
+ }
+
+ #[test]fn favourites_get_priority_in_matching(){
+  let path=std::env::temp_dir().join(format!("plazcode-favourite-match-{}.json",std::process::id()));let _=std::fs::remove_file(&path);
+  let mut store=Store::load(path.clone());
+  for (id,title) in [("a","Shop layout one"),("b","Shop layout two"),("c","Shop layout three"),("d","Shop layout four")]{let mut s=skill();s.id=id.into();s.title=title.into();s.description="shop".into();s.scope=String::new();store.request(&json!({"action":"save","skill":s,"revision":0})).unwrap();}
+  let ids=|store:&mut Store|store.request(&json!({"action":"match","query":"shop layout","domain":"roblox","scope":""})).unwrap()["skills"].as_array().unwrap().iter().map(|s|s["id"].as_str().unwrap().to_string()).collect::<Vec<_>>();
+  assert!(!ids(&mut store).contains(&"d".to_string()));
+  store.request(&json!({"action":"favorite","id":"d","favorite":true})).unwrap();
+  assert_eq!(ids(&mut store)[0],"d","a starred skill is ranked first");
+  let mut candidate=skill();candidate.id="starred-candidate".into();candidate.title="Shop pricing".into();candidate.confirmed=false;candidate.verification.clear();candidate.scope=String::new();store.request(&json!({"action":"save","skill":candidate,"revision":0})).unwrap();
+  assert!(!store.request(&json!({"action":"match","query":"pricing","domain":"roblox","scope":""})).unwrap()["skills"].as_array().unwrap().iter().any(|s|s["id"]=="starred-candidate"));
+  store.request(&json!({"action":"favorite","id":"starred-candidate","favorite":true})).unwrap();
+  assert!(store.request(&json!({"action":"match","query":"pricing","domain":"roblox","scope":""})).unwrap()["skills"].as_array().unwrap().iter().any(|s|s["id"]=="starred-candidate"),"starring a skill makes it eligible");
   let _=std::fs::remove_file(path.with_extension("json.backup"));std::fs::remove_file(path).unwrap();
  }
 }

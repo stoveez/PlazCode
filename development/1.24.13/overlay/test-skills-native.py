@@ -56,7 +56,7 @@ with tempfile.TemporaryDirectory(prefix='plazcode-skills-native-') as temporary:
    status,candidate=call('/api/skills',{'action':'checkpoint','checkpoint':task['id'],'manual':True});assert status==200,candidate
    assert candidate['skill']['scope']=='chat:test|chat' and candidate['skill']['confirmed']==False
    assert all(x['id']!=candidate['id'] for x in call('/api/skills',{'action':'match','domain':'roblox','scope':'chat:test|chat','query':'inventory'})[1]['skills'])
-   status,again=call('/api/skills',{'action':'checkpoint','checkpoint':task['id']});assert status==200 and again.get('id')==candidate['id'],again
+   status,again=call('/api/skills',{'action':'checkpoint','checkpoint':task['id']});assert status==200 and again.get('skipped')==True and again.get('reason')=='automatic task candidates are off',again
    status,starred=call('/api/skills',{'action':'favorite','id':'inventory','favorite':True});assert status==200 and starred['skill']['favorite']==True,starred
    status,cleared=call('/api/skills',{'action':'delete_all'});assert status==200 and cleared['removed']>=1,cleared
    remaining={x['id'] for x in call('/api/skills',{'action':'list'})[1]['skills']}
