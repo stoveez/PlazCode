@@ -76,6 +76,40 @@
     personalMemory = reply.memory; return personalMemory;
   }
   let continuedEngramScope="",continuedEngramChat="",engramRecallGeneration=0;
+  // 1.24.13: one-click "Save as skill" offer. The AI proposes a lasting user
+  // preference with plazcode_skills action suggest; only the user's click saves
+  // it. A small card at the top right, never over the chat box.
+  let skillOfferNode=null;const skillOffersShown=new Set();
+  function skillTitleKey(value){return String(value||'').toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean).join(' ');}
+  function closeSkillOffer(node=skillOfferNode){if(!node)return;try{clearInterval(node._rsWatch);}catch{}node.remove();if(skillOfferNode===node)skillOfferNode=null;}
+  function showSkillSuggestion(skill){
+    closeSkillOffer();
+    const node=document.createElement('section');node.className='rs-skill-offer';node.setAttribute('role','dialog');node.setAttribute('aria-label','Save as skill');
+    const style=document.createElement('style');style.textContent='.rs-skill-offer{position:fixed;top:72px;right:16px;z-index:2147483640;width:min(380px,calc(100vw - 32px));box-sizing:border-box;padding:16px 18px;border:1px solid var(--pc-accent,#ff9226);border-radius:14px;background:var(--pc-bg,#14161b);color:#f5f5f5;box-shadow:0 14px 50px #0008;font:13px/1.5 system-ui,sans-serif}.rs-skill-offer h3{margin:0 0 6px;font-size:15px}.rs-skill-offer strong{display:block;margin-bottom:4px}.rs-skill-offer p{margin:0 0 8px;opacity:.85;white-space:pre-wrap;overflow-wrap:anywhere}.rs-skill-offer small{display:block;opacity:.7;margin-bottom:10px}.rs-skill-offer button{font:inherit;padding:8px 12px;margin:0 8px 0 0;border-radius:9px;border:1px solid var(--pc-accent,#ff9226);background:transparent;color:inherit;cursor:pointer}.rs-skill-offer button.rs-skill-save{background:var(--pc-accent,#ff9226);color:#111822;font-weight:650}.rs-skill-offer button:disabled{opacity:.55;cursor:default}.rs-skill-offer [role=status]{margin:10px 0 0;min-height:1em}';
+    const heading=document.createElement('h3');heading.textContent='Save this as a skill?';
+    const name=document.createElement('strong');name.textContent=skill.title;
+    const preview=document.createElement('p');const text=skill.steps.join('\n');preview.textContent=text.length>280?text.slice(0,279)+'…':text;
+    const note=document.createElement('small');note.textContent='The AI will use it in future relevant tasks'+(skill.scope?' in this project':'')+'. Edit or delete it any time in Skills.';
+    const save=document.createElement('button'),dismiss=document.createElement('button'),status=document.createElement('p');
+    save.type=dismiss.type='button';save.className='rs-skill-save';save.textContent='Save as skill';dismiss.textContent='Not now';status.setAttribute('role','status');
+    save.onclick=async()=>{
+      save.disabled=dismiss.disabled=true;status.textContent='Saving…';
+      try{
+        const listed=await bg({type:'skills',request:{action:'list'}});
+        const twin=listed?.ok?(listed.skills||[]).find(item=>skillTitleKey(item.title)===skillTitleKey(skill.title)):null;
+        if(twin){status.textContent='Already saved as “'+twin.title+'”.';save.textContent='Saved';setTimeout(()=>closeSkillOffer(node),2500);return;}
+        const result=await bg({type:'skills',request:{action:'save',revision:0,skill:{...skill,id:'skill-'+crypto.randomUUID(),confirmed:false,enabled:true,revision:0,community:false}}});
+        if(!result?.ok)throw Error(result?.error||'The skill could not be saved.');
+        status.textContent='Saved “'+(result.skill?.title||skill.title)+'”. The AI will use it for relevant tasks.';save.textContent='Saved';setTimeout(()=>closeSkillOffer(node),2500);
+      }catch(error){status.textContent=String(error?.message||error);save.disabled=dismiss.disabled=false;}
+    };
+    dismiss.onclick=()=>closeSkillOffer(node);
+    const actions=document.createElement('div');actions.append(save,dismiss);
+    node.append(style,heading,name,preview,note,actions,status);
+    const chat=P.conversationKey();node._rsWatch=setInterval(()=>{if(!node.isConnected||P.conversationKey()!==chat)closeSkillOffer(node);},1000);
+    document.documentElement.appendChild(node);skillOfferNode=node;
+    return node;
+  }
   function engramScope(){return currentProject ? 'project:'+currentProject : (continuedEngramChat===P.conversationKey()?continuedEngramScope:'') || 'chat:'+P.id+'|'+P.conversationKey();}
   async function engramRequest(args,scope=engramScope()){
     const chat=P.id+'|'+P.conversationKey();
@@ -2045,7 +2079,7 @@
       A._bridgeToolNames = bridgeTools.map((tool) => tool.name);
       const tools = bridgeTools.slice();
       tools.push({name:'plazcode_templates',server:activeEngine(),description:'Read-only template references. match query describes a system and finds related script paths/code identifiers with up to 8 matches (limit); read id lists scripts, read id and path returns source with optional offset/limit.',inputSchema:{type:'object',properties:{action:{type:'string',enum:['match','read']},query:{type:'string'},id:{type:'string'},path:{type:'string'},script_id:{type:'string'},offset:{type:'integer',minimum:0},limit:{type:'integer',minimum:1,maximum:24000}},required:['action']}});
-      tools.push({name:'plazcode_skills',server:activeEngine(),description:'Read reusable methods with list/read/match. Bundled starter read returns full paginated instructions, resources and bundle_root; read required references before applying them. Use resource, offset and limit for full files. When the user states a lasting preference or rule about how or when to work (coding style, naming, structure, workflow), do not save automatically: finish the current reply, then ask in one short line whether to save it as a skill. Save only after the user agrees or explicitly asks, with user_approved:true so it guides future relevant tasks; never save skills on your own initiative, for routine task steps, or repeatedly. Give it a concise descriptive title and detailed description explaining when it is useful, adaptable steps, pitfalls and verification checks. List before saving; update an existing skill with the same purpose (its id and revision) instead of adding a duplicate. Use a new unique ID only for a new method; set confirmed:false unless actually verified. Keep private project details in a project scope. Save observable methods, never hidden reasoning or raw chat logs. The user verifies candidates in Skills. Adapt methods to the current project; never blindly copy code.',inputSchema:{type:'object',properties:{action:{type:'string',enum:['list','read','match','save']},id:{type:'string'},resource:{type:'string'},offset:{type:'integer',minimum:0},limit:{type:'integer',minimum:1,maximum:24000},revision:{type:'integer'},query:{type:'string'},title:{type:'string'},description:{type:'string'},domain:{type:'string',enum:['all','roblox','local','blender','model','ui']},steps:{type:'array',items:{type:'string'}},pitfalls:{type:'array',items:{type:'string'}},verification:{type:'array',items:{type:'string'}},user_approved:{type:'boolean',description:'true only when the user asked for or agreed to this skill'}},required:['action'],additionalProperties:false}});
+      tools.push({name:'plazcode_skills',server:activeEngine(),description:'Read reusable methods with list/read/match. Bundled starter read returns full paginated instructions, resources and bundle_root; read required references before applying them. Use resource, offset and limit for full files. When the user states a lasting preference or rule about how or when to work (coding style, naming, structure, workflow), apply it and call action suggest once with a short title, a description and the instructions as steps; PlazCode shows the user a one-click Save as skill button and only their click saves it. Never save such preferences yourself; use save only when the user explicitly asks you to save a skill, with user_approved:true. Never suggest routine task steps or repeat a suggestion. Give it a concise descriptive title and detailed description explaining when it is useful, adaptable steps, pitfalls and verification checks. List before saving; update an existing skill with the same purpose (its id and revision) instead of adding a duplicate. Use a new unique ID only for a new method; set confirmed:false unless actually verified. Keep private project details in a project scope. Save observable methods, never hidden reasoning or raw chat logs. The user verifies candidates in Skills. Adapt methods to the current project; never blindly copy code.',inputSchema:{type:'object',properties:{action:{type:'string',enum:['list','read','match','save','suggest']},id:{type:'string'},resource:{type:'string'},offset:{type:'integer',minimum:0},limit:{type:'integer',minimum:1,maximum:24000},revision:{type:'integer'},query:{type:'string'},title:{type:'string'},description:{type:'string'},domain:{type:'string',enum:['all','roblox','local','blender','model','ui']},steps:{type:'array',items:{type:'string'}},pitfalls:{type:'array',items:{type:'string'}},verification:{type:'array',items:{type:'string'}},user_approved:{type:'boolean',description:'true only when the user asked for or agreed to this skill'},project_only:{type:'boolean',description:'suggest: true when the preference applies only to the current project'}},required:['action'],additionalProperties:false}});
       tools.push({name:'plazcode_engram',server:activeEngine(),description:DESKTOP_TOOL_DESCRIPTIONS.plazcode_engram,inputSchema:{type:'object',properties:{action:{type:'string',enum:['context','search','read','save','summary']},query:{type:'string'},id:{type:'integer'},title:{type:'string'},content:{type:'string'},topic_key:{type:'string'}},required:['action'],additionalProperties:false}});
       tools.push({name:'plazcode_memory',server:typeof window.__rsEngine==='function'?window.__rsEngine():'roblox',description:'Read or save shared PlazCode memory.',inputSchema:{type:'object',properties:{action:{type:'string',enum:['list','read','remember']},title:{type:'string'},text:{type:'string'},id:{type:'integer'},offset:{type:'integer'},limit:{type:'integer'}},required:['action']}});
       tools.push({name:'studio_upload_asset',server:'roblox',description:DESKTOP_TOOL_DESCRIPTIONS.studio_upload_asset,inputSchema:{type:'object',properties:{kind:{type:'string',enum:['model','mesh','animation','sound','image','texture','video','package']},asset_id:{type:'string',description:'Asset ID, rbxassetid:// or Creator Store link'}},required:['kind','asset_id'],additionalProperties:false}});
@@ -2431,12 +2465,26 @@ return result`;
     }
     if (name === "plazcode_skills") {
       try {
-        if(!['list','read','match','save'].includes(args.action))throw Error('Use list, read, match or save. Confirmation and sharing belong in Skills.');
+        if(!['list','read','match','save','suggest'].includes(args.action))throw Error('Use list, read, match, save or suggest. Confirmation and sharing belong in Skills.');
+        if(args.action==='suggest'){
+          const steps=(Array.isArray(args.steps)?args.steps:[args.steps]).map(step=>String(step||'').trim()).filter(Boolean).slice(0,30).map(step=>step.slice(0,1000));
+          const title=String(args.title||'').trim().slice(0,100);
+          if(!title||!steps.length)throw Error('suggest needs a short title and the instructions as steps.');
+          const offerKey=P.conversationKey()+'|'+skillTitleKey(title);
+          const output=value=>"Output of 'plazcode_skills':\n"+JSON.stringify(value);
+          if(skillOffersShown.has(offerKey))return output({ok:true,shown:false,note:'Already offered in this chat. Do not offer it again; continue with the current request.'});
+          const listed=await bg({type:'skills',request:{action:'list'}});
+          const twin=listed?.ok?(listed.skills||[]).find(skill=>skillTitleKey(skill.title)===skillTitleKey(title)):null;
+          if(twin)return output({ok:true,shown:false,note:"A skill named '"+twin.title+"' already exists (id "+twin.id+"). Do not offer it again; update it only if the user asks."});
+          skillOffersShown.add(offerKey);
+          showSkillSuggestion({title,description:String(args.description||steps[0]).trim().slice(0,2000),domain:['all','roblox','local','blender','model','ui'].includes(args.domain)?args.domain:'all',scope:args.project_only===true?engramScope():'',steps,pitfalls:[],verification:[]});
+          return output({ok:true,shown:true,note:'PlazCode is showing the user a one-click Save as skill button. Do not save it yourself and do not ask again; continue with the current request.'});
+        }
         let request={...args,domain:args.domain||activeEngine(),scope:engramScope()};
         if(args.action==='save'){
           // 1.24.13: refuse a second card with the same name; the AI must update
           // the existing one. User-approved guidance is enabled so it is used.
-          const sameTitle=value=>String(value||'').toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean).join(' ');
+          const sameTitle=skillTitleKey;
           const listed=await bg({type:'skills',request:{action:'list'}});
           const twin=sameTitle(args.title)&&listed?.ok?(listed.skills||[]).find(skill=>skill.id!==args.id&&sameTitle(skill.title)===sameTitle(args.title)):null;
           if(twin)return "ERROR: A skill named '"+twin.title+"' already exists (id "+twin.id+", revision "+twin.revision+"). Update it with that id and revision, or choose a clearly different method name. Do not save duplicates.";
@@ -3712,7 +3760,7 @@ return result`;
     const id=A.checkpointId,scope=engramScope(),chat=P.id+'|'+P.conversationKey(); A.checkpointId=null;
     if (id) {
       const result=await Promise.race([bg({type:"checkpoints",request:{action:"finish",id,complete}}),sleep(5000)]);
-      if(result?.ok){void bg({type:'engram',request:{action:'checkpoint',checkpoint:id,scope,chat}}).catch(()=>{});if(complete)void bg({type:'skills',request:{action:'checkpoint',checkpoint:id}}).catch(()=>{});}
+      if(result?.ok){void bg({type:'engram',request:{action:'checkpoint',checkpoint:id,scope,chat}}).catch(()=>{});/* 1.24.13: automatic skill candidates are off; Skills keeps Save candidate. */}
     }
   }
 
@@ -9188,7 +9236,10 @@ function renderCards(panel) {
         // recreate the editor on each inject/clear (Kimi's Vue) drop the class,
         // which would un-hide the raw text and un-cap its height. Cheap idempotent
         // add every frame keeps the mask + height cap glued to the live node.
-        if (!e.classList.contains("rs-typing")) e.classList.add("rs-typing");
+        // 1.24.13: while the AI waits for a clarification answer, the chat box is
+        // shown as normal: no "Agent is working" cover and no typing mask.
+        if (A.waitingForClarification) e.classList.remove("rs-typing");
+        else if (!e.classList.contains("rs-typing")) e.classList.add("rs-typing");
         // The cover is SIZED to coverTarget() when a provider supplies one, else
         // to the editor node itself. Some composers (Meta AI) make the editable a
         // tiny line inside a much larger rounded card - covering only the editor
