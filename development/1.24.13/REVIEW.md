@@ -23,3 +23,9 @@ Live Studio, Blender, Notion, Crax and ChatGPT behaviour is not yet verified.
 - Notion startup keeps the exact 1.24.12 checklist wording; the new "Goal:"/label wording applies to the other providers only.
 - The stuck-draft resend never runs during startup or after an ambiguous send click.
 - `list_tools` serves a non-empty add-on catalogue refreshed in the last 30 s immediately and waits at most 2.5 s otherwise.
+
+## Test build 3 (Studio status, Blender in AgentScript, Claude startup)
+- Every Studio probe path (heartbeat `studio_status`, `list_tools`, browser intro, restart, auto-connect) shares one consecutive-miss counter: a verified link drops only after 3 misses or a dead helper process. Timeouts are misses, not fatal.
+- The bridge's first frame reports the already-verified link; a successful probe sets `mcpAlive`, so the heartbeat auto-heal no longer restarts a working helper.
+- AgentScript status lists the Blender add-on and its own tool count (separate local catalogue), so list_mcp_servers and the startup note tell the AI Blender is connected.
+- Claude: never clicks a guessed composer button (voice/model) while Send is disabled or labelled in another language; waits for the enabled Send, else presses Enter; one Enter fallback only when the draft provably did not submit.

@@ -19,7 +19,7 @@ const baseline = {
   "providers/arena.js": "7472973533a67ab200dbe0a60db61636cc8fbdde",
   "providers/chatgpt-cm.js": "c83bc0702be0d75590155cff61c36ee0340a17c1",
   "providers/chatgpt.js": "07f594935092235a89183ff8dfe1a9d671305194",
-  "providers/claude.js": "a86539115fbf58104336b41116634686222952e7",
+  "providers/claude.js": "dd4228f8994dafe24950d6d7b05e9a28626067a1",
   "providers/copilot.js": "2f0bd280402a94578a249baa7731b235a3d8a712",
   "providers/crax-net.js": "a3c1bfb62a62594a2d6eef3615f66d4aa53b9157",
   "providers/crax.js": "501518b20c4b609d8230181eab1ddb6c77e5e852",

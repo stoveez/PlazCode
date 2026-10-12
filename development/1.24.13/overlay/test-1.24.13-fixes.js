@@ -15,7 +15,7 @@ assert.equal(activity.active().taskLabel,'Planning project work','the AI names t
 assert(!activity.active().plan.items.some(item=>/\bI want you\b|first task will/i.test(item.label)));
 // AgentScript card: the local server reports its real tool count.
 const bg=read('background.js');
-assert(bg.includes('alive:localReady,tools:localReady ? toolsCache.length : 0'));
+assert(bg.includes('alive:localReady,tools:localReady ? localTools().length : 0'));
 assert(!bg.includes('alive:localReady,tools:0}'));
 // Startup handshake: every provider gets the single correction and extra calls do not fail it.
 const main=read('core/main.js');
@@ -41,3 +41,14 @@ console.log('PASS 1.24.13: checklist summaries, local tool count, handshake corr
 assert(read('core/config.js').includes('(opts.providerId === "notion" ? "" : "Write each label'));
 assert(/const draftStuck = !A\.stop && !A\.starting && [^\n]*\n\s*!\(P\.sendFailureAmbiguous && P\.sendFailureAmbiguous\(\)\)/.test(read('core/main.js')));
 console.log('test-1.24.13-fixes.js test-build-2 PASS');
+// 1.24.13 test build 3: AgentScript lists Blender and its own tool count; every Studio
+// probe path shares the 3-miss rule; Claude never clicks a guessed button.
+assert(bg.includes('servers: mode === "local" ? blenderServers([{id:"local"'));
+assert(bg.includes('tools: mergeBlenderTools(mode === "local" ? localTools() : toolsCache).length'));
+{
+  const rs=read('agent/src/main.rs');
+  assert(rs.includes('fn studio_probe_result(&self, probe: &anyhow::Result<()>) -> bool'));
+  assert.equal((rs.match(/mcp\.probe_studio\(\)\.await\.is_ok\(\)/g)||[]).length,0,'a probe path bypasses the shared miss rule');
+}
+assert(!/return buttons\[buttons\.length - 1\]/.test(read('providers/claude.js')));
+console.log('test-1.24.13-fixes.js test-build-3 PASS');

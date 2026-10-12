@@ -408,6 +408,9 @@ let lastMessageAt = 0; // timestamp of the last frame received from the bridge
 let nextId = 1;
 const pending = new Map(); // id -> {resolve, timer}
 let toolsCache = [];
+// 1.24.13: AgentScript's own catalogue. toolsCache follows the shared socket's
+// engine, so an AgentScript tab could show Roblox's count and "local (0 tools)".
+let localToolsCache = [];
 let mcpAlive = false;
 let serversCache = [];
 // true/false = a PLACE is loaded and usable in Roblox Studio; null = unknown.
@@ -822,6 +825,10 @@ function handleBridgeMessage(msg) {
     studioChecking = false;
     const online = studioConnected === true;
     if (engine === "roblox" || engine === "anim") robloxEditorConnected = online;
+    // 1.24.13: a successful Studio probe proves the helper is alive. Without this,
+    // a stale mcpAlive=false made the heartbeat auto-heal restart a working helper,
+    // which dropped the verified link and showed "MCP is off".
+    if (online && (engine === "roblox" || engine === "anim")) mcpAlive = true;
     resolvePending(msg.id, { ok: true, studio: online });
     broadcastStatus();
     return;
@@ -829,7 +836,8 @@ function handleBridgeMessage(msg) {
   if (msg.type === "connected") {
     studioChecking = msg.studio_checking === true;
     mcpAlive = !!msg.mcp_alive;
-    if (Array.isArray(msg.tools)) toolsCache = msg.tools;
+    // The bridge's first frame carries no catalogue yet; keep the last good one.
+    if (Array.isArray(msg.tools) && (msg.tools.length || msg.ok === false)) toolsCache = msg.tools;
     if (Array.isArray(msg.servers)) serversCache = msg.servers;
     const online = msg.studio === true;
     if (engine === "roblox" || engine === "anim") robloxEditorConnected = online;
@@ -907,14 +915,20 @@ function failAllPending(reason) {
 }
 
 // ── status push to any open DeepSeek tab + popup ─────────────────────────
+function localTools() {
+  if (localToolsCache.length) return localToolsCache;
+  return engine === "local" ? toolsCache : [];
+}
 function statusObj(mode = engine) {
   return {
     type: "rs-status", connected: mode === "local" ? localReady : connected, mcpAlive: mode === "local" ? localReady : mcpAlive, studio: studioConnected, studioApp, studioProc,
     robloxProc, roblox_connected: robloxEditorConnected, studio_checking: studioChecking,
     local_connected: localReady, local_full: localFull,
     local_root: localRoot,
-    tools: mergeBlenderTools(toolsCache).length,
-    servers: mode === "local" ? [{id:"local",name:"Local Filesystem",alive:localReady,tools:localReady ? toolsCache.length : 0}] : blenderServers(serversCache), engine: mode,
+    tools: mergeBlenderTools(mode === "local" ? localTools() : toolsCache).length,
+    // Blender (and any other live add-on) is listed in AgentScript too, so the bar,
+    // the popup, list_mcp_servers and the startup note all tell the AI it is connected.
+    servers: mode === "local" ? blenderServers([{id:"local",name:"Local Filesystem",alive:localReady,tools:localReady ? localTools().length : 0}]) : blenderServers(serversCache), engine: mode,
     blender: blenderAddon, blender_error: blenderError || undefined, bridge_error: bridgeError || undefined,
   };
 }
@@ -2007,7 +2021,8 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         // catalogue. Waiting the full 25s just froze the boot for no new data.
         const r = await dispatch({ type: "list_tools" }, 10000);
         if (mode === "roblox" && r.ok && Array.isArray(r.tools)) toolsCache = r.tools;
-        const tools = mergeBlenderTools(mode === "local" ? (r.tools || []) : toolsCache);
+        if (mode === "local" && r.ok && Array.isArray(r.tools)) { localToolsCache = r.tools; broadcastStatus(); }
+        const tools = mergeBlenderTools(mode === "local" ? (r.tools || localToolsCache) : toolsCache);
         const ok = r.ok || tools.length > 0;
         sendResponse({ ok, tools, error: r.ok ? undefined : r.error });
         break;

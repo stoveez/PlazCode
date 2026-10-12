@@ -4,7 +4,7 @@ use axum::{extract::{Query, State}, http::Method, response::{Html, IntoResponse}
 use clap::Parser;
 use futures::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
-use std::{collections::{HashMap, VecDeque}, fs::File, net::SocketAddr, path::PathBuf, process::Stdio, sync::{atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering}, Arc}, time::Duration};
+use std::{collections::{HashMap, VecDeque}, fs::File, net::SocketAddr, path::PathBuf, process::Stdio, sync::{atomic::{AtomicBool, AtomicU32, AtomicU64, AtomicUsize, Ordering}, Arc}, time::Duration};
 use tokio::{
     io::{AsyncBufReadExt, AsyncWriteExt, BufReader, Lines},
     process::{Child, ChildStdin, ChildStdout, Command},
@@ -149,6 +149,9 @@ struct AppState {
     mcp_in_flight: Arc<AtomicUsize>,
     roblox_proc: Arc<AtomicBool>,
     roblox_editor_connected: Arc<AtomicBool>,
+    /// Consecutive failed Studio probes, shared by every probe path (auto-connect,
+    /// heartbeat `studio_status`, `list_tools`, browser intro, restart).
+    studio_probe_misses: Arc<AtomicU32>,
     addons: Arc<Mutex<mcp_addons::AddonManager>>,
     /// Last good add-on catalogue, served while the manager is busy starting servers.
     addon_cache: Arc<std::sync::Mutex<(Vec<serde_json::Value>, Vec<mcp_addons::ServerSummary>)>>,
@@ -179,11 +182,29 @@ impl AppState {
             mcp_in_flight: Arc::new(AtomicUsize::new(0)),
             roblox_proc,
             roblox_editor_connected: Arc::new(AtomicBool::new(false)),
+            studio_probe_misses: Arc::new(AtomicU32::new(0)),
             addons: Arc::new(Mutex::new(mcp_addons::AddonManager::new())),
             addon_cache: Arc::new(std::sync::Mutex::new((Vec::new(), Vec::new()))),
             addon_refreshing: Arc::new(AtomicBool::new(false)),
             preferences,
             ui,
+        }
+    }
+
+    /// 1.24.13: the auto-connect loop already ignored one or two failed probes, but
+    /// the browser heartbeat (`studio_status`, every 10 s), `list_tools` and the
+    /// connection intro each flipped a verified Studio link to "MCP is off" on a
+    /// single slow or failed `get_studio_state`. Every probe now goes through the
+    /// same rule: a live link drops only after STUDIO_DROP_AFTER consecutive
+    /// misses or when the helper process itself is gone.
+    fn studio_probe_result(&self, probe: &anyhow::Result<()>) -> bool {
+        match probe {
+            Ok(()) => { self.studio_probe_misses.store(0, Ordering::Relaxed); true }
+            Err(error) => {
+                let misses = self.studio_probe_misses.fetch_add(1, Ordering::Relaxed).saturating_add(1);
+                let was_connected = self.roblox_editor_connected.load(Ordering::Relaxed);
+                !studio_should_drop(was_connected, misses, probe_failure_is_fatal(error))
+            }
         }
     }
 
@@ -1128,6 +1149,7 @@ async fn run_server(state: AppState, addr: SocketAddr, start: std::time::Instant
                     };
                     match connection {
                         Ok(tools) => {
+                            autoconnect_state.studio_probe_misses.store(0, Ordering::Relaxed);
                             autoconnect_state.ui.set_roblox_tools(&tools, true);
                             if !autoconnect_state.roblox_editor_connected.load(Ordering::Relaxed) {
                                 info!("Roblox Studio MCP connected automatically");
@@ -1138,8 +1160,8 @@ async fn run_server(state: AppState, addr: SocketAddr, start: std::time::Instant
                         }
                         Err(error) => {
                             misses = misses.saturating_add(1);
-                            let was_connected = autoconnect_state.roblox_editor_connected.load(Ordering::Relaxed);
-                            if studio_should_drop(was_connected, misses, helper_is_dead(&error)) {
+                            let keep = autoconnect_state.studio_probe_result(&Err(anyhow::anyhow!("{error:#}")));
+                            if !keep {
                                 autoconnect_state.set_editor_connection(false, None);
                                 autoconnect_state.ui.set_roblox_tools(&[], false);
                             }
@@ -1850,6 +1872,12 @@ fn close_competing_studio_helpers() -> Vec<String> {
     }
     closed
 }
+/// A probe failure that proves the helper process is gone (not merely slow).
+/// Timeouts are ordinary misses: Studio can be busy for a few seconds.
+fn probe_failure_is_fatal(error: &anyhow::Error) -> bool {
+    let msg = format!("{error:#}");
+    msg.contains("exited") || msg.contains("stdin unavailable") || msg.contains("stdout unavailable") || msg.contains("spawn failed")
+}
 fn helper_is_dead(error: &anyhow::Error) -> bool {
     let msg = format!("{error:#}");
     msg.contains("exited") || msg.contains("timed out") || msg.contains("stdin unavailable")
@@ -2046,8 +2074,13 @@ async fn handle_legacy_ws(ws_stream: tokio_tungstenite::WebSocketStream<tokio::n
     };
 
     // A browser connection does not depend on slow MCP initialization.
+    // 1.24.13: report the link the bridge already verified instead of a blanket
+    // "studio:false, mcp_alive:false". A reconnecting browser tab (service-worker
+    // wake, page reload) used to show "MCP is off" until the intro arrived, and the
+    // false mcp_alive made the extension's auto-heal restart a working helper.
+    let known_studio = engine == "roblox" && state.roblox_editor_connected.load(Ordering::Relaxed);
     send_json(&out_tx, serde_json::json!({"type":"connected","id":0,"ok":true,
-        "mcp_alive":false,"studio":false,"studio_checking":engine != "local","tools":[],"servers":[]}));
+        "mcp_alive":known_studio,"studio":known_studio,"studio_checking":engine != "local" && !known_studio,"tools":[],"servers":[]}));
     send_json(&out_tx, serde_json::json!({"type":"desktop_preferences","preferences":state.preferences.snapshot()}));
     let intro_state = state.clone();
     let intro_engine = engine.clone();
@@ -2065,12 +2098,17 @@ async fn handle_legacy_ws(ws_stream: tokio_tungstenite::WebSocketStream<tokio::n
                 Ok(tools) => {
                     let studio = {
                         let mut mcp = state.roblox_mcp.lock().await;
-                        mcp.probe_studio().await.is_ok()
+                        let probe = mcp.probe_studio().await;
+                        state.studio_probe_result(&probe)
                     };
                     state.set_editor_connection(studio, Some(&tools));
                     serde_json::json!({"type":"connected","id":0,"ok":studio,"mcp_alive":true,"studio":studio,"tools":tools,"servers":[{"id":"roblox","name":"Roblox Studio MCP","alive":studio,"tools":if studio { tools.len() } else { 0 }}]})
                 },
-                Err(_) => serde_json::json!({"type":"connected","id":0,"ok":false,"mcp_alive":false,"studio":false,"tools":[],"servers":[{"id":"roblox","name":"Roblox Studio MCP","alive":false,"tools":0}]}),
+                Err(error) => {
+                    // A still-verified link is not overwritten by one failed catalogue read.
+                    if state.studio_probe_result(&Err(error)) { serde_json::Value::Null }
+                    else { serde_json::json!({"type":"connected","id":0,"ok":false,"mcp_alive":false,"studio":false,"tools":[],"servers":[{"id":"roblox","name":"Roblox Studio MCP","alive":false,"tools":0}]}) }
+                }
             }
         }
     })
@@ -2079,7 +2117,7 @@ async fn handle_legacy_ws(ws_stream: tokio_tungstenite::WebSocketStream<tokio::n
     // may already have verified Studio, and a stale `ok:false` frame arriving after
     // its status event used to overwrite it until the next heartbeat. Skip the
     // frame instead and let the verified state stand.
-    if let Ok(intro) = intro { let _ = intro_tx.send(intro.to_string()); }
+    if let Ok(intro) = intro { if !intro.is_null() { let _ = intro_tx.send(intro.to_string()); } }
     });
     let mut last_online: Option<bool> = None;
     while let Some(Ok(msg)) = read.next().await {
@@ -2103,12 +2141,21 @@ async fn handle_legacy_ws(ws_stream: tokio_tungstenite::WebSocketStream<tokio::n
                                         state.roblox_editor_connected.load(Ordering::Relaxed)
                                     } else {
                                         let mut mcp = state.roblox_mcp.lock().await;
-                                        mcp.probe_studio().await.is_ok()
+                                        let probe = mcp.probe_studio().await;
+                                        state.studio_probe_result(&probe)
                                     };
                                     state.set_editor_connection(studio, Some(&tools));
                                     serde_json::json!({"type":"tools","id":id,"ok":studio,"mcp_alive":true,"studio":studio,"tools":tools,"servers":[{"id":"roblox","name":"Roblox Studio MCP","alive":studio,"tools":if studio { tools.len() } else { 0 }}]})
                                 },
-                                Err(error) => serde_json::json!({"type":"tools","id":id,"ok":false,"mcp_alive":false,"studio":false,"tools":[],"error":error.to_string()}),
+                                Err(error) => {
+                                    let message = error.to_string();
+                                    if state.studio_probe_result(&Err(error)) {
+                                        // Keep the verified link and the browser's cached catalogue (no "tools" key).
+                                        serde_json::json!({"type":"tools","id":id,"ok":false,"mcp_alive":true,"studio":true,"error":message})
+                                    } else {
+                                        serde_json::json!({"type":"tools","id":id,"ok":false,"mcp_alive":false,"studio":false,"tools":[],"error":message})
+                                    }
+                                }
                             }
                         };
                         send_json(&out_tx, response);
@@ -2122,11 +2169,9 @@ async fn handle_legacy_ws(ws_stream: tokio_tungstenite::WebSocketStream<tokio::n
                                     // Never lock / never mark MCP dead mid-tool.
                                     state.roblox_editor_connected.load(Ordering::Relaxed)
                                 } else {
-                                    let probed = {
-                                        let mut mcp = state.roblox_mcp.lock().await;
-                                        mcp.probe_studio().await.is_ok()
-                                    };
-                                    probed
+                                    let mut mcp = state.roblox_mcp.lock().await;
+                                    let probe = mcp.probe_studio().await;
+                                    state.studio_probe_result(&probe)
                                 }
                             }
                             _ => false,
@@ -2151,7 +2196,8 @@ async fn handle_legacy_ws(ws_stream: tokio_tungstenite::WebSocketStream<tokio::n
                                 Ok(tools) => {
                                     let studio = {
                                         let mut mcp = state.roblox_mcp.lock().await;
-                                        mcp.probe_studio().await.is_ok()
+                                        let probe = mcp.probe_studio().await;
+                                        state.studio_probe_result(&probe)
                                     };
                                     state.set_editor_connection(studio, Some(&tools));
                                     send_json(&out_tx, serde_json::json!({"type":"mcp_status","id":id,"ok":true,"alive":true,"studio":studio,"tools":tools}));
@@ -2250,6 +2296,14 @@ mod studio_detection_tests {
     fn empty_state_text_is_not_disconnected() { assert!(!studio_text_disconnected("")); }
     #[test]
     fn explicit_disconnect_is_detected() { assert!(studio_text_disconnected("Unable to find an active Studio instance")); }
+    #[test]
+    fn slow_probes_are_misses_but_a_dead_helper_is_fatal() {
+        assert!(!probe_failure_is_fatal(&anyhow::anyhow!("MCP request timed out: tools/call")));
+        assert!(!probe_failure_is_fatal(&anyhow::anyhow!("Studio discovery timed out; the local bridge remains available")));
+        assert!(!probe_failure_is_fatal(&anyhow::anyhow!("Roblox Studio is not connected")));
+        assert!(probe_failure_is_fatal(&anyhow::anyhow!("StudioMCP exited with code 1")));
+        assert!(probe_failure_is_fatal(&anyhow::anyhow!("spawn failed: not found")));
+    }
     #[test]
     fn single_miss_keeps_live_connection() {
         assert!(!studio_should_drop(true, 1, false));
