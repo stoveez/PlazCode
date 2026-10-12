@@ -5801,7 +5801,7 @@ return result`;
       memoryStyle.textContent = "#rs-memory-panel[hidden]{display:none!important}#rs-memory-panel{position:fixed;right:16px;top:8vh;width:440px;max-width:calc(100vw - 32px);max-height:75vh;overflow:auto;background:#091522;color:#f5f8ff;padding:20px;border:1px solid #ff9226;border-radius:14px;z-index:2147483601;font:13px/1.5 system-ui}#rs-memory-panel textarea{display:block;width:100%;box-sizing:border-box;min-height:70px;background:#07111e;color:#fff;border:1px solid #334155;border-radius:8px;margin:8px 0;padding:8px;font:13px/1.5 system-ui}#rs-memory-panel button{padding:7px 10px;margin:6px;border-radius:7px;background:#162338;border:1px solid #ff9226;color:#fff;cursor:pointer}#rs-memory-panel small{display:block;color:#aabbd2}#rs-memory-panel select{margin:8px;padding:8px;border:1px solid #ff92264d;border-radius:8px;background:#162338;color:#ffe5be;font:13px system-ui}#rs-memory-panel label{display:inline-block;margin:6px 8px 6px 0}";
       memoryStyle.textContent += "#rs-activity-panel[hidden]{display:none!important}#rs-activity-panel{position:fixed;right:16px;bottom:90px;width:420px;max-width:calc(100vw - 32px);max-height:60vh;overflow:auto;background:#091522;color:#fff;padding:16px;border:1px solid #ff9226;border-radius:12px;z-index:2147483601;font:13px/1.5 system-ui}#rs-activity-panel button{padding:8px;background:#162338;color:#fff;border:1px solid #ff9226;border-radius:8px;margin:6px 0;width:100%;cursor:pointer}[data-rs-activity-folded='1']{display:none!important}";
       root.appendChild(memoryStyle);
-      taskChecklist = PlazCodeChecklist.mount({root,getGroup:()=>activity.list(P.conversationKey()).at(-1),getBar:()=>bar,getDetached:()=>barCollapsed,blocked:()=> !!(menuEl && !menuEl.hidden) || !!P.captchaPresent?.() || !!P.overlayBlocking?.()});
+      taskChecklist = PlazCodeChecklist.mount({root,getGroup:()=>activity.list(P.conversationKey()).at(-1),getBar:()=>bar,getDetached:()=>barCollapsed,blocked:()=> !!A.waitingForClarification || !!(menuEl && !menuEl.hidden) || !!P.captchaPresent?.() || !!P.overlayBlocking?.()});
       taskChecklist.render();
       root.querySelector("#rs-activity").onclick = () => {
         const groups = activity.list(P.conversationKey()), group = groups.at(-1);
@@ -9202,6 +9202,7 @@ function renderCards(panel) {
         // cover so it doesn't sit on top of the modal; it reappears once the
         // overlay clears (the loop keeps running).
         if (
+          A.waitingForClarification ||
           (P.overlayBlocking && P.overlayBlocking()) ||
           (P.captchaPresent && P.captchaPresent())
         ) {
@@ -9382,7 +9383,7 @@ function renderCards(panel) {
         const style = document.createElement("style");
         style.textContent = `.rs-shot-overlay{position:fixed;inset:0;z-index:2147483646;background:#0009;display:flex;align-items:center;justify-content:center;padding:64px 24px 28px;box-sizing:border-box}.rs-shot-overlay .rs-shot{position:relative;inset:auto;width:min(1100px,95vw);max-width:95vw;max-height:88vh;display:flex;flex-direction:column;background:var(--pc-bg,#241f14);color:var(--pc-ink,#fff5df);border:1px solid var(--pc-accent,#e9ba53);border-radius:14px;overflow:visible}.rs-shot-overlay .rs-shot-body{padding:12px;display:flex;gap:16px;flex-direction:column;overflow:auto;min-height:0}.rs-shot-overlay .rs-shot-img{max-width:100%;width:auto;max-height:70vh;object-fit:contain;align-self:center;cursor:default}.rs-shot-overlay .rs-shot-hdr{padding:12px 16px}.rs-shot-overlay .rs-shot-x{position:fixed;top:18px;right:22px;width:42px;height:42px;border-radius:50%;font-size:22px;background:#24221e;color:#fff;border:1px solid #ffffff66;cursor:pointer}.rs-shot-overlay .rs-shot-bar{display:flex;justify-content:center;gap:12px;padding:14px}.rs-shot-overlay .rs-shot-btn{border:1px solid var(--pc-accent,#e9ba53);background:#302919;color:#fff2d2;border-radius:9px;padding:10px 18px;font:600 14px system-ui;cursor:pointer}`;
         try { const theme = getComputedStyle(root); for (const key of ["--pc-bg", "--pc-accent", "--pc-ink"]) overlay.style.setProperty(key, theme.getPropertyValue(key)); } catch {}
-        overlay.append(style, wrap); document.body.append(overlay);
+        overlay.append(style, wrap); document.documentElement.append(overlay);
         overlay.addEventListener("click", event => { if (event.target === overlay) cleanup(); });
         document.addEventListener("keydown", keyboard, true); close.focus({preventScroll:true});
       };
@@ -9904,7 +9905,7 @@ return "PLACED"`;const placed=await runTool({tool:"execute_luau",arguments:{code
 
   const clarification = PlazCodeClarification.create({
     document, context: () => JSON.stringify([P.conversationKey(), activeEngine(), A.sessionGen]),
-    provider: () => P.displayName, mount: () => document.body,
+    provider: () => P.displayName, mount: () => document.documentElement,
     cancelled: () => A.stop || A.staleExtension || condoLocked(),
     onCancel: () => stopLoop(),
     changed: waiting => { A.waitingForClarification = waiting; try { ui.setStarted(); ui.renderCowork(); } catch {} },
