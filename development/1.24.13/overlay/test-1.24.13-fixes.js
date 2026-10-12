@@ -36,3 +36,8 @@ assert(rust.includes('fn is_reactor_resource_panic')&&rust.includes('fn relaunch
 assert(rust.includes('async fn addon_snapshot')&&rust.includes('addon_cache'));
 assert(addons.includes('futures::future::join_all(self.runtimes.iter_mut()'));
 console.log('PASS 1.24.13: checklist summaries, local tool count, handshake correction, Studio reminder, stuck-draft resend, add-on startup and crash relaunch');
+// 1.24.13 test build 2: Notion startup keeps the exact 1.24.12 checklist wording and
+// the stuck-draft resend never runs during startup or after an ambiguous click.
+assert(read('core/config.js').includes('(opts.providerId === "notion" ? "" : "Write each label'));
+assert(/const draftStuck = !A\.stop && !A\.starting && [^\n]*\n\s*!\(P\.sendFailureAmbiguous && P\.sendFailureAmbiguous\(\)\)/.test(read('core/main.js')));
+console.log('test-1.24.13-fixes.js test-build-2 PASS');

@@ -18,3 +18,8 @@ Not changed: GLM "No response ... <!doctype" is z.ai returning an HTML error pag
 Tests: `test-1.24.13-fixes.js`, updated `test-desktop-regression.js` (hashes for core/config.js and core/main.js), Rust `reactor_resource_panics_are_recognised_but_other_panics_are_not`.
 
 Live Studio, Blender, Notion, Crax and ChatGPT behaviour is not yet verified.
+
+## Test build 2 (Notion startup regression)
+- Notion startup keeps the exact 1.24.12 checklist wording; the new "Goal:"/label wording applies to the other providers only.
+- The stuck-draft resend never runs during startup or after an ambiguous send click.
+- `list_tools` serves a non-empty add-on catalogue refreshed in the last 30 s immediately and waits at most 2.5 s otherwise.

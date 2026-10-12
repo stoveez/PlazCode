@@ -4,7 +4,7 @@ use axum::{extract::{Query, State}, http::Method, response::{Html, IntoResponse}
 use clap::Parser;
 use futures::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
-use std::{collections::{HashMap, VecDeque}, fs::File, net::SocketAddr, path::PathBuf, process::Stdio, sync::{atomic::{AtomicBool, AtomicUsize, Ordering}, Arc}, time::Duration};
+use std::{collections::{HashMap, VecDeque}, fs::File, net::SocketAddr, path::PathBuf, process::Stdio, sync::{atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering}, Arc}, time::Duration};
 use tokio::{
     io::{AsyncBufReadExt, AsyncWriteExt, BufReader, Lines},
     process::{Child, ChildStdin, ChildStdout, Command},
@@ -1908,11 +1908,25 @@ async fn refresh_addons(state: &AppState) -> Vec<serde_json::Value> {
     let (tools, servers) = state.addons.lock().await.list_tools().await;
     state.ui.set_addon_tools(&tools, servers.clone());
     if let Ok(mut cache) = state.addon_cache.lock() { *cache = (tools.clone(), servers); }
+    ADDON_REFRESHED_AT_MS.store(now_ms(), Ordering::Release);
     tools
+}
+
+static ADDON_REFRESHED_AT_MS: AtomicU64 = AtomicU64::new(0);
+const ADDON_CACHE_FRESH_MS: u64 = 30_000;
+
+fn now_ms() -> u64 {
+    std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis() as u64).unwrap_or(0)
 }
 
 async fn addon_snapshot(state: &AppState) -> Vec<serde_json::Value> {
     let cached = |state: &AppState| state.addon_cache.lock().map(|c| c.0.clone()).unwrap_or_default();
+    // Startup asks for the catalogue several times within seconds. A recent, non-empty
+    // catalogue is served immediately instead of re-polling every add-on each time.
+    let fresh = cached(state);
+    if !fresh.is_empty() && now_ms().saturating_sub(ADDON_REFRESHED_AT_MS.load(Ordering::Acquire)) < ADDON_CACHE_FRESH_MS {
+        return fresh;
+    }
     if state.addon_refreshing.swap(true, Ordering::AcqRel) {
         return cached(state);
     }
@@ -1922,7 +1936,7 @@ async fn addon_snapshot(state: &AppState) -> Vec<serde_json::Value> {
         refresh_state.addon_refreshing.store(false, Ordering::Release);
         tools
     });
-    match tokio::time::timeout(Duration::from_secs(4), task).await {
+    match tokio::time::timeout(Duration::from_millis(2500), task).await {
         Ok(Ok(tools)) => tools,
         _ => cached(state),
     }
