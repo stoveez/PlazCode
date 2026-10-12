@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "PlazCode \u00d7 Roblox Studio & AgentScript",
+  "name": "PlazCode × Roblox Studio & AgentScript",
   "version": "1.24.13",
   "minimum_chrome_version": "111",
   "description": "PlazCode connects supported AI chats to Roblox Studio and local AgentScript with animation, VFX, Luau knowledge, web research, and project tools.",
@@ -82,7 +82,7 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "PlazCode 1.24.13 \u2014 RS/AS",
+    "default_title": "PlazCode 1.24.13 — RS/AS",
     "default_icon": {
       "16": "icon.png",
       "48": "icon.png",
@@ -90,6 +90,47 @@
     }
   },
   "content_scripts": [
+    {
+      "matches": [
+        "https://chat.deepseek.com/*",
+        "https://deepseek.com/*",
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*",
+        "https://claude.ai/*",
+        "https://www.claude.ai/*",
+        "https://claude.com/*",
+        "https://www.claude.com/*",
+        "https://gemini.google.com/*",
+        "https://www.kimi.com/*",
+        "https://kimi.com/*",
+        "https://kimi.ai/*",
+        "https://www.kimi.ai/*",
+        "https://chat.z.ai/*",
+        "https://arena.ai/*",
+        "https://freebuff.ai/*",
+        "https://www.freebuff.ai/*",
+        "https://freebuff.com/*",
+        "https://www.freebuff.com/*",
+        "https://chat.qwen.ai/*",
+        "https://gpt.crax.lol/*",
+        "https://use.ai/*",
+        "https://www.use.ai/*",
+        "https://oxalpha.com/*",
+        "https://www.oxalpha.com/*",
+        "https://oxalpha.org/*",
+        "https://www.oxalpha.org/*",
+        "https://www.notion.so/*",
+        "https://app.notion.so/*",
+        "https://www.notion.com/*",
+        "https://notion.com/*",
+        "https://*.notion.com/*"
+      ],
+      "js": [
+        "core/debug-capture.js",
+        "core/input-isolation.js"
+      ],
+      "run_at": "document_start"
+    },
     {
       "matches": [
         "https://chat.deepseek.com/*",
@@ -138,6 +179,7 @@
       ],
       "js": [
         "core/debug-capture.js",
+        "core/input-isolation.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -194,6 +236,7 @@
       ],
       "js": [
         "core/debug-capture.js",
+        "core/input-isolation.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -241,6 +284,7 @@
       ],
       "js": [
         "core/debug-capture.js",
+        "core/input-isolation.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -285,6 +329,7 @@
       ],
       "js": [
         "core/debug-capture.js",
+        "core/input-isolation.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -332,6 +377,7 @@
       ],
       "js": [
         "core/debug-capture.js",
+        "core/input-isolation.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -376,6 +422,7 @@
       ],
       "js": [
         "core/debug-capture.js",
+        "core/input-isolation.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -420,6 +467,7 @@
       ],
       "js": [
         "core/debug-capture.js",
+        "core/input-isolation.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -467,6 +515,7 @@
       ],
       "js": [
         "core/debug-capture.js",
+        "core/input-isolation.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -521,6 +570,7 @@
       ],
       "js": [
         "core/debug-capture.js",
+        "core/input-isolation.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -575,6 +625,7 @@
       ],
       "js": [
         "core/debug-capture.js",
+        "core/input-isolation.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -620,6 +671,7 @@
       ],
       "js": [
         "core/debug-capture.js",
+        "core/input-isolation.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -667,6 +719,7 @@
       ],
       "js": [
         "core/debug-capture.js",
+        "core/input-isolation.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -715,6 +768,7 @@
       ],
       "js": [
         "core/debug-capture.js",
+        "core/input-isolation.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
