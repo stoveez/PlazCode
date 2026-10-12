@@ -979,7 +979,9 @@
             // once more, whatever its size. Never retried for attachments.
             const norm = value => String(value || "").replace(/\s+/g, " ").trim();
             const stuckTail = norm(sentTail).slice(-40);
-            const draftStuck = !A.stop && !retriedUnsent && !(images && images.length) && stuckTail.length >= 8 &&
+            // Never during startup or after an ambiguous click: those keep the 1.24.12 behaviour.
+            const draftStuck = !A.stop && !A.starting && !retriedUnsent && !(images && images.length) && stuckTail.length >= 8 &&
+              !(P.sendFailureAmbiguous && P.sendFailureAmbiguous()) &&
               typeof P.editorText === "function" && norm(P.editorText()).includes(stuckTail) && !landed();
             if (draftStuck) {
               await sleep(1500);
