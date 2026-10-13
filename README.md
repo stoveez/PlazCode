@@ -1,3 +1,21 @@
+PlazCode 1.24.13 — Skills, connection and Blender fixes
+
+The approved test build 6: faster startup, reliable connection status, improved Skills controls, a one-click Save as skill card, and the user-tested Blender screenshot and dashboard fixes.
+
+- Favourite stars and two-click skill deletion. Delete all keeps favourites, starter skills, UltraGUI references and shared workflows.
+- A one-click Save as skill card above the chat box for lasting preferences. It closes after 45 seconds without hover or focus; closing saves nothing.
+- MCP add-ons start in parallel in the background instead of blocking Studio startup.
+- Up to 8 favourite skills are always included within their project, engine and domain, followed by the 3 best other matches.
+- Short task checklist labels on other providers; Notion keeps its established startup wording.
+- Packaged launchers, Firefox extension copies and checksum manifests now match the reviewed source.
+- False disconnected status and stale dashboard connection labels.
+- Blender screenshots use an off-screen viewport capture and a unique receipt; no stale image is returned without a receipt.
+- Automatic completed-task skill candidates are disabled, duplicate saves are refused, and untouched duplicate candidates are cleaned up.
+- Clarification panels no longer sit behind overlays; the typing mask is lifted while questions wait.
+- Native paste and editing shortcuts work in PlazCode text boxes on pages with capture handlers.
+- Claude waits for an enabled Send control instead of clicking a guessed composer button.
+- OS Error 1450 recovery, provider startup handshakes and verifiably unsent Notion tool results.
+
 PlazCode 1.24.12 — Memory, Notion and Blender fixes + new UltraGUI
 
 Fixes memory notes that could not be pasted into, Notion startup freezes, plans that stopped without starting, false "Not connected" bars and Blender commands failing while busy. UltraGUI is replaced with the new GUI skill pack, and the desktop app gets an automatic-updates switch.

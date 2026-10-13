@@ -1,0 +1,28 @@
+## ✨ PlazCode 1.24.13
+
+Approved build 6 with Skills improvements, faster startup, and the user-tested Blender screenshot and dashboard fixes.
+
+### ⭐ Skills
+
+- Favourite stars, safe deletion and duplicate protection; automatic task candidates are off.
+- Up to 8 favourites are always used within their scope. Save as skill appears above the chat box and closes after 45 seconds.
+
+### 🛠️ Fixes
+
+- Parallel add-on startup and accurate Studio status. The tested heal guard is unchanged; automatic helper restart remains inactive.
+- Blender off-screen screenshots with unique capture receipts.
+- Visible clarification panels, working paste, safer Claude sends and Notion startup fixes.
+
+### 🧪 Checks
+
+- Exact-source Linux/Windows/Mac and browser checks passed; the user approved build 6. CI did not test live provider accounts or real Studio imports.
+- Windows is unsigned; Mac is ad-hoc signed, not notarized.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.13.zip** for Windows, **PlazCode-macOS-1.24.13.zip** for Mac, or **PlazCode-Firefox-1.24.13.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.

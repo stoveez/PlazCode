@@ -1,0 +1,10 @@
+PlazCode 1.24.13 — exact-source validation passed on Linux, Windows and macOS, with Chromium/Firefox fixtures and the packaged macOS desktop lifetime check.
+Approved test build 6: parallel add-on startup, accurate Studio status and dashboard, OS Error 1450 recovery, provider handshake and send fixes, skill deduplication and safe deletion, automatic task candidates disabled, scoped favourites always included, a Save as skill card above the chat box with a 45-second timeout, visible clarification panels, native paste isolation, and the user-tested off-screen Blender screenshot capture with unique receipts. The user approved publication. The tested Studio heal guard is preserved; automatic helper restart remains inactive because the bridge has no mcp_status handler.
+Startup/catalogue delivery, Stop/Continue recovery, input ownership, guarded provider DOM access, result pagination, editable clarification fields, Skills, Studio detection fixtures and authenticated native routes passed automated regressions. Studio mesh transactions ran in the official Luau VM with mocked services. Packaged Blender helpers ran in real Blender 4.5.3 LTS in CI.
+Installer checksums, rollback, restricted Windows PowerShell policy, startup/update handoff, Mac x86_64/arm64 packaging, relaunch modes and 210-second visible desktop lifetime passed their platform checks.
+CI did not test live signed-in provider accounts or real Roblox Studio imports. The Blender capture and Studio guard/dashboard changes were supplied as user-tested fixes, and test build 6 was approved by the user for publication. Windows binaries are unsigned; Mac uses ad-hoc signing, not notarization.
+Microsoft Defender runner result before assembly:
+Scan starting...
+Scan finished.
+Scanning D:\a\PlazCode\PlazCode\build-src\PlazCode/defender-scan found no threats.
+The scanned checksum and availability are recorded in release-validation-1.24.13.

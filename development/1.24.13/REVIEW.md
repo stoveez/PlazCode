@@ -1,6 +1,6 @@
 # PlazCode 1.24.13 review
 
-Validation: pending. Private test build only; not published.
+Validation: all exact-source platform CI jobs and the packaged macOS desktop check passed. See release-validation-1.24.13.
 
 Built from the published `PlazCode-source-1.24.12.zip` with `overlay/` applied by `prepare.py`.
 
