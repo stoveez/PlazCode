@@ -47,3 +47,14 @@ Live Studio, Blender, Notion, Crax and ChatGPT behaviour is not yet verified.
 - While a clarification waits, the chat box is shown normally: the "Agent is working" cover and the typing mask are both lifted, and come back once the answer is submitted.
 - UltraGUI references stay protected by Delete all.
 - Tests: `test-1.24.13-skill-offer.js` (real content-script boot), updated `test-skills-regression.js`, `test-1.24.13-skills.js`, Rust `favourites_get_priority_in_matching`.
+
+## Test build 6 (merge of the user's tested fixes + answers on build 5)
+Merged from the user's tested package (build 3 + their fixes); builds 4-5 never touched these files, so nothing conflicted.
+- Blender screenshots (user-tested): `plazcode_screenshot` renders the live 3D View off-screen into a unique file and returns a capture receipt (`PLAZCODE_SHOT_JSON`); falls back to a forced redraw + `screenshot_area`; no image is returned without a receipt. `background.js` (all copies) and `launch_blender_mcp.py`.
+- Studio "semi connected" loop (user-tested): no heal while Studio is attaching, linked or closed; 3 missed heartbeats; 60 s grace after the socket opens; 3 min cooldown; asks the bridge `mcp_status` first. Note: the bridge has no `mcp_status` handler (it replies "unknown bridge message type"), so the confirmation never passes and the auto-restart is effectively off. Kept exactly as tested; pending the user's decision.
+- Dashboard (user-tested): the Studio card uses `roblox_connected` (Connected / Open / Offline) instead of "Studio open + helper running". `agent/src/desktop.html`.
+- Release files: `package.py` now ships `launch_blender_mcp.py`, `SOURCE.txt` and `ollama-page.js` from this source (they were stale 1.23.0 baseline copies), rebuilds `PlazCode-Extension-Firefox` inside the native package from this source, recomputes every `SHA256SUMS.txt` entry and asserts all of this. Update feeds and `latest.json` are untouched (release-time only).
+- Save as skill card now sits just above the chat box (aligned with it, never over it) and closes by itself after 45 s without hover/focus; closing saves nothing.
+- Favourites are always used in their project/engine: up to 8 starred skills come first in every task's skill reference (marked `always_use`), then the 3 best other matches.
+- Clarification answers: only the PlazCode question panel takes answers (it is a full-page modal over the Notion chat box), unchanged.
+- Tests: new `test-1.24.13-merged-fixes.js`; updated `test-blender-receipts.js` (off-screen capture + no stale image without a receipt), `test-desktop-regression.js` (Connected/Open/Offline from the real editor link), `test-1.24.13-skill-offer.js`, Rust `favourites_get_priority_in_matching`.
