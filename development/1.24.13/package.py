@@ -17,7 +17,7 @@ with zipfile.ZipFile(baseline) as archive:
 package=install/'PlazCode'
 for folder in ['core','providers','PlazCode-Extension']:
  shutil.copytree(source/folder,package/folder,dirs_exist_ok=True)
-for name in ['manifest.json','background.js','popup.js','popup.html','overlay.css','launch_studio_mcp.py','Update-PlazCode.bat','Update-PlazCode.ps1','Updater-Progress.cs','blender_ops.py','blender_once.py','blender_once.ps1']:
+for name in ['manifest.json','background.js','popup.js','popup.html','overlay.css','ollama-page.js','launch_studio_mcp.py','launch_blender_mcp.py','SOURCE.txt','Update-PlazCode.bat','Update-PlazCode.ps1','Updater-Progress.cs','blender_ops.py','blender_once.py','blender_once.ps1']:
  shutil.copy2(source/name,package/name)
 if osname=='Windows':
  shutil.copy2(source/'agent/target/release/PlazCode.exe',package/'PlazCode.exe')
@@ -35,6 +35,22 @@ if osname=='Windows':
  for path in package.glob('*.command'):path.unlink()
 # Do not carry a stale v1.22 minification hash report into development builds.
 (package/'production-build.json').unlink(missing_ok=True)
+# 1.24.13: the Firefox folder inside the native package is rebuilt from this
+# exact source (the 1.23.0 baseline copy was stale), and SHA256SUMS.txt is
+# recomputed for every file it lists so no checksum describes an old file.
+subprocess.run(['python',str(source/'release-tools/build-firefox.py'),str(source/'PlazCode-Extension'),str(package/'PlazCode-Extension-Firefox'),str(output/'PlazCode-Firefox-in-package.zip')],check=True)
+(output/'PlazCode-Firefox-in-package.zip').unlink()
+sums=package/'SHA256SUMS.txt'
+if sums.exists():
+ listed=[line.split(None,1)[1].strip().lstrip('*') for line in sums.read_text().splitlines() if line.strip()]
+ sums.write_text(''.join(hashlib.sha256((package/item).read_bytes()).hexdigest()+'  '+item+'\n' for item in listed if (package/item).is_file()))
+# The package must ship the fixed launcher, extension and Firefox copies.
+for name in ['background.js','launch_blender_mcp.py','ollama-page.js','SOURCE.txt']:
+ assert (package/name).read_bytes()==(source/name).read_bytes(),name+' in the package is not the reviewed source'
+assert (package/'PlazCode-Extension/background.js').read_bytes()==(source/'background.js').read_bytes()
+assert (package/'PlazCode-Extension-Firefox/background.js').read_bytes()==(source/'background.js').read_bytes()
+for line in (sums.read_text().splitlines() if sums.exists() else []):
+ digest,item=line.split(None,1);assert hashlib.sha256((package/item).read_bytes()).hexdigest()==digest,item+' checksum'
 (package/'DEVELOPMENT.txt').write_text('PlazCode 1.24.13 development build. Validation and live-provider/Studio checks remain required before release. This build is not publisher-signed. Existing stable update feeds are unchanged.\n')
 name='PlazCode-1.24.13-development.zip' if osname=='Windows' else 'PlazCode-macOS-1.24.13-development.zip'
 with zipfile.ZipFile(output/name,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as archive:

@@ -7,7 +7,7 @@ const baseline = {
   "core/config.js": "9e1db555f9c850f0ce72a1a044649fb733cc3b41",
   "core/headless-builder.js": "b343a897a17fc05d79ab469aeea55c8abaa8c4e5",
   "core/luau-knowledge.js": "234c1ca2155d3ef5f38927d85893b70fd6bde6e6",
-  "core/main.js": "9bbf17144b15b9179d50ff3cc3959a2ae354f8e2",
+  "core/main.js": "1aefee1599b27c582093b4c6766b7245ad1a4273",
   "core/motion-interchange.js": "038afa13a5b59c030a809abf7d617a36f2fae82d",
   "core/motion-preview.js": "ae0ab0526fbc762dfbf7cae9c248239e217e7a2f",
   "core/motion-tools.js": "8ac81b4a4a9f634fef9285aeee06db4a15af578e",
@@ -243,6 +243,7 @@ async function runDesktopInteractionRegression() {
     bridge_connected: true,
     studio_running: true,
     mcp_alive: true,
+    roblox_connected: true,
     workspace_ready: true,
     workspace_root: "C:\\PlazCodeWorkspace",
     tools: [],
@@ -323,10 +324,16 @@ async function runDesktopInteractionRegression() {
   if (elementsById.get("coworkDialog").hidden) throw new Error("Co-work mode must show the inline chat");
   if (elementsById.get("coworkList").children.length !== 1) throw new Error("Queue preview missing");
   if (elementsById.get("sideStudioStatus").textContent !== "Studio connected") throw new Error("Connected Studio indicator missing");
+  if (elementsById.get("studioVal").textContent !== "Connected") throw new Error("Connected Studio card missing");
+  // 1.24.13: Studio open with a running helper but an OFFLINE editor link is not "Connected".
+  fakeState.roblox_connected = false; await window.PlazCodeDesktop.refresh();
+  if (elementsById.get("sideStudioStatus").textContent !== "Studio open · not linked") throw new Error("Studio + helper without the editor link must not say connected");
+  if (elementsById.get("studioVal").textContent !== "Open") throw new Error("Unlinked Studio card must say Open");
   fakeState.mcp_alive = false; await window.PlazCodeDesktop.refresh();
   if (elementsById.get("sideStudioStatus").textContent !== "Studio open · not linked") throw new Error("Unlinked Studio indicator missing");
   fakeState.studio_running = false; await window.PlazCodeDesktop.refresh();
   if (elementsById.get("sideStudioStatus").textContent !== "Studio closed") throw new Error("Closed Studio indicator missing");
+  if (elementsById.get("studioVal").textContent !== "Offline") throw new Error("Closed Studio card must say Offline");
   fakeState.browser_agent.canStop = false;
   fakeState.browser_agent.cowork.enabled = false;
   fakeState.browser_agent.canQueue = false;

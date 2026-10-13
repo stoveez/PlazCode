@@ -56,8 +56,11 @@ impl Store {
   if action=="match" {
    let query=request["query"].as_str().unwrap_or("").to_lowercase();let domain=request["domain"].as_str().unwrap_or("");let scope=request["scope"].as_str().unwrap_or("");
    let mut terms=query.split(|c:char|!c.is_alphanumeric()).filter(|s|s.len()>2&&!STOPWORDS.contains(s)).take(80).collect::<Vec<_>>();terms.sort_unstable();terms.dedup();
-   let mut hits=self.data.skills.values().filter(|s|(s.confirmed||s.enabled||s.favorite)&&(s.scope.is_empty()||s.scope==scope)&&(s.domain=="all"||s.domain==domain||(domain=="roblox"&&matches!(s.domain.as_str(),"model"|"ui"))||(domain=="local"&&s.domain=="blender"))).filter_map(|s|{let title=s.title.to_lowercase();let hay=format!("{} {} {}",title,s.description,s.steps.join(" ")).to_lowercase();let score=terms.iter().filter(|word|hay.contains(**word)).count()+terms.iter().filter(|word|title.contains(**word)).count();(score>0||s.enabled).then_some((score+if s.scope.is_empty(){0}else{3}+if s.enabled{8}else{0}+if s.favorite{6}else{0},s))}).collect::<Vec<_>>();hits.sort_by_key(|(score,_)|std::cmp::Reverse(*score));
-   return Ok(json!({"ok":true,"skills":hits.into_iter().take(3).map(|(_,skill)|skill).collect::<Vec<_>>() }));
+   let mut hits=self.data.skills.values().filter(|s|(s.confirmed||s.enabled||s.favorite)&&(s.scope.is_empty()||s.scope==scope)&&(s.domain=="all"||s.domain==domain||(domain=="roblox"&&matches!(s.domain.as_str(),"model"|"ui"))||(domain=="local"&&s.domain=="blender"))).filter_map(|s|{let title=s.title.to_lowercase();let hay=format!("{} {} {}",title,s.description,s.steps.join(" ")).to_lowercase();let score=terms.iter().filter(|word|hay.contains(**word)).count()+terms.iter().filter(|word|title.contains(**word)).count();(score>0||s.enabled||s.favorite).then_some((score+if s.scope.is_empty(){0}else{3}+if s.enabled{8}else{0}+if s.favorite{6}else{0},s))}).collect::<Vec<_>>();hits.sort_by_key(|(score,_)|std::cmp::Reverse(*score));
+   // 1.24.13: favourites are always used in their project/engine: every starred
+   // skill (up to 8) comes first, then the 3 best other matches.
+   let (starred,rest):(Vec<_>,Vec<_>)=hits.into_iter().partition(|(_,s)|s.favorite);
+   return Ok(json!({"ok":true,"skills":starred.into_iter().take(8).chain(rest.into_iter().take(3)).map(|(_,skill)|skill).collect::<Vec<_>>() }));
   }
   let id=request["id"].as_str().unwrap_or("");
   if action=="read"||action=="export" {let skill=self.data.skills.get(id).ok_or_else(||anyhow::anyhow!("Skill not found."))?;let mut result=json!({"ok":true,"skill":if action=="export"{public(skill)}else{serde_json::to_value(skill)?}});
@@ -240,6 +243,15 @@ pub async fn post(State(state):State<crate::AppState>,Json(request):Json<Value>)
   assert!(!store.request(&json!({"action":"match","query":"pricing","domain":"roblox","scope":""})).unwrap()["skills"].as_array().unwrap().iter().any(|s|s["id"]=="starred-candidate"));
   store.request(&json!({"action":"favorite","id":"starred-candidate","favorite":true})).unwrap();
   assert!(store.request(&json!({"action":"match","query":"pricing","domain":"roblox","scope":""})).unwrap()["skills"].as_array().unwrap().iter().any(|s|s["id"]=="starred-candidate"),"starring a skill makes it eligible");
+  let mut unrelated=skill();unrelated.id="starred-unrelated".into();unrelated.title="Tabs for indentation".into();unrelated.description="Coding style".into();unrelated.steps=vec!["Indent with tabs".into()];unrelated.confirmed=false;unrelated.scope=String::new();store.request(&json!({"action":"save","skill":unrelated,"revision":0})).unwrap();store.request(&json!({"action":"favorite","id":"starred-unrelated","favorite":true})).unwrap();
+  for id in ["a","b","c"]{store.request(&json!({"action":"favorite","id":id,"favorite":true})).unwrap();}
+  let mut other=skill();other.id="plain-match".into();other.title="Shop layout five".into();other.scope=String::new();store.request(&json!({"action":"save","skill":other,"revision":0})).unwrap();
+  let got=ids(&mut store);
+  for id in ["a","b","c","d","starred-unrelated"]{assert!(got.contains(&id.to_string()),"favourite {id} is always used");}
+  assert!(got.contains(&"plain-match".to_string()),"other matches still follow the favourites");
+  assert!(got.iter().position(|id|id=="plain-match").unwrap()>4,"favourites come first");
+  let blender=store.request(&json!({"action":"match","query":"anything","domain":"blender","scope":""})).unwrap()["skills"].as_array().unwrap().iter().map(|s|s["id"].as_str().unwrap().to_string()).collect::<Vec<_>>();
+  assert!(!blender.contains(&"d".to_string()),"a Roblox favourite is not used for Blender work");
   let _=std::fs::remove_file(path.with_extension("json.backup"));std::fs::remove_file(path).unwrap();
  }
 }
