@@ -1,52 +1,54 @@
 {
   "version": "1.24.13",
-  "title": "Connection, startup and checklist fixes",
-  "summary": "Fixes the false \"not connected\" bar and long startup pause caused by slow MCP add-ons, silent crashes of the desktop app (OS Error 1450), AI chats that paste scripts instead of editing Studio, startup handshake errors, Notion tool results that stayed unsent, and task checklists that repeated the user's prompt.",
-  "added": [],
+  "title": "Skills, connection and Blender fixes",
+  "summary": "The approved test build 6: faster startup, reliable connection status, improved Skills controls, a one-click Save as skill card, and the user-tested Blender screenshot and dashboard fixes.",
+  "added": [
+    "Favourite stars and two-click skill deletion. Delete all keeps favourites, starter skills, UltraGUI references and shared workflows.",
+    "A one-click Save as skill card above the chat box for lasting preferences. It closes after 45 seconds without hover or focus; closing saves nothing."
+  ],
   "improved": [
-    "MCP add-ons (Blender, Context7, Fetch, Git, Memory, Sequential Thinking) now start in parallel and in the background, so Studio connects without waiting for them.",
-    "The task checklist shows short summaries of what the AI has to do, not the user's own sentences.",
-    "After Start, PlazCode tells the AI that Studio is connected; if the AI replies with a script to paste, PlazCode reminds it once to run the script itself."
+    "MCP add-ons start in parallel in the background instead of blocking Studio startup.",
+    "Up to 8 favourite skills are always included within their project, engine and domain, followed by the 3 best other matches.",
+    "Short task checklist labels on other providers; Notion keeps its established startup wording.",
+    "Packaged launchers, Firefox extension copies and checksum manifests now match the reviewed source."
   ],
   "fixed": [
-    "The bar no longer shows \"not connected\" or \"MCP is off\" while the bridge and Studio are connected.",
-    "The long pause and near-freeze while commands load at startup.",
-    "The desktop app no longer ends in \"PlazCode Agent crashed\" (OS Error 1450): it relaunches itself silently, and crash dialogs can no longer freeze the app.",
-    "The AgentScript card no longer shows \"local (0 tools)\" next to \"128 tools ready\".",
-    "\"Startup handshake failed\" on Crax and other providers when the AI answered in prose first: PlazCode now asks once more.",
-    "Notion: a tool result left unsent in the composer is sent again once without typing continue."
+    "False disconnected status and stale dashboard connection labels.",
+    "Blender screenshots use an off-screen viewport capture and a unique receipt; no stale image is returned without a receipt.",
+    "Automatic completed-task skill candidates are disabled, duplicate saves are refused, and untouched duplicate candidates are cleaned up.",
+    "Clarification panels no longer sit behind overlays; the typing mask is lifted while questions wait.",
+    "Native paste and editing shortcuts work in PlazCode text boxes on pages with capture handlers.",
+    "Claude waits for an enabled Send control instead of clicking a guessed composer button.",
+    "OS Error 1450 recovery, provider startup handshakes and verifiably unsent Notion tool results."
   ],
   "notes": [
-    "Automated regressions passed. Not yet tested live in Studio, Blender, Notion, Crax or ChatGPT. GLM's \"No response\" HTML error is a z.ai server error and is unchanged."
+    "The user approved test build 6 for publication. Exact-source automated checks passed on Linux, Windows and macOS, with Chromium/Firefox and real Blender CI checks. Live provider accounts and real Roblox Studio imports were not tested by CI.",
+    "The user-tested Studio heal guard is preserved. Automatic helper restart remains inactive because the bridge has no mcp_status handler.",
+    "Windows binaries are unsigned. The Mac app is ad-hoc signed, not notarized. GLM HTML server errors are unchanged."
   ],
   "github": {
+    "summary": "Approved build 6 with Skills improvements, faster startup, and the user-tested Blender screenshot and dashboard fixes.",
     "sections": [
       {
-        "title": "🔌 Connection",
+        "title": "⭐ Skills",
         "items": [
-          "**No false \"not connected\":** slow MCP add-ons no longer block the Studio connection or startup.",
-          "**Faster startup:** add-ons start in parallel in the background."
+          "Favourite stars, safe deletion and duplicate protection; automatic task candidates are off.",
+          "Up to 8 favourites are always used within their scope. Save as skill appears above the chat box and closes after 45 seconds."
         ]
       },
       {
-        "title": "🛠️ Agent fixes",
+        "title": "🛠️ Fixes",
         "items": [
-          "**No more crash box:** OS Error 1450 relaunches the app silently.",
-          "**Handshake:** Crax and others get one correction instead of \"Startup handshake failed\".",
-          "**Studio access:** the AI is told Studio is connected and reminded once if it pastes a script.",
-          "**Notion:** an unsent tool result is sent again once."
-        ]
-      },
-      {
-        "title": "✅ Task checklist",
-        "items": [
-          "**Short titles:** steps summarise what the AI has to do instead of repeating your prompt."
+          "Parallel add-on startup and accurate Studio status. The tested heal guard is unchanged; automatic helper restart remains inactive.",
+          "Blender off-screen screenshots with unique capture receipts.",
+          "Visible clarification panels, working paste, safer Claude sends and Notion startup fixes."
         ]
       },
       {
         "title": "🧪 Checks",
         "items": [
-          "Automated regressions passed. Not yet tested live in Studio, Blender, Notion, Crax or ChatGPT."
+          "Exact-source Linux/Windows/Mac and browser checks passed; the user approved build 6. CI did not test live provider accounts or real Studio imports.",
+          "Windows is unsigned; Mac is ad-hoc signed, not notarized."
         ]
       }
     ]
