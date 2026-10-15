@@ -56,7 +56,12 @@ const RSProvider = (() => {
     const p=prompts().at(-1); return query(p,S.editor);
   }
   const composerFrame = () => closest(getEditor(),S.prompt);
-  const barAnchor = () => composerFrame();
+  function barAnchor() {
+    const frame=composerFrame(),group=closest(frame,'.ai-agent-builder-input-container');
+    // Ask Brain's landing screen has Ask/Agents tabs immediately above Quill.
+    // Anchor above that small group so the bar never covers either tab.
+    return mode()==='brain' && query(group,'[role="tab"]') ? group : frame;
+  }
   function allItems() {
     const root=activeThread(); if (!root) return [];
     return all(root,S.item).filter(item=>closest(item,S.thread)===root && role(item));

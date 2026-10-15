@@ -2,7 +2,7 @@
 from pathlib import Path
 import importlib.util,tempfile,zipfile,json
 root=Path(__file__).resolve().parents[2]
-spec=importlib.util.spec_from_file_location('promotion',Path(__file__).with_name('promote.py'))
+spec=importlib.util.spec_from_file_location('promotion',root/'development/1.24.14/promote.py')
 p=importlib.util.module_from_spec(spec);spec.loader.exec_module(p)
 with tempfile.TemporaryDirectory() as temp:
  archive=root/'PlazCode-1.23.0.zip'
