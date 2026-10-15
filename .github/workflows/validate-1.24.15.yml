@@ -52,6 +52,10 @@ jobs:
       - name: ClickUp Brain and agent startup, tool feedback and composer fixtures
         run: node release-tools/test-clickup-browser.cjs
         working-directory: build-src-1.24.15/PlazCode
+      - name: Ultra effort labels, animations and Deleted Skills controls
+        timeout-minutes: 5
+        run: node release-tools/test-ultra-trash-browser.cjs
+        working-directory: build-src-1.24.15/PlazCode
       - run: node release-tools/test-1.24.14-browser.cjs
         working-directory: build-src-1.24.15/PlazCode
       - run: node release-tools/test-notion-block-cards.cjs
@@ -66,6 +70,7 @@ jobs:
       - run: node release-tools/test-ultracode-appearance.cjs
         working-directory: build-src-1.24.15/PlazCode
       - run: node release-tools/test-sidebar-explorer.cjs
+        timeout-minutes: 5
         working-directory: build-src-1.24.15/PlazCode
       - run: node release-tools/test-workspace-scroll.cjs
         working-directory: build-src-1.24.15/PlazCode
