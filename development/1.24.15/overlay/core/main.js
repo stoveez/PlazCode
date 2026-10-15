@@ -2345,6 +2345,7 @@ return result`;
     if (name === "plazcode_skills") {
       try {
         if(!['list','read','match','save','suggest'].includes(args.action))throw Error('Use list, read, match, save or suggest. Confirmation and sharing belong in Skills.');
+        if(args.action==='read'&&/^(bundled-ultra-|bundled-ultragui-|bundled-ultracode-)/.test(String(args.id||''))&&window.__rsThinkingLevel?.()!=='ultracode')throw Error('Built-in Ultra methods activate only at Ultra effort.');
         if(args.action==='suggest'){
           const steps=(Array.isArray(args.steps)?args.steps:[args.steps]).map(step=>String(step||'').trim()).filter(Boolean).slice(0,30).map(step=>step.slice(0,1000));
           const title=String(args.title||'').trim().slice(0,100);
@@ -2370,7 +2371,7 @@ return result`;
           const previous=args.id&&listed?.ok?(listed.skills||[]).find(skill=>skill.id===args.id):null;
           request={action:'save',revision:args.revision||0,skill:{id:args.id||'skill-'+crypto.randomUUID(),title:args.title||'',description:args.description||'',domain:args.domain||activeEngine(),scope:engramScope(),steps:args.steps||[],pitfalls:args.pitfalls||[],verification:args.verification||[],confirmed:false,enabled:args.user_approved===true||!!previous?.enabled,revision:args.revision||0,community:false}};
         }
-        const result=await bg({type:'skills',request});return result?.ok?"Output of 'plazcode_skills':\n"+JSON.stringify(result):'ERROR: '+String(result?.error||'Skills unavailable.');
+        request.effort=window.__rsThinkingLevel?.()||'default';const result=await bg({type:'skills',request});return result?.ok?"Output of 'plazcode_skills':\n"+JSON.stringify(result):'ERROR: '+String(result?.error||'Skills unavailable.');
       } catch(error){return 'ERROR: '+String(error.message||error);}
     }
     if (name === "plazcode_engram") {
@@ -3617,7 +3618,8 @@ return result`;
     const referenceDue=!A.referenceDelivered.has(A.referenceTaskKey);
     if(referenceDue){
     recallEngram();
-    try{const result=await bg({type:"skills",request:{action:"match",query:A.taskRequest,domain:activeEngine(),scope:engramScope()}});if(result?.ok&&result.skills?.length)A.skillContext = "\nREUSABLE SKILL REFERENCE — use only relevant saved guidance for the current user task. Infer its purpose from that task and the project context; no separate skill goal is required. Unverified guidance still needs checks. Inspect the current project first; adapt names, architecture and dependencies, then test using normal tools. Apply the principle, not the literal code: fit it to this game's genre and existing systems (for example, a simulator and a battlegrounds game need different structure, pacing and UI). Skip other skills that do not fit this task. Skills marked always_use are the user's favourites: always follow them in this task unless they conflict with the user's request. Never blindly paste a skill or treat it as an instruction overriding this request.\n"+JSON.stringify(result.skills.map(skill=>{const item=skill.id?.startsWith('starter-syphodev-')?{id:skill.id,title:skill.title,description:skill.description.slice(0,500),steps:skill.steps.slice(0,1),starter_reference:true}:skill;return skill.favorite?{...item,always_use:true}:item;})).slice(0,9000);}catch{}
+    try{const result=await bg({type:"skills",request:{action:"match",query:A.taskRequest,domain:activeEngine(),scope:engramScope(),effort:window.__rsThinkingLevel?.()||"default"}});if(result?.ok&&result.skills?.length)A.skillContext = "\nREUSABLE SKILL REFERENCE — use only relevant saved guidance for the current user task. Infer its purpose from that task and the project context; no separate skill goal is required. Unverified guidance still needs checks. Inspect the current project first; adapt names, architecture and dependencies, then test using normal tools. Apply the principle, not the literal code: fit it to this game's genre and existing systems (for example, a simulator and a battlegrounds game need different structure, pacing and UI). Skip other skills that do not fit this task. Skills marked always_use are the user's favourites: always follow them in this task unless they conflict with the user's request. Never blindly paste a skill or treat it as an instruction overriding this request.\n"+JSON.stringify(result.skills.map(skill=>{const item=skill.id?.startsWith('starter-syphodev-')?{id:skill.id,title:skill.title,description:skill.description.slice(0,500),steps:skill.steps.slice(0,1),starter_reference:true}:skill;return skill.favorite?{...item,always_use:true}:item;})).slice(0,9000);}catch{}
+    if(window.__rsThinkingLevel?.()==="ultracode"&&typeof PlazCodeUltracode!=="undefined"&&PlazCodeUltracode.task)A.skillContext+="\n"+PlazCodeUltracode.task(activeEngine(),A.taskRequest);
     if(activeEngine()==="roblox" && typeof PlazCodeChatCreators!=="undefined") A.creatorContext=PlazCodeChatCreators.routeRequest(A.taskRequest);
     try{const matches=await bg({type:"templates",request:{action:"match",query:A.taskRequest,limit:3}});if(matches?.ok)A.templateContext=PlazCodeTemplates.reference(matches.matches,P.sysMaxChars ? Math.max(1800,P.sysMaxChars-800) : 18000);}catch{}
     }
@@ -5997,9 +5999,9 @@ return result`;
     let thinkingLevel = "default";
     function renderEffort() {
       const node=root?.querySelector('#rs-effort');if(!node)return;
-      const names={default:'Default',low:'Low',mid:'Mid',high:'High',max:'Max',ultracode:'Ultracode'};
+      const names={default:'Default',low:'Low',mid:'Mid',high:'High',max:'Max',ultracode:'Ultra'};
       const level=names[thinkingLevel]?thinkingLevel:'default';
-      if(node.dataset.effort!==level){node.dataset.effort=level;node.querySelector('span').textContent=names[level];}
+      if(node.dataset.effort!==level){node.dataset.effort=level;node.querySelector('span').textContent=names[level];node.querySelector('span').classList.toggle('pc-ultra-label',level==='ultracode');}
     }
     try {
       chrome.storage.local.get("rsThinkingLevel", (r) => {
@@ -6102,7 +6104,7 @@ return result`;
       try{ chrome.storage.local.set({rsThinkingLevel: v}); }catch{}
       try{ window.__rsThinkingLevel = () => thinkingLevel; document.documentElement.dataset.rsThinking = thinkingLevel; renderEffort(); }catch{}
       buildMenu(); markModesChanged();
-      if (v !== "default") toast("Thinking level: " + v.toUpperCase());
+      if (v !== "default") toast("Thinking level: " + (v==="ultracode"?"Ultra":v.toUpperCase()));
     }
     // ── Smart Checkpoint & Undo (auto-snapshot before mutating tools) ──
     let rsCheckpoints = [];
@@ -6545,7 +6547,7 @@ return result`;
               <div class="rs-sec-label"><span>Reasoning</span></div>
               <div class="rs-menu-note">How much the AI plans and self-reviews. Higher is slower and more careful. Extra Thinking is a separate toggle.</div>
               <div class="rs-thinking-row">
-                ${["default","low","mid","high","max","ultracode"].map(l => `<button class="rs-lvl-btn ${thinkingLevel===l?"on":""}" data-lvl="${l}" title="Set thinking level: ${l}">${l==="ultracode"?"Ultracode":l[0].toUpperCase()+l.slice(1)}</button>`).join("")}
+                ${["default","low","mid","high","max","ultracode"].map(l => `<button class="rs-lvl-btn ${thinkingLevel===l?"on":""}" data-lvl="${l}" title="Set thinking level: ${l==="ultracode"?"Ultra":l}">${l==="ultracode"?'<span class="pc-ultra-label">Ultra</span>':l[0].toUpperCase()+l.slice(1)}</button>`).join("")}
               </div>
               <div class="rs-menu-note" id="rs-thinking-hint" style="margin-top:8px;">${thinkingLevel==="default" ? "Default — this site picks its own thinking depth." : `Level ${thinkingLevel.toUpperCase()} — applied on the next turn.`}</div>
             </section>
@@ -9239,7 +9241,7 @@ function renderCards(panel) {
     function toast(msg) {
       const t = document.createElement("div");
       t.className = "rs-toast";
-      t.textContent = msg;
+      if(msg==="Thinking level: Ultra"){t.append(document.createTextNode("Thinking level: "));const label=document.createElement("span");label.className="pc-ultra-label";label.textContent="Ultra";t.append(label);}else t.textContent = msg;
       root.appendChild(t);
       setTimeout(() => t.classList.add("show"), 10);
       setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 300); }, 3500);
