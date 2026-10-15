@@ -14,5 +14,7 @@ for path in (here/'overlay').rglob('*'):
   target=source/path.relative_to(here/'overlay');target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(path.read_bytes().replace(b'\r\n',b'\n'))
 for folder in ['core','providers']:shutil.copytree(source/folder,source/'PlazCode-Extension'/folder,dirs_exist_ok=True)
 for name in ['manifest.json','background.js','popup.js','popup.html','overlay.css','blender_ops.py','blender_once.py','blender_once.ps1','SOURCE.txt']:shutil.copy2(source/name,source/'PlazCode-Extension'/name)
+import subprocess,sys
+subprocess.run([sys.executable,str(here/'prepare-ultra.py'),str(source)],check=True)
 assert json.loads((source/'manifest.json').read_text())['version']=='1.24.15'
 print(source)

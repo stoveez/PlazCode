@@ -4,10 +4,10 @@ const crypto = require("crypto");
 const baseline = {
   "core/agent_skills.js": "86e63d2ecefeafd586744411650cb446c0db2a5f",
   "core/animlib.js": "420ea8eb69637b27ca9856b974d44181e57d3420",
-  "core/config.js": "7cffd152a3ce953b0f243cd6684ad78939649ff2",
+  "core/config.js": "54e14472bb723ed02c949c2a3db2c8aad26ce6f8",
   "core/headless-builder.js": "b343a897a17fc05d79ab469aeea55c8abaa8c4e5",
   "core/luau-knowledge.js": "234c1ca2155d3ef5f38927d85893b70fd6bde6e6",
-  "core/main.js": "c328b49b4b5e4849c54998c57934306b7bbbc135",
+  "core/main.js": "dff20078301e7b7dffcd2a6758d15cc182700f88",
   "core/motion-interchange.js": "038afa13a5b59c030a809abf7d617a36f2fae82d",
   "core/motion-preview.js": "ae0ab0526fbc762dfbf7cae9c248239e217e7a2f",
   "core/motion-tools.js": "8ac81b4a4a9f634fef9285aeee06db4a15af578e",
@@ -210,6 +210,7 @@ async function runDesktopInteractionRegression() {
     getElementById(id) {
       return elementsById.get(id) || null;
     },
+    querySelector(selector) {return this.querySelectorAll(selector)[0]||null;},
     querySelectorAll(selector) {
       if (selector === ".page") return pages;
       if (selector === ".navbtn") return navButtons;
