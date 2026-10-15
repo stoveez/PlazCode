@@ -1,0 +1,23 @@
+## ✨ PlazCode 1.24.14
+
+Fixes for sent Co-Work cards, completed Claude replies and automatic Studio connection.
+
+### 🛠️ Fixes
+
+- Sent Co-Work cards clear immediately.
+- Completed Claude replies stay readable across nested response nodes.
+- More robust Studio MCP discovery and startup retry.
+
+### 🧪 Validation and limitations
+
+- Windows, macOS, Linux and browser checks passed; packaged Mac desktop lifetime is checked before publishing.
+- Live affected Edge/Studio installations were not reproduced. Windows is unsigned; Mac is not notarized.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.14.zip** for Windows, **PlazCode-macOS-1.24.14.zip** for Mac, or **PlazCode-Firefox-1.24.14.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.

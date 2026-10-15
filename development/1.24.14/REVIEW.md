@@ -1,6 +1,6 @@
 # PlazCode 1.24.14 release review
 
-Validation: all four exact-source CI jobs passed for 8c06d97da7e6c41129d89efc317f6189c0e6a651 (run 38666981941). Final local JavaScript suite: 155 passed, zero failures. The user explicitly authorized publication after receiving the private artifacts. The packaged macOS lifetime gate must pass before assets and feeds are published.
+Validation: all exact-source platform CI jobs and the packaged macOS desktop check passed. See release-validation-1.24.14.
 
 ## Reported behavior and scope
 1. Confirmed Co-Work follow-ups should disappear immediately. Their cards and queue-panel history stayed mounted after delivery.

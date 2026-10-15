@@ -1,3 +1,12 @@
+PlazCode 1.24.14 — Co-Work cleanup, Claude replies and Studio startup
+
+Sent Co-Work requests clear immediately, completed Claude replies are read reliably, and Studio connection starts automatically with stronger Windows launcher discovery.
+
+- Discover the running Windows Studio MCP helper or a complete installed version when the batch launcher is missing.
+- Attempt Studio connection at app launch and retry when Studio opens later, even when process-name scans miss it.
+- Confirmed Co-Work follow-ups disappear immediately; queued and unconfirmed requests remain visible.
+- Read one owning Claude assistant turn and all non-thinking answer blocks so nested empty nodes do not hide a completed reply.
+
 PlazCode 1.24.13 — Skills, connection and Blender fixes
 
 The approved test build 6: faster startup, reliable connection status, improved Skills controls, a one-click Save as skill card, and the user-tested Blender screenshot and dashboard fixes.
