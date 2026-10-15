@@ -321,6 +321,8 @@ html[data-desktop-thinking=ultracode] .explorer-layout{border-color:#a879e866;bo
 .desktop-effort{color:var(--orange);transition:color .42s ease}.desktop-effort [data-effort-value]{color:inherit!important}.desktop-effort[data-effort=low]{color:#fff1a8}.desktop-effort[data-effort=mid]{color:#ffc56b}.desktop-effort[data-effort=high]{color:#ff9255}.desktop-effort[data-effort=max]{color:#ff6267}.desktop-effort[data-effort=ultracode]{color:#c5a1f9}@media(prefers-reduced-motion:reduce){.desktop-effort,.settings-summary:after{transition:none}}
 /* Keep Skills cards and expanded learning controls in separate flow rows. */
 #skillsWorkspace .skills-learning{margin-top:18px;min-width:0}#skillsWorkspace .skills-learning>summary{cursor:pointer;line-height:1.6;overflow-wrap:anywhere}#skillsWorkspace .skills-learning-body{display:grid;gap:14px;margin-top:18px;min-width:0}#skillsWorkspace .skills-learning-body>p{margin:0}#skillsWorkspace .skills-learning-body>button{justify-self:start}#skillsWorkspace label{display:block;line-height:1.6}#skillsWorkspace input:not([type=checkbox]),#skillsWorkspace textarea,#skillsWorkspace select{display:block;min-width:0;box-sizing:border-box}
+/* Donation destinations stay readable in every shared desktop palette. */
+#page-donations .donation-list{max-width:900px;padding:26px 28px}#page-donations .donation-entry+ .donation-entry{margin-top:28px}#page-donations h2{font-size:16px;line-height:1.5;margin:0 0 8px;color:var(--ink)}#page-donations .donation-amount{margin-left:10px;font-size:12px;font-weight:500;color:var(--ink-soft)}#page-donations a{display:inline-block;max-width:100%;color:var(--orange);line-height:1.7;font-size:13px;overflow-wrap:anywhere;text-underline-offset:4px}#page-donations a:focus-visible{outline:2px solid var(--orange);outline-offset:5px;border-radius:2px}
 </style>
 </head>
 <body>
@@ -342,6 +344,7 @@ html[data-desktop-thinking=ultracode] .explorer-layout{border-color:#a879e866;bo
       <button class="navbtn" data-page="mcp"><svg class="navicon" viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/><circle cx="6" cy="5" r="1"/><circle cx="18" cy="12" r="1"/><circle cx="9" cy="19" r="1"/></svg><span class="navlabel">MCP Servers</span></button>
       <button class="navbtn" data-page="skills" title="Skills"><svg class="navicon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h7l2 3h7v15H4zM8 10h8M8 14h8M8 18h5"/></svg><span class="navlabel">Skills</span></button>
       <button class="navbtn" data-page="templates"><svg class="navicon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19V6a2 2 0 0 1 2-2h2M7 14V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7M10 5h6M10 8h4M19 7a3 3 0 0 1 3 3v1"/><path d="m3 19 3.2-7a3 3 0 0 1 2.7-1.8h12a1.5 1.5 0 0 1 1.4 2l-2.7 7a3 3 0 0 1-2.8 1.8H5a2 2 0 0 1-2-2z"/></svg><span class="navlabel">Templates</span></button>
+      <button class="navbtn" data-page="donations"><svg class="navicon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg><span class="navlabel">Donations</span></button>
       <button class="navbtn" data-page="terminal"><svg class="navicon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></svg><span class="navlabel">Terminal</span></button>
       <button class="navbtn" data-page="updates"><svg class="navicon" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg><span class="navlabel">Updates</span></button>
       <button class="navbtn" data-page="settings"><svg class="navicon" viewBox="20 20 220 220" aria-hidden="true" style="stroke-width:11"><path d="M168 98L183 105L197 94L213 110L201 123L209 142H227V167H209L201 185L214 198L196 216L182 204L165 211V229H141V211L123 204L109 217L92 199L105 185L99 169"/><circle cx="154" cy="155" r="32"/><path d="M143 35C116 28 92 51 103 80L62 146C42 143 25 161 31 179C37 199 62 207 78 194C89 185 94 173 87 160L129 100C157 104 180 79 164 49L145 76L122 61Z"/><circle cx="60" cy="173" r="12"/></svg><span class="navlabel">Settings</span></button>
@@ -420,6 +423,15 @@ html[data-desktop-thinking=ultracode] .explorer-layout{border-color:#a879e866;bo
       <section class="page" id="page-mcp">
         <div class="page-head"><div><div class="page-title">MCP Servers</div><div class="page-sub">Optional integrations plus the protected Roblox Studio primary server.</div></div></div>
         <div id="mcpGrid" class="cardgrid"></div>
+      </section>
+      <section class="page" id="page-donations">
+        <div class="page-head"><div><h1 class="page-title">Donations</h1><p class="page-sub">Support PlazCode. Donation links open in your browser.</p></div></div>
+        <div class="settingcard donation-list">
+          <div class="donation-entry"><h2>Small Donation:<span class="donation-amount">50 Robux</span></h2><a href="https://www.roblox.com/game-pass/2025206972/plazcode-small-donation" data-ipc="open:donation-small" target="_blank" rel="noopener noreferrer" aria-label="Small Donation: 50 Robux — opens in your browser">https://www.roblox.com/game-pass/2025206972/plazcode-small-donation</a></div>
+          <div class="donation-entry"><h2>Medium Donation:<span class="donation-amount">100 Robux</span></h2><a href="https://www.roblox.com/game-pass/2026664687/plazcode-medium-donation" data-ipc="open:donation-medium" target="_blank" rel="noopener noreferrer" aria-label="Medium Donation: 100 Robux — opens in your browser">https://www.roblox.com/game-pass/2026664687/plazcode-medium-donation</a></div>
+          <div class="donation-entry"><h2>Large Donation:<span class="donation-amount">500 Robux</span></h2><a href="https://www.roblox.com/game-pass/2025386949/Plazcode-Large-Donation" data-ipc="open:donation-large" target="_blank" rel="noopener noreferrer" aria-label="Large Donation: 500 Robux — opens in your browser">https://www.roblox.com/game-pass/2025386949/Plazcode-Large-Donation</a></div>
+          <div class="donation-entry"><h2>Massive Donation:<span class="donation-amount">1,000 Robux</span></h2><a href="https://www.roblox.com/game-pass/2026352931/Plazcode-Massive-Donation-much-love" data-ipc="open:donation-massive" target="_blank" rel="noopener noreferrer" aria-label="Massive Donation: 1,000 Robux — opens in your browser">https://www.roblox.com/game-pass/2026352931/Plazcode-Massive-Donation-much-love</a></div>
+        </div>
       </section>
       <section class="page" id="page-terminal">
         <div class="page-head"><div><div class="page-title">Terminal</div><div class="page-sub">Live bridge, Studio, MCP, and AgentScript logs.</div></div><div style="margin-left:auto;display:flex;gap:8px"><button class="softbtn" id="restartMcp">Restart MCP</button><button class="clearbtn" id="clearTerminal">Clear</button></div></div>
@@ -1189,7 +1201,10 @@ __PLAZCODE_VERSION_UI__
     });
 
     Toarray(document.querySelectorAll("[data-ipc]")).forEach(function (Button) {
-      Button.onclick = function () {
+      Button.onclick = function (Event) {
+        // Native WebViews use the OS default browser. In browser-hosted dashboards,
+        // real donation anchors keep their normal current-browser new-tab behavior.
+        if (Button.tagName === "A" && window.ipc && typeof window.ipc.postMessage === "function") Event.preventDefault();
         Ipc(Button.getAttribute("data-ipc"));
       };
     });
