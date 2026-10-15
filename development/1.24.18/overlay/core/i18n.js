@@ -61,6 +61,7 @@ function scan(root){
 function ensureStyles(doc){
  if(doc.getElementById('pc-language-styles'))return;
  const style=doc.createElement('style');style.id='pc-language-styles';style.textContent=`
+ .language-card .settings-summary p{font-size:14px!important;line-height:1.5!important}
  .pc-language-picker{display:grid;gap:10px;min-width:0;width:100%;max-width:520px;font-family:inherit}
  .pc-language-picker label{display:block;font-size:14px;font-weight:600;line-height:1.5}
  .pc-language-picker input,.pc-language-picker select{box-sizing:border-box;width:100%;min-width:0;min-height:44px;padding:10px 12px;border:1px solid var(--rs-border,rgba(160,175,195,.5));border-radius:8px;background:var(--rs-bg,#151a22);color:var(--rs-text,#f4f6fb);font:inherit;font-size:16px;line-height:1.5}
