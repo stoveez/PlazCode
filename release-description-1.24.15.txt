@@ -1,0 +1,29 @@
+## ✨ PlazCode 1.24.15
+
+ClickUp support, unified Ultra effort, recoverable Skills and updated donations.
+
+### ✨ New features
+
+- Use PlazCode tools in ClickUp Brain and existing AI-agent chats.
+- Ultra effort combines hidden UltraCode/UltraGUI methods with selected-only UltraLab enhancements and animated labels.
+- Restore Deleted Skills or permanently remove them, including a separate trash Delete All.
+- Donation links are updated and clearly labelled, with a new desktop Donations page.
+
+### 🛠️ Fixes
+
+- Bounded, confirmed ClickUp startup and a chatbox-aligned toolbar with usable Ask/Agents tabs.
+- Condo Lock removed across supported sites; unrelated permissions remain.
+
+### 🧪 Checks
+
+- Approved after the user tested build 3 in ClickUp; platform/browser and packaged Mac checks passed.
+- Older hard-deleted skills are not recoverable. Windows unsigned; Mac not notarized.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.15.zip** for Windows, **PlazCode-macOS-1.24.15.zip** for Mac, or **PlazCode-Firefox-1.24.15.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.

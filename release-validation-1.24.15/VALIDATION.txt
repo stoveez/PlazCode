@@ -1,0 +1,9 @@
+PlazCode 1.24.15 — exact-source platform and browser validation; packaged macOS desktop lifetime checks are verified by the evidence gates above.
+Changes: ClickUp Ask Brain and existing AI-agent chats, confirmed bounded startup and composer placement; Ultra rebrand with animated labels and selected-only companion routing; recoverable Deleted Skills with confirmed permanent deletion and separate trash Delete All; updated Robux donation links and desktop Donations page; Condo Lock removed across supported providers.
+The user reported test build 3 works perfectly with ClickUp and explicitly authorized publication as 1.24.15. Production-core fixtures exercise Studio/Blender/local-file commands through a mocked bridge; arbitrary custom agents and the user's real Studio/Blender/file projects are not established by CI. UltraLab resources are inspected reference material and task routing, not proof that every external helper, model or service is configured or works.
+Platform checks and scanner evidence belong to the exact validated test-build-3 source run. Windows binaries are unsigned; macOS uses ad-hoc signing, not notarization. The final release retains the validated native executable bytes; only release notices, changelog and package metadata are promoted.
+Microsoft Defender runner result before assembly:
+Scan starting...
+Scan finished.
+Scanning D:\a\PlazCode\PlazCode\build-src-1.24.15\PlazCode/defender-scan found no threats.
+The scanned checksum and availability are recorded in release-validation-1.24.15.

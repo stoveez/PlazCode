@@ -1,3 +1,18 @@
+PlazCode 1.24.15 — ClickUp, Ultra and recoverable Skills
+
+Use PlazCode in ClickUp Brain and existing AI-agent chats, activate the unified Ultra effort, recover deleted skills, and find clearly labelled donation links.
+
+- ClickUp Ask Brain and existing AI-agent chats support the usual PlazCode Studio, Blender and local-file commands.
+- Deleted Skills tab with Restore, confirmed permanent deletion and a separate Delete All for deleted items.
+- Desktop Donations page after Templates with labelled 50, 100, 500 and 1,000 Robux links opening in the current/default browser.
+- Ultra replaces the visible UltraCode effort label and adds animated gradient text with reduced-motion and forced-colour accessibility fallbacks.
+- UltraCode and UltraGUI work as hidden internal components; relevant UltraLab companion enhancements activate only at Ultra effort. The eleven starter skills remain visible.
+- ClickUp startup sends bounded, acknowledged context parts without truncating instructions or automatically replaying uncertain sends.
+- Updated donation destinations and amounts everywhere in the shared bar settings and desktop page.
+- ClickUp toolbar follows the actual chatbox width and position while Ask/Agents tabs stay visible and clickable.
+- Injected ClickUp startup/tool messages stay hidden after UI remounts; failed startup cannot restore a false Ready state.
+- Removed Condo Lock classification, strikes and cooldown lockouts across all supported providers, including migration of old stored locks. Other permissions and safety controls are unchanged.
+
 PlazCode 1.24.14 — Co-Work cleanup, Claude replies and Studio startup
 
 Sent Co-Work requests clear immediately, completed Claude replies are read reliably, and Studio connection starts automatically with stronger Windows launcher discovery.
