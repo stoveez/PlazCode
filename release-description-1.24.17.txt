@@ -1,0 +1,23 @@
+## ✨ PlazCode 1.24.17
+
+Fixes oversized ClickUp tool feedback and Blender command-list selection.
+
+### 🛠️ Fixes
+
+- Large results and complete Blender/Roblox GUI catalogs use retained pages, without repeating the operation.
+- Blender catalog requests preserve server when supplied outside params.
+- Final feedback sizing includes appended status and references.
+
+### 🧪 Validation and limitations
+
+- Platform/browser and packaged Mac desktop gates run before publication.
+- Fixtures use a mocked bridge; affected accounts and real projects were not tested. Windows unsigned; Mac not notarized.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.17.zip** for Windows, **PlazCode-macOS-1.24.17.zip** for Mac, or **PlazCode-Firefox-1.24.17.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.

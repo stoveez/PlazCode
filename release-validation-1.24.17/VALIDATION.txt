@@ -1,0 +1,9 @@
+PlazCode 1.24.17 — exact-source platform and browser validation; packaged macOS desktop lifetime checks are verified by the evidence gates above.
+Changes: ClickUp-sized lossless retained tool-result pages; final feedback sizing after appended state/reference context; persistent masking for owned retained pages; unambiguous read-only top-level server selection for Blender and other command catalogs, with conflicting selectors rejected.
+Publication follows the user's current preference for direct updates after validation without a private-build review step. The new production-core Chromium/Firefox fixtures reproduce the prior 18,000-character failure, read complete Blender and Roblox GUI references, read a large Blender result without re-executing it, and dispatch a Studio UI inspection through a mocked bridge. No affected live ClickUp account, custom agent, actual Blender model edit or real Studio GUI creation is claimed tested.
+Platform checks and scanner evidence belong to the exact validated source run. Windows binaries are unsigned; macOS uses ad-hoc signing, not notarization. The final release retains validated executable bytes; release notices, changelog and package metadata are promoted.
+Microsoft Defender runner result before assembly:
+Scan starting...
+Scan finished.
+Scanning D:\a\PlazCode\PlazCode\build-src-1.24.17\PlazCode/defender-scan found no threats.
+The scanned checksum and availability are recorded in release-validation-1.24.17.

@@ -1,9 +1,47 @@
 {
-  "version": "1.24.16",
-  "desktop_version": "1.24.16",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.16.zip",
-  "sha256": "5f269a4d6893c15a5253fc263a380acabd6d36c7e9344daf40c68b25294e9840",
+  "version": "1.24.17",
+  "desktop_version": "1.24.17",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.17.zip",
+  "sha256": "a49cae10d89adc4dee547f0d785b0e2b6fd1cd3a3c2768df53ffe77ba2a34b45",
   "release_notes": [
+    {
+      "version": "1.24.17",
+      "title": "ClickUp tool results and Blender command lists",
+      "summary": "ClickUp reads large tool results through complete retained pages and correctly selects Blender when its catalog request places server outside params.",
+      "added": [],
+      "improved": [
+        "Send ClickUp-sized result pages while keeping every original character available through plazcode_result_read, without rerunning the original tool.",
+        "Recheck final tool feedback after appended status and reference context."
+      ],
+      "fixed": [
+        "Large Blender results and full command references no longer exceed ClickUp’s outgoing transport bound.",
+        "Read-only command-list requests preserve an unambiguous top-level server selector; conflicting selectors are rejected."
+      ],
+      "notes": [
+        "Exact-source Windows/macOS/Linux/browser and packaged Mac desktop checks are required before publication.",
+        "Browser fixtures use a mocked bridge; affected live ClickUp accounts and real Blender/Studio work are not claimed tested. Windows is unsigned; macOS is not notarized."
+      ],
+      "github": {
+        "summary": "Fixes oversized ClickUp tool feedback and Blender command-list selection.",
+        "sections": [
+          {
+            "title": "🛠️ Fixes",
+            "items": [
+              "Large results and complete Blender/Roblox GUI catalogs use retained pages, without repeating the operation.",
+              "Blender catalog requests preserve server when supplied outside params.",
+              "Final feedback sizing includes appended status and references."
+            ]
+          },
+          {
+            "title": "🧪 Validation and limitations",
+            "items": [
+              "Platform/browser and packaged Mac desktop gates run before publication.",
+              "Fixtures use a mocked bridge; affected accounts and real projects were not tested. Windows unsigned; Mac not notarized."
+            ]
+          }
+        ]
+      }
+    },
     {
       "version": "1.24.16",
       "title": "Reliable ClickUp startup receipts",
@@ -191,73 +229,12 @@
           }
         ]
       }
-    },
-    {
-      "version": "1.24.12",
-      "title": "Memory, Notion and Blender fixes + new UltraGUI",
-      "summary": "Fixes memory notes that could not be pasted into, Notion startup freezes, plans that stopped without starting, false \"Not connected\" bars and Blender commands failing while busy. UltraGUI is replaced with the new GUI skill pack, and the desktop app gets an automatic-updates switch.",
-      "added": [
-        "Memory: Paste button and import of .md, .json or .txt files, each saved as its own note.",
-        "Desktop app: Settings → Updates switch to turn automatic updates off (manual Update still works)."
-      ],
-      "improved": [
-        "UltraGUI replaced with the new 8-skill GUI pack, used only for ScreenGui, BillboardGui and SurfaceGui work, with fewer repeated checks.",
-        "Blender: a command waits for one that is already running instead of failing, and reconnects after a short drop.",
-        "Long messages sent as a file now describe themselves plainly."
-      ],
-      "fixed": [
-        "Typing and pasting into memory notes works again.",
-        "One-time task reference no longer makes the AI think its command had not run.",
-        "Notion startup no longer freezes or stays unsent when preferences contain formatting.",
-        "Plans that end with \"Shall I proceed?\" continue in Plan Mode/Ultracode instead of stopping.",
-        "No more false \"Not connected\" bar in a running Notion chat.",
-        "If Notion does not take a screenshot, PlazCode sends the text once and points to the capture viewer.",
-        "Slow Blender answers no longer mark Blender as disconnected.",
-        "Notion: a tool result that landed in the chat but could not be matched no longer stops the turn with \"Message was not confirmed\"."
-      ],
-      "notes": [
-        "Automated regressions passed. Not yet tested live in Notion, Roblox Studio or Blender."
-      ],
-      "github": {
-        "sections": [
-          {
-            "title": "🧠 Memory",
-            "items": [
-              "**Paste works:** typing and pasting into notes no longer gets swallowed.",
-              "**Import:** add .md, .json or .txt files as notes, as-is."
-            ]
-          },
-          {
-            "title": "🛠️ Agent fixes",
-            "items": [
-              "**Notion:** startup no longer freezes on formatted preferences; no false \"Not connected\" bar; screenshot fallback.",
-              "**Plans continue:** \"Shall I proceed?\" no longer stops Plan Mode/Ultracode.",
-              "**References:** task reference now comes after the real command result.",
-              "**Blender:** waits for a busy command and survives slow answers.",
-              "**Notion:** an accepted tool result is no longer reported as \"Message was not confirmed\"."
-            ]
-          },
-          {
-            "title": "✨ New",
-            "items": [
-              "**UltraGUI:** new GUI skill pack, GUI-only and faster.",
-              "**Auto-update switch** in the desktop app."
-            ]
-          },
-          {
-            "title": "🧪 Checks",
-            "items": [
-              "Automated regressions passed. Not yet tested live in Notion, Studio or Blender."
-            ]
-          }
-        ]
-      }
     }
   ],
   "platforms": {
     "macos": {
-      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.16.zip",
-      "sha256": "3db1a2bd4e78ee2307ec01568d78b72656d80540529b0dcabecc23be7da088bd"
+      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.17.zip",
+      "sha256": "e07e9e5513c5edc299fa88340e5511cc9b990bd453b47eb7008a24c8f63d1fce"
     }
   }
 }

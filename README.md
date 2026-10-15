@@ -1,3 +1,12 @@
+PlazCode 1.24.17 — ClickUp tool results and Blender command lists
+
+ClickUp reads large tool results through complete retained pages and correctly selects Blender when its catalog request places server outside params.
+
+- Send ClickUp-sized result pages while keeping every original character available through plazcode_result_read, without rerunning the original tool.
+- Recheck final tool feedback after appended status and reference context.
+- Large Blender results and full command references no longer exceed ClickUp’s outgoing transport bound.
+- Read-only command-list requests preserve an unambiguous top-level server selector; conflicting selectors are rejected.
+
 PlazCode 1.24.16 — Reliable ClickUp startup receipts
 
 ClickUp startup continues after accepted context parts, uses compact defaults, and stops clearly when the selected AI model declines the connection.
