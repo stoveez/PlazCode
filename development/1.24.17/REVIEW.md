@@ -21,6 +21,8 @@ Real Chromium production-core fixture passes: one large Blender operation, compl
 
 Windows CRLF preparation, all 217 original starter resources/licenses and platform-only package byte/mode preservation pass. Local native tests: 147 passed, two existing exclusions, zero failures. The local full JavaScript suite passed 161 files; one isolated send-block harness initially lacked the newly used production helper. Loading that real helper corrected the harness without changing its assertions, and its focused rerun passes (162 checks overall). Exact-source CI remains required before release.
 
+Validation: local targeted/native checks passed; exact-source platform/browser CI and packaged Mac desktop gate remain pending before publication.
+
 ## Publication and limits
 The user's latest preference is direct publication after validation, with no private-build review step. The publisher must still use exact-source Windows/macOS/Linux/browser artifacts, run the packaged Mac desktop lifetime/relaunch gate, verify final provenance, and upload assets before promoting feeds. No live affected ClickUp account, custom agent, real Blender model change or actual Studio GUI creation is claimed from fixtures. Windows remains unsigned and macOS is ad-hoc signed, not notarized.
 
