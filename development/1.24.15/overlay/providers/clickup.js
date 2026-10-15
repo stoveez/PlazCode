@@ -43,7 +43,7 @@ const RSProvider = (() => {
   }
   function activeThread() {
     if (!mode()) return null;
-    return all(document,S.thread).filter(visible).at(-1) || null;
+    return all(document,S.thread).filter(node=>!closest(node,'#rs-root,[hidden],[aria-hidden="true"]') && safeRead(()=>getComputedStyle(node).display!=='none',false)).at(-1) || null;
   }
   function prompts() {
     if (!mode()) return [];
@@ -55,16 +55,57 @@ const RSProvider = (() => {
     // Always continue in that thread; never post tool results as new room threads.
     const p=prompts().at(-1); return query(p,S.editor);
   }
-  const composerFrame = () => closest(getEditor(),S.prompt);
-  function barAnchor() {
-    const frame=composerFrame(),group=closest(frame,'.ai-agent-builder-input-container');
-    // Ask Brain's landing screen has Ask/Agents tabs immediately above Quill.
-    // Anchor above that small group so the bar never covers either tab.
-    return mode()==='brain' && query(group,'[role="tab"]') ? group : frame;
+  const composerRoot = () => closest(getEditor(),S.prompt);
+  // The custom element spans the whole chat column after the first send. The
+  // rounded input wrapper stays composer-width, including in an agent thread.
+  const composerFrame = () => closest(getEditor(),'.refinement-prompt-wrapper__form-input-wrapper') ||
+    closest(getEditor(),'.refinement-prompt-wrapper') || composerRoot();
+  const barAnchor = () => composerFrame();
+  function rawItems() {
+    const root=activeThread();return root?all(root,S.item).filter(item=>closest(item,S.thread)===root && role(item)):[];
+  }
+  function maskInjectedItems(items) {
+    for(const item of items) {
+      if(!isUserItem(item))continue;
+      const text=itemText(item);
+      if(text.includes('⟦RS-SYS⟧') || (typeof RSParse!=='undefined' && RSParse.isInjectedFeedback(text))) {
+        item.setAttribute('data-rs-clickup-injected','1');item.classList.add('rs-hidden');
+      }
+    }
+  }
+  function setupStyles() {
+    if(document.getElementById('rs-clickup-provider-style'))return;
+    const style=document.createElement('style');style.id='rs-clickup-provider-style';style.textContent=`
+      [data-test="chat-item-presentational__container"][data-rs-clickup-injected] > :not(.rs-chip){display:none!important}
+      html.rs-clickup-injecting cu-refinement-prompt .ql-editor[contenteditable]{max-height:72px!important;overflow:hidden!important;color:transparent!important;caret-color:transparent!important;text-shadow:none!important}
+      html:not([data-rs-bar-collapsed]) #rs-bar.rs-prov-clickup{display:grid!important;grid-template-columns:minmax(0,1fr) auto;gap:5px 8px!important;padding:8px 10px!important;min-width:0!important}
+      #rs-bar.rs-prov-clickup[style*="display: none"]{display:none!important}
+      #rs-bar.rs-prov-clickup .rs-cluster-left{grid-row:1;grid-column:1;min-width:0}
+      #rs-bar.rs-prov-clickup #rs-ctx{grid-row:1;grid-column:2;justify-self:end}
+      #rs-bar.rs-prov-clickup #rs-state{grid-row:2;grid-column:1 / -1;min-width:0;margin:0!important;width:auto!important}
+      #rs-bar.rs-prov-clickup .rs-cluster-right{grid-row:3;grid-column:1 / -1;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:4px;margin-left:var(--rs-clickup-tab-space,0px)!important;min-width:0}
+      #rs-bar.rs-prov-clickup :is(#rs-status-pill,#rs-perf){display:none!important}
+    `;
+    document.documentElement.append(style);
+  }
+  function syncBarCutout() {
+    const bar=query(document,'#rs-bar');if(!bar)return;
+    const group=closest(composerRoot(),'.ai-agent-builder-input-container');
+    const tabs=all(group,'[role="tab"]').filter(visible);
+    if(!tabs.length || safeRead(()=>document.documentElement.hasAttribute('data-rs-bar-collapsed'),false)) {
+      bar.style.clipPath='';bar.style.removeProperty('--rs-clickup-tab-space');return;
+    }
+    const r=safeRead(()=>bar.getBoundingClientRect()),rects=tabs.map(n=>safeRead(()=>n.getBoundingClientRect())).filter(Boolean);
+    if(!r || !r.width || !rects.length)return;
+    const left=Math.max(0,Math.min(...rects.map(t=>t.left))-r.left-4),right=Math.min(r.width,Math.max(...rects.map(t=>t.right))-r.left+4);
+    const top=Math.max(0,Math.min(...rects.map(t=>t.top))-r.top-3);
+    // Leave the native Ask/Agents area out of our painted AND clickable shape.
+    // Its own DOM, listeners and stacking contexts remain untouched.
+    bar.style.setProperty('--rs-clickup-tab-space',Math.max(0,right+4)+'px');
+    bar.style.clipPath=top<r.height?`polygon(0 0,100% 0,100% 100%,${right}px 100%,${right}px ${top}px,${left}px ${top}px,${left}px 100%,0 100%)`:'';
   }
   function allItems() {
-    const root=activeThread(); if (!root) return [];
-    return all(root,S.item).filter(item=>closest(item,S.thread)===root && role(item));
+    const items=rawItems();maskInjectedItems(items);return items;
   }
   function role(item) {
     if (!item) return "";
@@ -136,7 +177,7 @@ const RSProvider = (() => {
     }
   }
   function setInputLock(on) {locked=!!on;applyLock(getEditor(),locked);}
-  function exactControl(selector) {return all(composerFrame(),selector).find(visible)||null;}
+  function exactControl(selector) {return all(composerRoot(),selector).find(visible)||null;}
   const sendButton=()=>exactControl(S.send);
   const stopButton=()=>exactControl(S.stop);
   function actionable(node) {
@@ -164,7 +205,7 @@ const RSProvider = (() => {
     await waitFor(()=>!!getEditor(),5000);
     return {ready:!!getEditor(),detail:modeWarning()};
   }
-  function enforceComposer() {if(locked)applyLock(getEditor(),true);return {ready:!!getEditor()};}
+  function enforceComposer() {setupStyles();maskInjectedItems(rawItems());syncBarCutout();if(locked)applyLock(getEditor(),true);return {ready:!!getEditor()};}
   async function writeDraft(text, expected) {
     const editor=getEditor(),key=conversationKey(),generation=++writeGeneration;
     if(!editor)throw Error('ClickUp AI chat box is not available. Open Ask Brain or an agent chat.');
@@ -194,12 +235,12 @@ const RSProvider = (() => {
     return new File([bytes],'plazcode-capture-'+index+'.'+(image.mimeType==='image/png'?'png':'jpg'),{type:image.mimeType||'image/jpeg'});
   }
   function attachmentNodes() {
-    return all(composerFrame(),'[data-test="link-preview-element__root"].attachment-chip')
+    return all(composerRoot(),'[data-test="link-preview-element__root"].attachment-chip')
       .filter(node=>visible(node) && query(node,'a[href]'));
   }
   async function attachImages(images) {
     if(!images?.length)return true;
-    const frame=composerFrame(),input=query(frame,'input[type="file"]');
+    const frame=composerRoot(),input=query(frame,'input[type="file"]');
     if(!input)throw Error('ClickUp image upload control was not found. The screenshot message was not submitted.');
     const key=conversationKey(),before=new Set(attachmentNodes()),transfer=new DataTransfer();
     images.forEach((image,index)=>transfer.items.add(fileFromImage(image,index)));
@@ -216,14 +257,52 @@ const RSProvider = (() => {
     try {await writeDraft(editorText());return await waitFor(()=>!attachmentNodes().length,2500);}
     catch {return false;}
   }
+  function renderedReceipt(text) {
+    return norm(text).replace(/```[^\n]*\n/g,'').replace(/```/g,'')
+      .replace(/(`+)([^`]+)\1/g,'$2').replace(/\*\*([^*]+)\*\*/g,'$1')
+      .replace(/__([^_]+)__/g,'$1').replace(/~~([^~]+)~~/g,'$1')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'$1')
+      .replace(/^\s{0,3}(?:#{1,6}\s+|[-*+]\s+|\d+[.)]\s+)/gm,'')
+      .replace(/\s+/g,' ').trim();
+  }
+  function nativeFailure(item) {
+    if(!item)return '';
+    const failed=safeRead(()=>Array.from(item.classList).some(c=>/^_failed_/.test(c)),false) ||
+      safeRead(()=>item.getAttribute('data-state')==='failed',false);
+    if(!failed)return '';
+    return textWithout(query(item,'[class*="failedLabel"]')) || 'ClickUp marked the message as failed.';
+  }
+  function serverReceipt(item) {
+    const key=itemKey(item)||'';
+    // ClickUp's optimistic messages have UUIDs; accepted messages receive the
+    // numeric chat ID. An optimistic row alone is never delivery confirmation.
+    return /^user:\d+$/.test(key) && !nativeFailure(item);
+  }
+  function startupFeedbackMessages(text) {
+    text=String(text);const limit=10500;
+    if(text.length<=limit)return [{text}];
+    const chunks=[];let offset=0;
+    while(offset<text.length) {
+      let end=Math.min(offset+limit,text.length);
+      if(end<text.length){const line=text.lastIndexOf('\n',end);if(line>offset+limit/2)end=line+1;}
+      if(end<text.length && /[\uD800-\uDBFF]/.test(text[end-1]))end--;
+      chunks.push(text.slice(offset,end));offset=end;
+    }
+    return chunks.map((chunk,index)=>{
+      const final=index===chunks.length-1,ack=`PlazCode startup part ${index+1}/${chunks.length} received.`;
+      return {text:`⟦RS-SYS⟧ PlazCode startup context part ${index+1}/${chunks.length}. This is a split command reference and user-preference message, not a project task. Preserve every part in order. No project actions or command calls while receiving it.\n\nBEGIN CONTEXT PART\n${chunk}\nEND CONTEXT PART\n\n`+(final?'All startup context parts have now arrived. The list_commands handshake already succeeded. Acknowledge with exactly "PlazCode is ready." and wait for my first actual task.':`More context follows. Reply with exactly "${ack}" and nothing else; do not repeat list_commands or announce readiness yet.`),...(final?{}:{ack})};
+    });
+  }
   async function typeAndSend(text, images) {
     if(sendInFlight)throw Error('A ClickUp send is already pending; it was not duplicated.');
-    sendInFlight=true;committed=false;failure='';
+    sendInFlight=true;committed=false;failure='';setupStyles();document.documentElement.classList.add('rs-clickup-injecting');
     const key=conversationKey(),beforeIds=new Set(allItems().filter(isUserItem).map(itemKey));
+    let rejected='';
     try {
       if(isHardGenerating())throw Error('ClickUp is still generating. No new message was submitted.');
       if(typeof window.__rsLimitOutgoing==='function')text=window.__rsLimitOutgoing(text);
       text=String(text??'');
+      if(text.length>18000)throw Error('PlazCode did not submit this ClickUp message: it exceeds the conservative 18,000-character transport bound. Use smaller/paged tool results; startup context is split automatically.');
       await writeDraft(text);
       if(images?.length)await attachImages(images);
       await waitFor(()=>conversationKey()!==key||actionable(sendButton()),15000);
@@ -231,12 +310,17 @@ const RSProvider = (() => {
       const button=sendButton();
       if(!actionable(button)||norm(editorText())!==norm(text))throw Error('ClickUp Send is unavailable or the draft changed. Close any dialog and inspect the draft. Nothing was submitted.');
       committed=true;button.click(); // Exactly ONE commit, never Enter or a guessed form submit.
-      const confirmed=await waitFor(()=>allItems().some(item=>isUserItem(item)&&!beforeIds.has(itemKey(item))&&norm(itemText(item))===norm(text)),20000);
+      const confirmed=await waitFor(()=>{
+        const newUsers=allItems().filter(item=>isUserItem(item)&&!beforeIds.has(itemKey(item)));
+        rejected=newUsers.map(nativeFailure).find(Boolean)||'';
+        return !!rejected || newUsers.some(item=>serverReceipt(item)&&renderedReceipt(itemText(item))===renderedReceipt(text));
+      },20000);
+      if(rejected){committed=false;throw Error('ClickUp rejected the message: '+rejected+' No automatic resend was attempted.');}
       if(!confirmed)throw Error('ClickUp send was not confirmed. It may have reached the chat; PlazCode will not resend it automatically. Inspect the conversation before retrying.');
       committed=false;
       diag('clickup.send.confirmed',{mode:mode(),characters:text.length});return true;
     } catch(error) {failure=String(error.message||error);throw error;}
-    finally {sendInFlight=false;if(locked)applyLock(getEditor(),true);}
+    finally {sendInFlight=false;document.documentElement.classList.remove('rs-clickup-injecting');if(locked)applyLock(getEditor(),true);}
   }
   function stopGeneration() {const button=stopButton();if(actionable(button))button.click();}
   function scanError() {
@@ -275,14 +359,15 @@ const RSProvider = (() => {
   }
   return {
     id:'clickup',displayName:'ClickUp Brain',supportsVision:true,timings,
-    compactStartup:true,startupReplyAsCode:true,settleStartupReply:true,
+    compactStartup:true,startupReplyAsCode:true,settleStartupReply:true,requireConfirmedStartup:true,startupFeedbackMessages,
     barOutside:true,barTrackIntervalMs:150,chipAtItemLevel:true,reliableCounts:true,
     authoritativeSendResult:true,thinkingSel:S.thinking,
     promptExtra:'You are running in ClickUp Ask Brain or an AI-agent chat. The user installed PlazCode to operate their local Roblox Studio, Blender and AgentScript files. Use the PlazCode JSON command protocol in your normal chat reply, not ClickUp native task/Doc/agent-creation tools. First request list_commands, acknowledge PlazCode is ready after receiving the reference, then wait for the user. A native ClickUp capability cannot replace a PlazCode command or prove a local edit occurred. Do not create or modify ClickUp tasks, Docs or agents merely to carry out a local Studio/Blender/file request.',
-    init({diag:d}={}){if(d)diag=d;},
+    init({diag:d}={}){if(d)diag=d;setupStyles();setInterval(syncBarCutout,150);},
     allItems,isUserItem,isAssistantItem,itemText,classifyText,itemKey,
     assistantCount,userCount,lastAssistant,lastAssistantId,readAssistant,streamLen,snapshot,
     getEditor,editorText,chatIsEmpty,isFreshChat,composerFrame,barAnchor,conversationKey,
+    canRestoreSession:()=>!rawItems().some(item=>isUserItem(item)&&nativeFailure(item)&&itemText(item).includes('⟦RS-SYS⟧')),
     setInputLock,writeDraft,typeAndSend,stopGeneration,isGenerating,isBusyNow,isHardGenerating,
     enforceComposer,ensureComposerReady,modeWarning,installSendHooks,findToolBlockSpot,
     followupPlaceholderTargets(){const editor=getEditor();return editor?[editor]:[];},
