@@ -1,0 +1,32 @@
+{
+  "version": "1.24.16",
+  "title": "Reliable ClickUp startup receipts",
+  "summary": "Private test build for ClickUp startup stopping after accepted context parts and model-specific connection refusals.",
+  "added": [],
+  "improved": [
+    "Use compact default ClickUp startup instructions and bounded saved-note previews; keep full notes available through the memory reader and preserve custom instructions exactly.",
+    "Observe a startup acknowledgement through the existing response timeout when its receipt is delayed."
+  ],
+  "fixed": [
+    "Confirm each startup context part from a persisted new user row and its exact new assistant acknowledgement when rich-text rendering changes the user row.",
+    "Recognize explicit ClickUp model refusals before sending a protocol correction; leave startup stopped and the composer unlocked.",
+    "Cancel receipt observation on Stop or a known conversation change without sending again."
+  ],
+  "notes": [
+    "Private test build; platform/browser validation and user approval remain required before public release.",
+    "DOM fixtures reproduce the reported patterns. No signed-in affected account or custom-agent test is claimed."
+  ],
+  "github": {
+    "summary": "ClickUp startup receipt and model-refusal fixes.",
+    "sections": [
+      {
+        "title": "🛠️ Fixes",
+        "items": [
+          "Accepted startup parts continue after rendered text changes or delayed acknowledgements.",
+          "Compact defaults reduce startup context while preserving custom instructions.",
+          "Explicit model refusals stop without repeated handshake requests."
+        ]
+      }
+    ]
+  }
+}
