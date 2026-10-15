@@ -402,40 +402,11 @@
   const WORKINK_URL = "https://work.ink/2JXi/robloxscript-free-roblox-ai-coding-tool";
   // Roblox "tip" Game Passes - the native currency for the audience.
   const ROBUX_PASSES = [
-    { id: 1941228530 },
-    { id: 1941336506 },
-    { id: 1940736510 },
-    { id: 1941672495 },
+    { id: 2025206972, amount: 50, url: "https://www.roblox.com/game-pass/2025206972/plazcode-small-donation" },
+    { id: 2026664687, amount: 100, url: "https://www.roblox.com/game-pass/2026664687/plazcode-medium-donation" },
+    { id: 2025386949, amount: 500, url: "https://www.roblox.com/game-pass/2025386949/Plazcode-Large-Donation" },
+    { id: 2026352931, amount: 1000, url: "https://www.roblox.com/game-pass/2026352931/Plazcode-Massive-Donation-much-love" },
   ];
-  const passUrl = (id) => `https://www.roblox.com/game-pass/${id}`;
-  function parseRobuxPrice(text) {
-    const m = String(text || "").match(/"PriceInRobux"\s*:\s*(\d+)/i);
-    return m ? Number(m[1]) : 0;
-  }
-  async function lookupRobuxPrice(id) {
-    const urls = [
-      "https://economy.roblox.com/v1/game-passes/" + id + "/game-pass-product-info",
-      "https://economy.roblox.com/v2/assets/" + id + "/details",
-    ];
-    for (let i = 0; i < urls.length; i++) {
-      try {
-        const r = await bg({ type: "web_fetch", url: urls[i], max_chars: 2500 });
-        const price = parseRobuxPrice(r && (r.text || r.body));
-        if (price > 0) return price;
-      } catch (e) {}
-    }
-    return 0;
-  }
-  async function fillRobuxPrices(root) {
-    if (!root) return;
-    const btns = root.querySelectorAll(".rs-tip-rbx[data-pass]");
-    await Promise.all(Array.from(btns).map(async (btn) => {
-      const id = btn.getAttribute("data-pass");
-      const amt = btn.querySelector(".rs-rbx-amt");
-      const price = await lookupRobuxPrice(id);
-      if (amt) amt.textContent = price > 0 ? String(price) : "";
-    }));
-  }
   // AI chat sites PlazCode works on. Keep in sync with manifest.json
   // content_scripts and background.js PROVIDER_URLS when adding a provider.
   const DISCORD_URL = "https://discord.gg/FmKY5bXZn";
@@ -6521,7 +6492,8 @@ return result`;
       }
       let passes = "";
       for (const p of ROBUX_PASSES) {
-        passes += `<button class="rs-tip-opt rs-tip-rbx" data-u="${passUrl(p.id)}" data-pass="${p.id}"><span class="rs-rbx-cur">R$</span><span class="rs-rbx-amt"></span></button>`;
+        const label = `${p.amount.toLocaleString("en-US")} Robux`;
+        passes += `<button class="rs-tip-opt rs-tip-rbx" data-u="${p.url}" data-pass="${p.id}" aria-label="Donate ${label}"><span class="rs-rbx-cur" aria-hidden="true">R$</span><span class="rs-rbx-amt">${label}</span></button>`;
       }
       const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
       const mergedServers = mergedMcpServers();
@@ -6696,7 +6668,6 @@ return result`;
       };
       menuEl.querySelectorAll("button.rs-site-opt, .rs-tip-opt:not([data-mode])").forEach((b) =>
         b.addEventListener("click", () => open(b.dataset.u)));
-      try { fillRobuxPrices(menuEl); } catch (e) {}
       // In-app tutorial (no external link): opens the centered modal.
       const tutBtn = menuEl.querySelector("#rs-menu-tutorial");
       if (tutBtn) tutBtn.addEventListener("click", () => { menuEl.hidden = true; openTutorial(); });
