@@ -81,9 +81,10 @@ const RSProvider = (() => {
       html:not([data-rs-bar-collapsed]) #rs-bar.rs-prov-clickup{display:grid!important;grid-template-columns:minmax(0,1fr) auto;gap:5px 8px!important;padding:8px 10px!important;min-width:0!important}
       #rs-bar.rs-prov-clickup[style*="display: none"]{display:none!important}
       #rs-bar.rs-prov-clickup .rs-cluster-left{grid-row:1;grid-column:1;min-width:0}
-      #rs-bar.rs-prov-clickup #rs-ctx{grid-row:1;grid-column:2;justify-self:end}
+      #rs-bar.rs-prov-clickup #rs-ctx{grid-row:1;grid-column:2;justify-self:end;margin-right:34px}
       #rs-bar.rs-prov-clickup #rs-state{grid-row:2;grid-column:1 / -1;min-width:0;margin:0!important;width:auto!important}
-      #rs-bar.rs-prov-clickup .rs-cluster-right{grid-row:3;grid-column:1 / -1;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:4px;margin-left:var(--rs-clickup-tab-space,0px)!important;min-width:0}
+      #rs-bar.rs-prov-clickup .rs-cluster-right{grid-row:3;grid-column:1 / -1;display:flex;position:static!important;justify-content:flex-end;flex-wrap:wrap;gap:4px;margin-left:var(--rs-clickup-tab-space,0px)!important;min-width:0}
+      html:not([data-rs-bar-collapsed]) #rs-bar.rs-prov-clickup #rs-hide{position:absolute;top:8px;right:10px;margin:0!important}
       #rs-bar.rs-prov-clickup :is(#rs-status-pill,#rs-perf){display:none!important}
     `;
     document.documentElement.append(style);

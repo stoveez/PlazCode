@@ -36,6 +36,11 @@ async function checks(browser,name){
    const p=provider,check=(v,m)=>{if(!v)throw Error(m);};
    check((await p.ensureComposerReady()).ready,'composer ready');check(p.getEditor().closest('cu-refinement-prompt').id===(agent?'thread-prompt':'main-prompt'),'active thread composer');
    check(p.chatIsEmpty(),'new chat');const initial=p.conversationKey();
+   const source='Output of list_commands:\n'+('Unicode 🧪 `code` **exact**\n'.repeat(2100))+'user preference end';
+   const stages=p.startupFeedbackMessages(source);check(stages.length>1&&stages.every(x=>x.text.length<12000),'bounded context stages');
+   check(stages.map(x=>x.text.split('BEGIN CONTEXT PART\n')[1].split('\nEND CONTEXT PART')[0]).join('')===source,'lossless context staging');
+   check(stages.slice(0,-1).every(x=>x.text.includes(x.ack))&&!stages.at(-1).ack,'ordered acknowledgements');
+
    p.setInputLock(true);const text='Unicode 🧪 line\nC:\\project\\a.lua\n{"command":"read_file","params":{"path":"a.txt"}}';
    await p.writeDraft(text);check(p.editorText()===text,'exact multiline text');check(p.getEditor().getAttribute('contenteditable')==='false','lock restored');
    check(!(await p.writeDraft('bad','different user draft')).ok,'changed draft protected');check(p.editorText()===text,'draft preserved');
@@ -63,6 +68,13 @@ async function checks(browser,name){
   const {page,errors}=await pageFor(browser,agent,true);
   const bar=await page.evaluate(()=>{const r=document.querySelector('#rs-bar').getBoundingClientRect(),a=provider.barAnchor().getBoundingClientRect();return {bottom:r.bottom,left:r.left,width:r.width,top:a.top,anchorLeft:a.left,anchorWidth:a.width};});
   assert(bar.width>100&&bar.bottom<=bar.top,JSON.stringify(bar));if(!agent){const tabHit=await page.evaluate(()=>[...document.querySelectorAll('[role=tab]')].every(t=>{const r=t.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return t===hit||t.contains(hit);}));assert(tabHit,'Ask/Agents must stay in front and clickable through the bar cutout');}assert(Math.abs(bar.left-bar.anchorLeft)<=1);assert(Math.abs(bar.width-bar.anchorWidth)<=1);
+  const donations=await page.evaluate(()=>[...document.querySelectorAll('#rs-menu .rs-tip-rbx')].map(b=>({url:b.dataset.u,label:b.querySelector('.rs-rbx-amt').textContent})));
+  assert.deepEqual(donations,[
+   {url:'https://www.roblox.com/game-pass/2025206972/plazcode-small-donation',label:'50 Robux'},
+   {url:'https://www.roblox.com/game-pass/2026664687/plazcode-medium-donation',label:'100 Robux'},
+   {url:'https://www.roblox.com/game-pass/2025386949/Plazcode-Large-Donation',label:'500 Robux'},
+   {url:'https://www.roblox.com/game-pass/2026352931/Plazcode-Massive-Donation-much-love',label:'1,000 Robux'}]);
+  const overlaps=await page.evaluate(()=>{const controls=[...document.querySelectorAll('#rs-bar button')].filter(b=>{const r=b.getBoundingClientRect();return r.width&&r.height&&getComputedStyle(b).visibility!=='hidden';});const conflicts=[];for(let i=0;i<controls.length;i++)for(let j=i+1;j<controls.length;j++){const a=controls[i].getBoundingClientRect(),b=controls[j].getBoundingClientRect();if(Math.min(a.right,b.right)-Math.max(a.left,b.left)>1&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>1)conflicts.push([controls[i].id,controls[j].id]);}return conflicts;});assert.deepEqual(overlaps,[],'toolbar buttons must not overlap');
   await page.evaluate(()=>fixture.startSession());
   let state=await page.evaluate(()=>({started:fixture.A.started,starting:fixture.A.starting,sent:sent.map(x=>x.text),draft:provider.editorText(),editable:provider.getEditor().getAttribute('contenteditable')}));
   assert(state.started,JSON.stringify(state));assert.equal(state.starting,false);assert(state.sent.length>2,'large startup context is staged, never a single oversized paste');assert(state.sent.every(x=>x.length<12000),'every startup stage stays below the conservative bound');assert(state.sent.slice(1,-1).every(x=>x.includes('More context follows.')));assert(state.sent[0].length<1600);assert(state.sent.join('\n').includes('ClickUp native task'));assert.equal(state.editable,'true');

@@ -34,6 +34,16 @@ fn toolkit_store_url(action:&str)->Option<String>{
     url.query_pairs_mut().append_pair("keyword",query);Some(url.to_string())
 }
 
+fn donation_url(action: &str) -> Option<&'static str> {
+    match action {
+        "open:donation-small" => Some("https://www.roblox.com/game-pass/2025206972/plazcode-small-donation"),
+        "open:donation-medium" => Some("https://www.roblox.com/game-pass/2026664687/plazcode-medium-donation"),
+        "open:donation-large" => Some("https://www.roblox.com/game-pass/2025386949/Plazcode-Large-Donation"),
+        "open:donation-massive" => Some("https://www.roblox.com/game-pass/2026352931/Plazcode-Massive-Donation-much-love"),
+        _ => None,
+    }
+}
+
 fn supported_ai_url(action: &str) -> Option<&'static str> {
     match action {
         "open:clickup" => Some("https://app.clickup.com/"),
@@ -316,7 +326,7 @@ pub fn run_gui(
                 "open:github" => Some(UiEvent::OpenExternal("https://github.com/stoveez/PlazCode".to_owned())),
                 "open:blender-guide" => Some(UiEvent::OpenExternal("https://github.com/ahujasid/blender-mcp#installation".to_owned())),
                 _ if body.starts_with("toolkit-store:") => toolkit_store_url(body).map(UiEvent::OpenExternal),
-                _ => supported_ai_url(body).map(|url|UiEvent::OpenExternal(url.to_owned())).or_else(|| body.strip_prefix("js-error:").map(|message| UiEvent::JsError(message.to_string()))),
+                _ => donation_url(body).or_else(|| supported_ai_url(body)).map(|url|UiEvent::OpenExternal(url.to_owned())).or_else(|| body.strip_prefix("js-error:").map(|message| UiEvent::JsError(message.to_string()))),
             };
             if let Some(event) = event {
                 let _ = ipc_proxy.send_event(event);
@@ -456,6 +466,20 @@ mod tests {
         assert!(url.starts_with("https://create.roblox.com/store/models?"));assert!(url.contains("tree+%26+castle"));
         assert!(toolkit_store_url("open:https://example.com").is_none());
     }
+    #[test] fn donation_links_are_fixed_and_match_desktop_anchors() {
+        let html=include_str!("desktop.html");
+        assert_eq!(donation_url("open:donation-small"),Some("https://www.roblox.com/game-pass/2025206972/plazcode-small-donation"));
+        assert!(html.contains("href=\"https://www.roblox.com/game-pass/2025206972/plazcode-small-donation\" data-ipc=\"open:donation-small\""));
+        assert_eq!(donation_url("open:donation-medium"),Some("https://www.roblox.com/game-pass/2026664687/plazcode-medium-donation"));
+        assert!(html.contains("href=\"https://www.roblox.com/game-pass/2026664687/plazcode-medium-donation\" data-ipc=\"open:donation-medium\""));
+        assert_eq!(donation_url("open:donation-large"),Some("https://www.roblox.com/game-pass/2025386949/Plazcode-Large-Donation"));
+        assert!(html.contains("href=\"https://www.roblox.com/game-pass/2025386949/Plazcode-Large-Donation\" data-ipc=\"open:donation-large\""));
+        assert_eq!(donation_url("open:donation-massive"),Some("https://www.roblox.com/game-pass/2026352931/Plazcode-Massive-Donation-much-love"));
+        assert!(html.contains("href=\"https://www.roblox.com/game-pass/2026352931/Plazcode-Massive-Donation-much-love\" data-ipc=\"open:donation-massive\""));
+        assert_eq!(donation_url("open:donation-unknown"),None);
+        assert_eq!(donation_url("open:https://example.com"),None);
+    }
+
     #[test] fn supported_ai_links_are_fixed_and_match_desktop_buttons() {
         let html=include_str!("desktop.html");
         let actions=["clickup","chatgpt","deepseek","claude","gemini","kimi","glm","qwen","arena","freebuff","crax","useai","oxalpha","notion","ollama"];

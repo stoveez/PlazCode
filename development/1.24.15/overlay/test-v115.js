@@ -76,7 +76,7 @@ ok("log-only panel", mainSrc.includes("Run Log") && !mainSrc.includes('data-tab=
 ok("no motion tab", !mainSrc.includes('data-tab="motion"') && !mainSrc.includes("MOTION_CLIPS") && !mainSrc.includes("motionBuildClip"));
 ok("UI Creator removed from interface", !mainSrc.includes('data-tab="uicreator"'));
 ok("forge gui toggle removed", !popupHtml.includes('id="tgl-forge"') && !mainSrc.includes('data-mode="forge"'));
-ok("robux pass ids live prices", ["1941228530","1941336506","1940736510","1941672495"].every((id) => mainSrc.includes(id)) && mainSrc.includes("fillRobuxPrices") && !mainSrc.includes("1865342947") && !mainSrc.includes("ko-fi.com") && !popupHtml.includes('id="kofi"'));
+ok("robux donation links have explicit amounts", ["2025206972","2026664687","2025386949","2026352931"].every((id) => mainSrc.includes(id)) && mainSrc.includes('aria-label="Donate ${label}"') && !mainSrc.includes("fillRobuxPrices") && !mainSrc.includes("1865342947") && !mainSrc.includes("ko-fi.com") && !popupHtml.includes('id="kofi"'));
 ok("setup card 1.17.19", cssSrc.includes("setup card 1.17.19") && mainSrc.includes('setupCard.id = "rs-setup"') && mainSrc.includes('id="rs-setup-tutorial"') && !mainSrc.includes("<b>AN</b> animation"));
 ok("chat gui atelier composer", fs.readFileSync(path.join(root, "ollama.html"), "utf8").includes("Ask Ollama") && fs.readFileSync(path.join(root, "ollama.html"), "utf8").includes("ui/hero.jpg"));
 ok("manifest exposes ui photos", JSON.stringify(manifest).includes("ui/*.jpg"));
