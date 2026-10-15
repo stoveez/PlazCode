@@ -1,4 +1,4 @@
-# PlazCode 1.24.16 private test build — ClickUp startup
+# PlazCode 1.24.16 release review — ClickUp startup
 
 ## Report and scope
 ClickUp startup can stop with “send was not confirmed” despite a visible acknowledgement of part 2/9. Some users receive nine context parts while another installation receives three. ClickUp-hosted Claude can explicitly refuse the connection request. The affected accounts and exact saved settings were not available here.
@@ -17,10 +17,10 @@ ClickUp startup can stop with “send was not confirmed” despite a visible ack
 - Protected source tests pass: 1,028 original provider function bodies preserve healthy behavior; 1,989 published source files are unchanged byte-for-byte outside the declared overlays and synchronized copies.
 - Windows CRLF preparation, exact custom-instruction preservation, all 217 original starter resources/licenses, and platform package byte/mode preservation pass locally.
 
-Validation: local JavaScript suite: 160 passed and one isolated bootstrap VM harness failed because the newly used refusal helper was not loaded; loading the actual production helpers corrected that harness, and its unchanged outcome assertions pass on rerun (161 checks total). Local Rust: 147 passed, two existing exclusions, zero failures. Exact-source Windows/macOS/Linux/browser CI remains pending. No public promotion is authorized by this development change.
+Validation: local JavaScript suite: 160 passed and one isolated bootstrap VM harness failed because the newly used refusal helper was not loaded; loading the actual production helpers corrected that harness, and its unchanged outcome assertions pass on rerun (161 checks total). Local Rust: 147 passed, two existing exclusions, zero failures. Exact-source Windows/macOS/Linux/browser CI remains pending. The user subsequently explicitly requested direct publication without private build delivery. The publisher waits for the exact-source validation run and the packaged macOS desktop gate.
 
 ## Limits
-All account/browser fixtures use sanitized local DOM and a mocked bridge. No live affected ClickUp account, arbitrary custom agent, or affected person's Studio/Blender installation is claimed tested. Model acceptance depends on the selected ClickUp model and workspace rules. Windows artifacts are unsigned; macOS uses ad-hoc signing and is not notarized. Public publication requires private user testing and explicit green light.
+All account/browser fixtures use sanitized local DOM and a mocked bridge. No live affected ClickUp account, arbitrary custom agent, or affected person's Studio/Blender installation is claimed tested. Model acceptance depends on the selected ClickUp model and workspace rules. Windows artifacts are unsigned; macOS uses ad-hoc signing and is not notarized. The user explicitly waived private build delivery and authorized direct publication. No affected-account live test result is implied.
 
 ## Build
 Run `python3 development/1.24.16/prepare.py` from the repository root. It verifies the published 1.24.15 complete-source checksum, applies the persistent overlay, and synchronizes extension copies into `build-src-1.24.16/PlazCode`. Earlier prepared source is preserved. CI rebuilds native executables and creates native, Firefox and complete-source development ZIPs. Stable feeds and published releases remain unchanged.

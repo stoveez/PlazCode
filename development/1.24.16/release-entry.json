@@ -1,7 +1,7 @@
 {
   "version": "1.24.16",
   "title": "Reliable ClickUp startup receipts",
-  "summary": "Private test build for ClickUp startup stopping after accepted context parts and model-specific connection refusals.",
+  "summary": "ClickUp startup continues after accepted context parts, uses compact defaults, and stops clearly when the selected AI model declines the connection.",
   "added": [],
   "improved": [
     "Use compact default ClickUp startup instructions and bounded saved-note previews; keep full notes available through the memory reader and preserve custom instructions exactly.",
@@ -13,8 +13,8 @@
     "Cancel receipt observation on Stop or a known conversation change without sending again."
   ],
   "notes": [
-    "Private test build; platform/browser validation and user approval remain required before public release.",
-    "DOM fixtures reproduce the reported patterns. No signed-in affected account or custom-agent test is claimed."
+    "Validated on Windows, macOS and Linux with Chromium/Firefox regressions and packaged macOS desktop checks before publishing.",
+    "Affected live ClickUp accounts were not reproduced. AI models can still decline the connection request. Windows is unsigned; macOS is not notarized."
   ],
   "github": {
     "summary": "ClickUp startup receipt and model-refusal fixes.",
@@ -25,6 +25,13 @@
           "Accepted startup parts continue after rendered text changes or delayed acknowledgements.",
           "Compact defaults reduce startup context while preserving custom instructions.",
           "Explicit model refusals stop without repeated handshake requests."
+        ]
+      },
+      {
+        "title": "🧪 Validation and limitations",
+        "items": [
+          "Windows, macOS, Linux and Chromium/Firefox checks; packaged Mac desktop lifetime checked before publication.",
+          "Affected live accounts were not reproduced. A ClickUp model can still decline. Windows unsigned; Mac not notarized."
         ]
       }
     ]
