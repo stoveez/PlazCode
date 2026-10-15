@@ -192,109 +192,9 @@
     const key = raw.replace(/-/g, "_").toLowerCase();
     return TOOL_ALIASES[key] || TOOL_ALIASES[raw] || n;
   }
-  // ── Condo lock (condo-topic ONLY — not a general NSFW filter) ─────────────
-  const CONDO_STORE = "rsCondoLock";
-  let condoState = { strikes: 0, until: 0, lastAt: 0 };
-  try {
-    chrome.storage.local.get(CONDO_STORE, (r) => {
-      const s = r && r[CONDO_STORE];
-      if (!s) return;
-      condoState.strikes = Number(s.strikes) || 0;
-      condoState.until = Number(s.until) || 0;
-      condoState.lastAt = Number(s.lastAt) || 0;
-      if (Date.now() < condoState.until) {
-        try { showCondoLockPanel(condoState.strikes, condoState.until); } catch {}
-      }
-    });
-  } catch {}
-  function isCondoTopic(text) {
-    const t = String(text || "").toLowerCase().replace(/[_-]+/g, " ");
-    if (!/\bcondos?\b/.test(t)) return false;
-    if (/\bcondo\s*games?\b/.test(t)) return true;
-    if (/\broblox\s+condos?\b/.test(t)) return true;
-    if (/\bcondos?\s+(place|map|hangout|server|lobby|house|rp|erp)\b/.test(t)) return true;
-    if (/\b(nsfw|erp|lewd|18\s*\+|adult|sex|porn|nude|naked|horny)\b/.test(t)) return true;
-    if (/\b(make|build|create|script|code)\b.{0,80}\bcondos?\b/.test(t) && /\b(game|place|map|hangout|roleplay)\b/.test(t)) return true;
-    return false;
-  }
-  function grabCondoHaystack() {
-    const chunks = [];
-    try {
-      const uiRoot = document.getElementById("rs-root");
-      for (const ed of document.querySelectorAll('[contenteditable="true"], textarea')) {
-        if (uiRoot && uiRoot.contains(ed)) continue;
-        const v = (ed.innerText || ed.value || "").trim();
-        if (v) chunks.push(v);
-      }
-    } catch {}
-    try {
-      const users = document.querySelectorAll('[data-message-role="user"], [data-role="user"], [data-author="user"], [data-author="human"]');
-      if (users.length) chunks.push((users[users.length - 1].innerText || "").trim());
-    } catch {}
-    try {
-      if (typeof P !== "undefined" && P.readAssistant) {
-        const d = P.readAssistant();
-        if (d && d.reply) chunks.push(String(d.reply));
-      }
-    } catch {}
-    return chunks.join("\n");
-  }
-  function condoLocked() { return Date.now() < (condoState.until || 0); }
-  function haltCondoSite() {
-    try {
-      const btns = [...document.querySelectorAll("button")].filter((b) => !b.closest("#rs-root"));
-      const stop = btns.find((b) => /stop|cancel generation|abort/i.test((b.getAttribute("aria-label") || b.title || "") + " " + (b.textContent || "")));
-      if (stop) stop.click();
-    } catch {}
-  }
-  function showCondoLockPanel(strikes, until) {
-    let el = document.getElementById("rs-condo-lock");
-    if (!el) {
-      el = document.createElement("div");
-      el.id = "rs-condo-lock";
-      (document.body || document.documentElement).appendChild(el);
-    }
-    el.style.cssText = "position:fixed;z-index:2147483646;right:12px;bottom:72px;width:280px;padding:12px 14px;background:#1a1014;color:#f3d5dc;border:1px solid #a33;border-radius:5px;font:12px/1.45 ui-sans-serif,system-ui,sans-serif;box-shadow:0 8px 24px #0008;";
-    el.textContent = "";
-    const h = document.createElement("div");
-    h.textContent = "CONDO LOCK";
-    h.style.cssText = "font-weight:700;letter-spacing:.08em;color:#ff6b81;margin-bottom:6px;";
-    const p = document.createElement("div");
-    el.appendChild(h);
-    el.appendChild(p);
-    const tick = () => {
-      const s = Math.ceil(((until || 0) - Date.now()) / 1000);
-      if (s <= 0) { try { el.remove(); } catch {} return; }
-      p.textContent = "You tried to create a condo game. That's blocked. The agent will not build it. Strike " + strikes + " — Start is frozen for " + s + "s.";
-      el._t = setTimeout(tick, 1000);
-    };
-    try { clearTimeout(el._t); } catch {}
-    tick();
-  }
-  function punishCondo(source) {
-    if (condoState._busy) return;
-    condoState._busy = true;
-    const now = Date.now();
-    if (now - (condoState.lastAt || 0) > 86400000) condoState.strikes = 0;
-    condoState.strikes = (condoState.strikes || 0) + 1;
-    condoState.lastAt = now;
-    const wait = condoState.strikes >= 3 ? 600000 : condoState.strikes === 2 ? 180000 : 45000;
-    condoState.until = now + wait;
-    try { chrome.storage.local.set({ [CONDO_STORE]: { strikes: condoState.strikes, until: condoState.until, lastAt: condoState.lastAt } }); } catch {}
-    try { A.stop = true; A.userStopped = true; A.resumeArmed = false; } catch {}
-    try { haltCondoSite(); } catch {}
-    try { ui.toast("CONDO LOCK — that topic is blocked"); } catch {}
-    try { ui.banner("warn", "CONDO LOCK", "Condo games are blocked. Strike " + condoState.strikes + ". Start is frozen."); } catch {}
-    try { showCondoLockPanel(condoState.strikes, condoState.until); } catch {}
-    try { diag("condo.lock", { source: String(source || ""), strikes: condoState.strikes }); } catch {}
-    setTimeout(() => { condoState._busy = false; }, 800);
-  }
-  function enforceCondo(source, extra) {
-    const text = [extra, grabCondoHaystack()].filter(Boolean).join("\n");
-    if (!isCondoTopic(text)) return false;
-    punishCondo(source);
-    return true;
-  }
+  // Migration only: retire saved lockouts from older builds on every provider.
+  try { const clear=chrome.storage.local.remove("rsCondoLock"); if(clear?.catch)clear.catch(()=>{}); } catch {}
+  try { const old=document.getElementById("rs-condo-lock"); if(old){clearTimeout(old._t);old.remove();} } catch {}
   const ASK_OPS = new Set([
     "execute_luau","multi_edit","write_file","edit_file","delete_path","move_path","create_folder",
     "run_command","process_kill","download_file","open_path",
@@ -2456,7 +2356,7 @@ return result`;
     const args = call.arguments == null ? {} : call.arguments;
     if (name === "plazcode_clarify") {
       try { PlazCodeClarification.validate(args); } catch (error) { return "ERROR: " + error.message; }
-      if (A.stop || condoLocked()) throw new SendAbortedError("Clarification was stopped.");
+      if (A.stop) throw new SendAbortedError("Clarification was stopped.");
       try { return "Output of 'plazcode_clarify':\n" + JSON.stringify(await clarification.request(args)); }
       catch (error) { if (error.name === 'AbortError') throw new SendAbortedError(error.message); throw error; }
     }
@@ -2525,15 +2425,6 @@ return result`;
     }
     if (!name) return RS.FEEDBACK.parseError("malformed");
     try { name = remapToolName(name); } catch {}
-    if (condoLocked() && name !== "plazcode_status") {
-      return "ERROR: CONDO LOCK is active. Commands are frozen until the lock expires. Do not retry condo-game requests.";
-    }
-    try {
-      const blob = name + " " + JSON.stringify(args).slice(0, 8000);
-      if (enforceCondo("tool:" + name, blob)) {
-        return "ERROR: CONDO LOCK. Condo-game requests are blocked. Do not retry.";
-      }
-    } catch {}
     // NEVER execute while the AI tab is backgrounded/minimized. This is the single
     // choke point for ALL execution (agentLoop's tool dispatch AND the bootstrap's
     // list_commands), so it closes the hole the loop-entry gate alone left open:
@@ -3655,7 +3546,7 @@ return result`;
   const cowork = PlazCodeCowork.create({
     context: () => JSON.stringify([P.conversationKey(), typeof window.__rsEngine === "function" ? window.__rsEngine() : "roblox"]),
     ready: () => A.started && !A.stop && !A.stopping && !A.starting && !A.enhancing && !A.injecting &&
-      !A.staleExtension && !condoLocked() && ui.coworkReady() &&
+      !A.staleExtension && ui.coworkReady() &&
       !(P.isHardGenerating ? P.isHardGenerating() : P.isBusyNow()) && !String(P.editorText() || "").trim(),
     send: text => submitAndGetBase(text, undefined, true),
     changed: () => { try { ui.renderCowork(); } catch {} },
@@ -3774,10 +3665,6 @@ return result`;
 
   async function agentLoop(base, recoveryAttempt = 0) {
     if (A.running || A.starting || A.stopping || A.enhancing || A.pendingToolSettles || (A.budgetResume && A.budgetResume.chat===P.conversationKey())) return;
-    if (condoLocked()) {
-      try { ui.toast("CONDO LOCK — commands frozen"); } catch {}
-      return;
-    }
     A.running = true;
     A.budgetResume=null;A.visualChecks=0;
     const taskBudget=PlazCodeReliability.createBudget({calls:reliabilitySettings.rsRunLimitsEnabled?reliabilitySettings.rsToolBudget:0,minutes:reliabilitySettings.rsRunLimitsEnabled?reliabilitySettings.rsTaskMinutes:0});
@@ -4641,12 +4528,6 @@ return result`;
       return;
     }
     if (A.running || A.starting || A.startupOwner || A.enhancing || A.injecting || A.stopping || A.pendingToolSettles) return;
-    if (condoLocked()) {
-      const s = Math.ceil((condoState.until - Date.now()) / 1000);
-      try { ui.toast("CONDO LOCK — Start is frozen for " + s + "s"); } catch {}
-      try { showCondoLockPanel(condoState.strikes, condoState.until); } catch {}
-      return;
-    }
     // "Start session" is normally allowed ONLY on a blank conversation.
     // A "Restart" (existing chat, user explicitly clicked ↻ Restart) bypasses
     // this and injects the system prompt mid-chat so the AI will work.
@@ -4655,6 +4536,7 @@ return result`;
       return;
     }
     A.userStopped = false;
+    A._confirmedStartup = false;
     A.stop = false;               // clear any halt left by a prior aborted bootstrap
     // Snapshot any turn already on screen at session start (normally none on a
     // clean new chat; on a reload-restored generation it's the stray turn). The
@@ -4848,11 +4730,18 @@ return result`;
       // Use equivalent plain-text markers for the Notion preferences only.
       if(P.id==="notion")readyPrompt=`Output of 'list_commands':\n${digest}\n\nThe list_commands handshake already ran. These user preferences apply to future requested project work:\n${notionPlainText(prompt)}\n\nThe command-list request succeeded. Please acknowledge this connection with "PlazCode is ready."`;
       diag("start.commandDigest", { chars: readyPrompt.length, lines: readyPrompt.split("\n").length, commands: scoped.length });
-      const readyBase = await submitAndGetBase(readyPrompt);
-      if (!alive()) return;
-      const readyRes = await waitForResponse(readyBase);
-      if (!alive()) return;
-      if (A.stop || readyRes.kind === "stopped") { diag("start.aborted", { kind: readyRes.kind }); return; }
+      const stages = P.startupFeedbackMessages ? P.startupFeedbackMessages(readyPrompt) : [{text:readyPrompt}];
+      let readyRes;
+      for (const stage of stages) {
+        const readyBase = await submitAndGetBase(stage.text);
+        if (!alive()) return;
+        readyRes = await waitForResponse(readyBase);
+        if (!alive()) return;
+        if (A.stop || readyRes.kind === "stopped") { diag("start.aborted", { kind: readyRes.kind }); return; }
+        if(stage.ack && (readyRes.kind!=="text" || String(readyRes.text||"").trim()!==stage.ack)) {
+          ui.banner("warn","Startup context was not acknowledged","PlazCode stayed stopped. No project command ran and no message was resent. Inspect this chat before restarting.");return;
+        }
+      }
       const readyText = String(readyRes.text || "").replace(/[`*#]/g, "").trim().replace(/^_+|_+$/g, "");
       const readyOk = readyRes.kind === "text" && (
         /^(?:PLAZCODE_READY|PlazCode is ready)[.!]?$/i.test(readyText) ||
@@ -4877,6 +4766,7 @@ return result`;
         try { P.renderReadyAcknowledgement(P.lastAssistant()); } catch (error) { log("Readiness display failed", error); }
       }
       A.started = true;
+      A._confirmedStartup = true;
       rememberSession(P.conversationKey()); // survives virtualization AND reloads
       ui.setStarted(true);
       const _eng = activeEngine() === "local" ? "AgentScript" : "Roblox";
@@ -4896,6 +4786,11 @@ return result`;
       // opened another chat), the newer flow / syncSessionState owns it now.
       if (A.startupOwner === myGen) A.startupOwner = null;
       if (alive()) {
+        if(P.requireConfirmedStartup && !A._confirmedStartup) {
+          A.started=false;
+          if(typeof startedSessions!=="undefined") {startedSessions.delete(P.conversationKey());try{chrome.storage.local.set({rsStartedSessions:[...startedSessions].slice(-300)});}catch{}}
+          try{ui.setStarted(false);}catch{}
+        }
         A.starting = false;
         A.startingKey = null;
         try { ui.setStarting(false); } catch {}
@@ -7520,10 +7415,6 @@ let cardsUiStyle = "modern";
       const status = cardsPanel && cardsPanel.querySelector("#rs-ui-status");
       const btn = cardsPanel && cardsPanel.querySelector("[data-ui-build]");
       const text = uiBuildPrompt(cardsUiStyle, (cardsUiPrompt || "").trim());
-      if (enforceCondo("ui-create", (cardsUiPrompt || "") + "\n" + text)) {
-        if (status) status.textContent = "CONDO LOCK — that topic is blocked.";
-        return;
-      }
       const imgs = cardsUiRefs.map((r) => ({ mimeType: r.mimeType || "image/jpeg", data: r.data }));
       if (typeof P === "undefined" || !P.typeAndSend) {
         if (status) status.textContent = "Chat composer not ready.";
@@ -7639,7 +7530,6 @@ function renderCards(panel) {
     // the composer, then sends). Shift+click = paste only, for stacking
     // several cards first.
     async function runLibraryCard(card, send = true) {
-      if (enforceCondo("card", [card && card.title, card && card.desc, card && card.prompt].filter(Boolean).join("\n"))) return;
       if (!send) { pasteLibraryCard(card); return; }
       try { cardsPanel.hidden = true; } catch {}
       hideCardEmbed();
@@ -9964,7 +9854,7 @@ return "PLACED"`;const placed=await runTool({tool:"execute_luau",arguments:{code
   const clarification = PlazCodeClarification.create({
     document, context: () => JSON.stringify([P.conversationKey(), activeEngine(), A.sessionGen]),
     provider: () => P.displayName, mount: () => document.documentElement,
-    cancelled: () => A.stop || A.staleExtension || condoLocked(),
+    cancelled: () => A.stop || A.staleExtension,
     onCancel: () => stopLoop(),
     changed: waiting => { A.waitingForClarification = waiting; try { ui.setStarted(); ui.renderCowork(); } catch {} },
   });
@@ -10346,6 +10236,7 @@ statusTimer = rsInterval(() => bg({ type: "status" }).then(onStatus), 5000);
   // The same saved chat can be reached through more than one URL shape (Notion:
   // /chat/<id> and /chat?t=<id>). Any known alias counts as this session.
   function sessionKnown(path) {
+    if(P.canRestoreSession && !P.canRestoreSession())return false;
     if (!path) return false;
     if (startedSessions.has(path)) return true;
     try { return (typeof P.conversationAliases === "function" ? P.conversationAliases() : []).some(alias => alias && startedSessions.has(alias)); } catch { return false; }
@@ -10375,6 +10266,7 @@ statusTimer = rsInterval(() => bg({ type: "status" }).then(onStatus), 5000);
   // system-note turn, or an PlazCode command an assistant wrote. Works even
   // after a full cold start and regardless of scroll position.
   function domHasRsSignal() {
+    if(P.requireConfirmedStartup)return false;
     for (const it of P.allItems()) {
       const txt = it.textContent || "";
       if (txt.includes(RS.SYS_MARKER)) return true;
@@ -10596,7 +10488,6 @@ statusTimer = rsInterval(() => bg({ type: "status" }).then(onStatus), 5000);
         setTimeout(dispatch,100); return;
       }
       A.nativeSendIntent=null;
-      if (enforceCondo("user-send")) return;
       const item=P.lastAssistant();
       if (intent.continue && item && isRememberedExecuted(item,P.itemText(item))) return;
       A.sendToken=intent.token;
