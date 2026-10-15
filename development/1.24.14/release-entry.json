@@ -1,0 +1,37 @@
+{
+  "version": "1.24.14",
+  "title": "Co-Work cleanup, Claude replies and Studio startup",
+  "summary": "Private test build for sent follow-up cards, completed Claude responses and native Studio auto-connect.",
+  "added": [],
+  "improved": [
+    "Discover the running Windows Studio MCP helper or a complete installed version when the batch launcher is missing.",
+    "Attempt Studio connection at app launch and retry when Studio opens later, even when process-name scans miss it."
+  ],
+  "fixed": [
+    "Confirmed Co-Work follow-ups disappear immediately; queued and unconfirmed requests remain visible.",
+    "Read one owning Claude assistant turn and all non-thinking answer blocks so nested empty nodes do not hide a completed reply."
+  ],
+  "notes": [
+    "Private test build. Await user testing and explicit approval before public publication.",
+    "Local regression fixtures do not establish live Edge/Claude or real Windows Studio behavior. Platform CI must pass before complete native test packages are considered validated."
+  ],
+  "github": {
+    "summary": "Private test build; no public release authorized.",
+    "sections": [
+      {
+        "title": "\ud83d\udee0\ufe0f Fixes",
+        "items": [
+          "Sent Co-Work cards clear immediately.",
+          "Completed Claude replies stay readable across nested response nodes.",
+          "More robust Studio MCP discovery and startup retry."
+        ]
+      },
+      {
+        "title": "\ud83e\uddea Testing",
+        "items": [
+          "Automated fixtures cover the reported failure patterns; live user testing remains required."
+        ]
+      }
+    ]
+  }
+}
