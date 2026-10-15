@@ -101,7 +101,7 @@ jobs:
         run: |
           node --experimental-strip-types learning-service/test-protocol.mjs
           python learning-service/test-sql.py
-          python development/1.24.5/test-starter-pack.py
+          python development/1.24.14/test-starter-pack.py
           python test-release-feed.py
           python test-release-notes.py
           python build-src-1.24.14/PlazCode/test-update-marker.py
