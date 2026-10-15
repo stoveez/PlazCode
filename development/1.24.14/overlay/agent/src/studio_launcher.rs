@@ -1,17 +1,17 @@
 use std::path::{Path, PathBuf};
 
-/// The active Studio installation is authoritative. Otherwise use Roblox's
-/// launcher or a complete installed version; never scan entire user drives.
+/// Preserve Roblox's official launcher when present. Otherwise discover the
+/// active or a complete installed version; never scan entire user drives.
 pub fn windows_launcher(running: &[PathBuf], local: Option<&Path>, roots: &[PathBuf]) -> Option<PathBuf> {
+    if let Some(local) = local {
+        let official = local.join("Roblox/mcp.bat");
+        if official.is_file() { return Some(official); }
+    }
     for studio in running {
         if let Some(parent) = studio.parent() {
             let helper = parent.join("StudioMCP.exe");
             if helper.is_file() { return Some(helper); }
         }
-    }
-    if let Some(local) = local {
-        let official = local.join("Roblox/mcp.bat");
-        if official.is_file() { return Some(official); }
     }
     let mut candidates = Vec::new();
     for root in roots {
@@ -53,7 +53,9 @@ mod tests {
         assert_eq!(windows_launcher(&[],Some(&local),&roots),Some(batch.clone()));
         let active=running.join("RobloxStudioBeta.exe");let helper=running.join("StudioMCP.exe");
         std::fs::write(&active,b"active").unwrap();std::fs::write(&helper,b"matching").unwrap();
-        assert_eq!(windows_launcher(&[active],Some(&local),&roots),Some(helper),"Use the running Studio's matching helper instead of a stale batch file");
+        assert_eq!(windows_launcher(&[active.clone()],Some(&local),&roots),Some(batch.clone()),"Preserve the official launcher when available");
+        std::fs::remove_file(batch).unwrap();
+        assert_eq!(windows_launcher(&[active],Some(&local),&roots),Some(helper),"When the batch launcher is missing, use the running Studio's matching helper");
         assert!(windows_launcher(&[],None,&[]).is_none());
         std::fs::remove_dir_all(root).unwrap();
     }

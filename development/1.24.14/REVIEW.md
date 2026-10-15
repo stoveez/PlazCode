@@ -10,7 +10,7 @@ Validation: local focused/browser/native checks passed. The first full JavaScrip
 ## Changes
 - Hide only confirmed sent Co-Work receipts from the chat and queue panel. Keep bounded internal receipts, ordering, exact text and delivery uncertainty safeguards.
 - Normalize Claude assistant candidates to owning turns and read all non-thinking answer blocks without duplicating nested markdown. Keep old layouts, raw tool source and empty-latest-turn isolation.
-- Discover the running Windows Studio's matching StudioMCP.exe, then the official batch launcher, then a complete version under bounded Roblox install roots. Support spaces and custom running installation paths without scanning entire drives.
+- Preserve the official Windows batch launcher; if missing, discover the running Studio's matching StudioMCP.exe, then a complete version under bounded Roblox install roots. Support spaces and custom running installation paths without scanning entire drives.
 - Attempt MCP connection at app launch and retry without requiring process-name detection. Keep current operation locks, selected-Studio safeguards, miss debounce and truthful verified status. This does not enable a disabled Studio MCP setting.
 
 ## Evidence
