@@ -1,6 +1,6 @@
-# PlazCode 1.24.14 private test build
+# PlazCode 1.24.14 release review
 
-Validation: all four exact-source CI jobs passed for 8c06d97da7e6c41129d89efc317f6189c0e6a651 (run 38666981941). Final local JavaScript suite: 155 passed, zero failures. Private user testing and the packaged macOS lifetime gate remain required before public release.
+Validation: all four exact-source CI jobs passed for 8c06d97da7e6c41129d89efc317f6189c0e6a651 (run 38666981941). Final local JavaScript suite: 155 passed, zero failures. The user explicitly authorized publication after receiving the private artifacts. The packaged macOS lifetime gate must pass before assets and feeds are published.
 
 ## Reported behavior and scope
 1. Confirmed Co-Work follow-ups should disappear immediately. Their cards and queue-panel history stayed mounted after delivery.
@@ -21,7 +21,7 @@ Validation: all four exact-source CI jobs passed for 8c06d97da7e6c41129d89efc317
 - Existing native authenticated-route tests, generated Luau mesh/Explorer transactions, overlay CRLF preparation, package byte/mode preservation and promotion permission tests pass.
 
 ## Limits and release gate
-The actual Edge/Claude account and affected Windows Studio installation have not been reproduced live. Fixtures are not proof of those live environments. Studio must be installed and its MCP server enabled; PlazCode must not claim connected before a successful probe. Windows artifacts are unsigned; macOS signing is only what the existing validation/package pipeline performs. Live user testing and explicit green light are required before any public release, feed promotion or publisher workflow. Current stable feeds and release assets are untouched.
+The actual Edge/Claude account and affected Windows Studio installation have not been reproduced live. Fixtures are not proof of those live environments. Studio must be installed and its MCP server enabled; PlazCode must not claim connected before a successful probe. Windows artifacts are unsigned; macOS signing is only what the existing validation/package pipeline performs. The user explicitly requested publication after receiving the private artifacts. No live affected-machine test result was supplied. The publisher requires the remaining packaged macOS lifetime gate, and uploads verified assets before advancing the feeds.
 
 Source: checksum-verified PlazCode-source-1.24.13.zip with development/1.24.14/overlay applied. Run python3 development/1.24.14/prepare.py; output is build-src-1.24.14/PlazCode. Existing build-src/PlazCode is preserved.
 
@@ -30,4 +30,4 @@ Source: checksum-verified PlazCode-source-1.24.13.zip with development/1.24.14/o
 - macOS: https://github.com/stoveez/PlazCode/actions/runs/38666981941/artifacts/11943343483
 - Installation/live-test steps: PRIVATE-TEST.md
 
-Both artifacts include matching native, Firefox and complete-source ZIPs. Windows package installation/update checks passed; this is not a claim of live Studio/provider verification. The public latest release remains v1.24.13.
+Both artifacts include matching native, Firefox and complete-source ZIPs. Windows package installation/update checks passed; this is not a claim of live Studio/provider verification. At authorization time, the public latest release was v1.24.13.

@@ -95,7 +95,7 @@ def main():
     validation=f'''PlazCode {VERSION} — exact-source platform and browser validation; packaged macOS desktop lifetime checks are verified by the evidence gates above.
 Changes: confirmed Co-Work cards clear immediately; Claude reads owning turns and all answer blocks; native Windows Studio launcher discovery handles missing batch files and startup retries no longer depend on process scans.
 The regression fixtures reproduce these failure patterns, including late Studio availability and reconnection without a browser. Studio mesh transactions use the official Luau VM with mocked Roblox services. Neither fixtures nor CI establish live Edge/Claude account behavior or the affected person's Windows Studio connection.
-Platform checks and scanner evidence belong to the validated source run. Windows binaries are unsigned; macOS uses ad-hoc signing, not notarization. User testing and explicit approval are separate prerequisites for public publication; no approval is inferred from this report.
+Platform checks and scanner evidence belong to the validated source run. Windows binaries are unsigned; macOS uses ad-hoc signing, not notarization. The user explicitly authorized publication after receiving the private test artifacts; live affected-machine verification was not reported.
 Microsoft Defender runner result before assembly:
 {defender}
 The scanned checksum and availability are recorded in release-validation-{VERSION}.

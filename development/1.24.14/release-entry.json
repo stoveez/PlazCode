@@ -1,7 +1,7 @@
 {
   "version": "1.24.14",
   "title": "Co-Work cleanup, Claude replies and Studio startup",
-  "summary": "Private test build for sent follow-up cards, completed Claude responses and native Studio auto-connect.",
+  "summary": "Sent Co-Work requests clear immediately, completed Claude replies are read reliably, and Studio connection starts automatically with stronger Windows launcher discovery.",
   "added": [],
   "improved": [
     "Discover the running Windows Studio MCP helper or a complete installed version when the batch launcher is missing.",
@@ -12,14 +12,14 @@
     "Read one owning Claude assistant turn and all non-thinking answer blocks so nested empty nodes do not hide a completed reply."
   ],
   "notes": [
-    "Private test build. Await user testing and explicit approval before public publication.",
-    "Local regression fixtures do not establish live Edge/Claude or real Windows Studio behavior. Platform CI must pass before complete native test packages are considered validated."
+    "Validated on Windows, macOS and Linux with Chromium/Firefox regressions and packaged macOS desktop lifetime checks.",
+    "Automated fixtures cover the reported failures; the affected live Edge account and Windows Studio installation were not reproduced. Windows is unsigned; macOS is ad-hoc signed, not notarized."
   ],
   "github": {
-    "summary": "Private test build; no public release authorized.",
+    "summary": "Fixes for sent Co-Work cards, completed Claude replies and automatic Studio connection.",
     "sections": [
       {
-        "title": "\ud83d\udee0\ufe0f Fixes",
+        "title": "🛠️ Fixes",
         "items": [
           "Sent Co-Work cards clear immediately.",
           "Completed Claude replies stay readable across nested response nodes.",
@@ -27,9 +27,10 @@
         ]
       },
       {
-        "title": "\ud83e\uddea Testing",
+        "title": "🧪 Validation and limitations",
         "items": [
-          "Automated fixtures cover the reported failure patterns; live user testing remains required."
+          "Windows, macOS, Linux and browser checks passed; packaged Mac desktop lifetime is checked before publishing.",
+          "Live affected Edge/Studio installations were not reproduced. Windows is unsigned; Mac is not notarized."
         ]
       }
     ]
