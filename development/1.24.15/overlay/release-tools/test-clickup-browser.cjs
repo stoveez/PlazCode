@@ -14,7 +14,7 @@ async function pageFor(browser,agent=false,core=false){
   for(const frame of document.querySelectorAll('cu-refinement-prompt')){
    frame.querySelector('form').onsubmit=e=>{e.preventDefault();unwanted++;};
    for(const button of frame.querySelectorAll('button'))if(button.dataset.test!=='refinement-prompt-submit-button')button.onclick=e=>{e.preventDefault();unwanted++;};
-   frame.querySelector('[data-test="refinement-prompt-submit-button"]').onclick=e=>{e.preventDefault();const editor=frame.querySelector('[contenteditable]');const copy=editor.cloneNode(true);copy.querySelectorAll('.attachment-chip').forEach(n=>n.remove());frame.append(copy);const text=copy.innerText.trim();copy.remove();sent.push({text,frame:frame.id,attachments:editor.querySelectorAll('.attachment-chip').length});editor.innerHTML='<p><br></p>';if(!echo)return;addItem('user',text,'user-'+sent.length);if(agent)history.replaceState({},'','/90141771095/chat/r/agent-room/t/thread-1');else history.replaceState({},'','/90141771095/ai/brain?conversationId=brain-1');if(autoReply)addItem('assistant',nextReply||(sent.length===1?'```json\n{"command":"list_commands"}\n```':'PlazCode is ready.'),'ai-'+sent.length);};
+   frame.querySelector('[data-test="refinement-prompt-submit-button"]').onclick=e=>{e.preventDefault();const editor=frame.querySelector('[contenteditable]');const copy=editor.cloneNode(true);copy.querySelectorAll('.attachment-chip').forEach(n=>n.remove());const text=Array.from(copy.childNodes).map(n=>n.innerText??n.textContent).join('\n').trim();sent.push({text,frame:frame.id,attachments:editor.querySelectorAll('.attachment-chip').length});editor.innerHTML='<p><br></p>';if(!echo)return;addItem('user',text,'user-'+sent.length);if(agent)history.replaceState({},'','/90141771095/chat/r/agent-room/t/thread-1');else history.replaceState({},'','/90141771095/ai/brain?conversationId=brain-1');if(autoReply)addItem('assistant',nextReply||(sent.length===1?'```json\n{"command":"list_commands"}\n```':'PlazCode is ready.'),'ai-'+sent.length);};
    frame.querySelector('input[type=file]').onchange=e=>{for(const file of e.target.files){const node=document.createElement('span');node.className='attachment-chip';node.dataset.test='link-preview-element__root';node.innerHTML='<a href="https://attachments.example.invalid/image">Attachment '+file.name+'</a>';frame.querySelector('[contenteditable]').append(node);}};
   }
   const tools=[['execute_luau','roblox','code'],['execute_blender_code','blender','code'],['read_file','local','path'],['write_file','local','path']].map(([name,server,field])=>({name,server,description:'Isolated fixture tool',inputSchema:{type:'object',properties:{[field]:{type:'string'}},required:[field]}}));
@@ -25,7 +25,7 @@ async function pageFor(browser,agent=false,core=false){
  if(core){
   await page.addStyleTag({path:'overlay.css'});
   for(const file of manifest.content_scripts.find(x=>x.js.includes('providers/clickup.js')).js){let code=fs.readFileSync(file,'utf8');if(file==='providers/clickup.js')code+=';window.provider=RSProvider;Object.assign(RSProvider.timings,{GEN_IDLE_MS:30,STABLE_MS:100,WARMUP_MS:100});';if(file==='core/main.js')code=code.replace('const TOKEN_CHARS = 4;','window.fixture={A,startSession,runTool,agentLoop,ui};const TOKEN_CHARS = 4;');await page.addScriptTag({content:code});}
-  await page.waitForSelector('#rs-bar');
+  await page.waitForSelector('#rs-bar');await page.waitForTimeout(450);
  }else{await page.addScriptTag({content:provider+';window.provider=RSProvider;'});await page.addScriptTag({path:'core/parser.js'});}
  return {page,errors};
 }
@@ -42,8 +42,8 @@ async function checks(browser,name){
    p.setInputLock(false);check(p.getEditor().getAttribute('contenteditable')==='true','unlock');
    const image={data:'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg==',mimeType:'image/png'};
    await p.attachImages([image,image]);check(p.editorText()===text,'attachment labels excluded');check(await p.clearAttachments(),'clear own pending attachments');check(!p.getEditor().querySelector('.attachment-chip'),'cleared embeds');
-   check(await p.typeAndSend(text,[image,image]),'confirmed send');check(sent.length===1&&sent[0].attachments===2,'single send with both images');check(!p.sendFailureAmbiguous(),'confirmed receipt is unambiguous');check(unwanted===0,'no skills/model/form submits');
-   check(p.userCount()===1&&p.assistantCount()===1,'owned roles');check(p.conversationKey()!==initial,'route key updates');
+   try{check(await p.typeAndSend(text,[image,image]),'confirmed send');}catch(e){throw Error(e.message+' DEBUG '+JSON.stringify({sent,items:p.allItems().map(x=>[p.itemKey(x),p.itemText(x)]),text,thread:document.querySelector('#thread').outerHTML}));}check(sent.length===1&&sent[0].attachments===2,'single send with both images');check(!p.sendFailureAmbiguous(),'confirmed receipt is unambiguous');check(unwanted===0,'no skills/model/form submits');
+   check(p.userCount()===1&&p.assistantCount()===1,'owned roles');check(agent?p.conversationKey().endsWith(':thread-1'):p.conversationKey()!==initial,'route key updates/preserves active thread');
    const calls=RSParse.parseToolCalls(p.readAssistant().reply);check(calls.length===1&&calls[0].tool==='list_commands','JSON read and parse');
    const key=p.lastAssistantId(),old=p.lastAssistant(),copy=old.parentElement.cloneNode(true);old.parentElement.replaceWith(copy);check(p.lastAssistantId()===key,'stable key after remount');
    const other=addItem('assistant','IGNORE OLD MAIN TIMELINE','old',document.querySelector('#timeline'));check(p.assistantCount()===1,'timeline duplicate ignored');
