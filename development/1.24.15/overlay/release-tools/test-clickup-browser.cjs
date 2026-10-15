@@ -67,16 +67,19 @@ async function checks(browser,name){
   let state=await page.evaluate(()=>({started:fixture.A.started,starting:fixture.A.starting,sent:sent.map(x=>x.text),draft:provider.editorText(),editable:provider.getEditor().getAttribute('contenteditable')}));
   assert(state.started,JSON.stringify(state));assert.equal(state.starting,false);assert.equal(state.sent.length,2);assert(state.sent[0].length<1600);assert.match(state.sent[1],/ClickUp native task/);assert.equal(state.editable,'true');
   const dispatch=await page.evaluate(async()=>{
-   autoReply=false;const results=[];
-   for(const [tool,args] of [['execute_luau',{code:'print("fixture")'}],['execute_blender_code',{code:'print("fixture")'}],['read_file',{path:'fixture.txt'}]]){
-    addItem('assistant','```json\n'+JSON.stringify({command:tool,params:args})+'\n```','tool-'+tool);
-    const calls=RSParse.parseToolCalls(provider.readAssistant().reply);if(calls.length!==1)throw Error('command read');const result=await fixture.runTool(calls[0]);results.push(result);await provider.typeAndSend(result);
-   }
-   return {results,calls:nativeCalls.map(x=>({name:x.name,engine:x.engine})),frames:sent.map(x=>x.frame),unwanted};
-  });assert.equal(dispatch.calls.length,3,JSON.stringify(dispatch));assert.deepEqual(dispatch.calls.map(x=>x.name),['execute_luau','execute_blender_code','read_file']);assert(dispatch.results.every(x=>x.includes('FIXTURE RESULT')),JSON.stringify(dispatch));assert.equal(dispatch.unwanted,0);assert(dispatch.frames.every(x=>x===(agent?'thread-prompt':'main-prompt')));
+   const commands=[['execute_luau',{code:'print("fixture")'}],['execute_blender_code',{code:'print("fixture")'}],['read_file',{path:'fixture.txt'}]];
+   const responses=commands.map(([command,params])=>'```json\n'+JSON.stringify({command,params})+'\n```');
+   const base=provider.assistantCount();addItem('user','Run the isolated test command sequence','fixture-task');
+   addItem('assistant',responses.shift(),'fixture-first-tool');
+   // Subsequent simulated AI replies arrive only after the real core submits feedback.
+   autoReply=false;const button=provider.composerFrame().querySelector('[data-test="refinement-prompt-submit-button"]'),original=button.onclick;
+   button.onclick=event=>{original(event);addItem('assistant',responses.shift()||'Fixture sequence complete.','sequence-'+sent.length);};
+   const before=sent.length;await fixture.agentLoop(base);
+   return {results:sent.slice(before).map(x=>x.text),calls:nativeCalls.map(x=>({name:x.name,engine:x.engine,args:x.arguments})),frames:sent.map(x=>x.frame),unwanted,running:fixture.A.running,editable:provider.getEditor().getAttribute('contenteditable')};
+  });const requested=dispatch.calls.filter(x=>x.args?.code==='print("fixture")'||x.args?.path==='fixture.txt');assert.equal(requested.length,3,JSON.stringify(dispatch));assert.deepEqual(requested.map(x=>x.name),['execute_luau','execute_blender_code','read_file']);const probes=dispatch.calls.filter(x=>!requested.includes(x));assert(probes.every(x=>x.name==='execute_luau'&&x.args.code.includes('GetLogHistory')),'only unchanged read-only Debug log probes may accompany the three commands');assert.equal(dispatch.results.length,3);assert(dispatch.results.every(x=>x.includes('FIXTURE RESULT')),JSON.stringify(dispatch));assert.equal(dispatch.unwanted,0);assert.equal(dispatch.running,false);assert.equal(dispatch.editable,'true');assert(dispatch.frames.every(x=>x===(agent?'thread-prompt':'main-prompt')));
   await page.evaluate(()=>{const old=provider.getEditor(),copy=old.cloneNode(true);old.replaceWith(copy);document.querySelector('cu-refinement-prompt:last-of-type').style.bottom='160px';});await page.waitForTimeout(400);
   const moved=await page.evaluate(()=>({bar:document.querySelector('#rs-bar').getBoundingClientRect().bottom,anchor:provider.barAnchor().getBoundingClientRect().top}));assert(moved.bar<=moved.anchor,JSON.stringify(moved));
-  assert.deepEqual(errors,[]);console.log('PASS '+name+' '+(agent?'agent':'Brain')+' FULL CORE startup, real parser/dispatch/feedback, mock Studio/Blender/files, bar tracks active composer');await page.close();
+  assert.deepEqual(errors,[]);console.log('PASS '+name+' '+(agent?'agent':'Brain')+' FULL CORE startup, automatic watcher/parser/dispatch/feedback loop, mock Studio/Blender/files, bar tracks active composer');await page.close();
  }
  // Post-click uncertain delivery: one click, no automatic resend, failure remains explicit.
  const {page}=await pageFor(browser);await page.evaluate(()=>{echo=false;window.realTimeout=setTimeout;window.setTimeout=(fn,ms,...args)=>realTimeout(fn,Math.min(ms,1),...args);window.realNow=Date.now;let tick=realNow();Date.now=()=>tick+=100;});
