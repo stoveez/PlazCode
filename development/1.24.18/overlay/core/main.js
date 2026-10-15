@@ -5824,7 +5824,7 @@ return result`;
           });
         }
       };
-      supportBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(true); });
+      supportBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(false); });
       // Engine toggle (Roblox ↔ AgentScript ↔ Animation)
       const engineEl = root.querySelector("#rs-engine");
       currentEngine = "roblox";
@@ -8868,7 +8868,7 @@ function renderCards(panel) {
         bar.style.display = "flex";
         if (menuEl && !menuEl.hidden) {
           const br = bar.getBoundingClientRect();
-          menuEl.style.right = Math.round(window.innerWidth - br.right) + "px";
+          menuEl.style.right = Math.round(Math.max(12, Math.min(window.innerWidth - (menuEl.offsetWidth || 340) - 12, window.innerWidth - br.right))) + "px";
           menuEl.style.bottom = Math.round(window.innerHeight - br.top + 6) + "px";
           menuEl.style.maxHeight = Math.max(140, Math.round(br.top - 16)) + "px";
         }
@@ -8939,7 +8939,7 @@ function renderCards(panel) {
         bar.style.borderRadius = "";
         if (menuEl && !menuEl.hidden) {
           bar.classList.remove("rs-bar-inline"); // ensure fixed geometry for menu math
-          menuEl.style.right = Math.round(window.innerWidth - (r.left + r.width)) + "px";
+          menuEl.style.right = Math.round(Math.max(12, Math.min(window.innerWidth - (menuEl.offsetWidth || 340) - 12, window.innerWidth - (r.left + r.width)))) + "px";
           menuEl.style.bottom = Math.round(window.innerHeight - r.top + 6) + "px";
           menuEl.style.maxHeight = Math.max(140, Math.round(r.top - 16)) + "px";
         }
@@ -8980,7 +8980,7 @@ function renderCards(panel) {
       // Keep the open "more" menu anchored to the bar, opening upward.
       if (menuEl && !menuEl.hidden) {
         const br = bar.getBoundingClientRect();
-        menuEl.style.right = Math.round(window.innerWidth - br.right) + "px";
+        menuEl.style.right = Math.round(Math.max(12, Math.min(window.innerWidth - (menuEl.offsetWidth || 340) - 12, window.innerWidth - br.right))) + "px";
         menuEl.style.bottom = Math.round(window.innerHeight - br.top + 6) + "px";
         menuEl.style.maxHeight = Math.max(140, Math.round(br.top - 16)) + "px";
       }
