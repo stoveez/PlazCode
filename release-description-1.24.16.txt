@@ -1,0 +1,23 @@
+## ✨ PlazCode 1.24.16
+
+ClickUp startup receipt and model-refusal fixes.
+
+### 🛠️ Fixes
+
+- Accepted startup parts continue after rendered text changes or delayed acknowledgements.
+- Compact defaults reduce startup context while preserving custom instructions.
+- Explicit model refusals stop without repeated handshake requests.
+
+### 🧪 Validation and limitations
+
+- Windows, macOS, Linux and Chromium/Firefox checks; packaged Mac desktop lifetime checked before publication.
+- Affected live accounts were not reproduced. A ClickUp model can still decline. Windows unsigned; Mac not notarized.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.16.zip** for Windows, **PlazCode-macOS-1.24.16.zip** for Mac, or **PlazCode-Firefox-1.24.16.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.

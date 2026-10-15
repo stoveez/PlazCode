@@ -17,7 +17,7 @@ ClickUp startup can stop with “send was not confirmed” despite a visible ack
 - Protected source tests pass: 1,028 original provider function bodies preserve healthy behavior; 1,989 published source files are unchanged byte-for-byte outside the declared overlays and synchronized copies.
 - Windows CRLF preparation, exact custom-instruction preservation, all 217 original starter resources/licenses, and platform package byte/mode preservation pass locally.
 
-Validation: local JavaScript suite: 160 passed and one isolated bootstrap VM harness failed because the newly used refusal helper was not loaded; loading the actual production helpers corrected that harness, and its unchanged outcome assertions pass on rerun (161 checks total). Local Rust: 147 passed, two existing exclusions, zero failures. Exact-source Windows/macOS/Linux/browser CI remains pending. The user subsequently explicitly requested direct publication without private build delivery. The publisher waits for the exact-source validation run and the packaged macOS desktop gate.
+Validation: all exact-source platform CI jobs and the packaged macOS desktop check passed. See release-validation-1.24.16.
 
 ## Limits
 All account/browser fixtures use sanitized local DOM and a mocked bridge. No live affected ClickUp account, arbitrary custom agent, or affected person's Studio/Blender installation is claimed tested. Model acceptance depends on the selected ClickUp model and workspace rules. Windows artifacts are unsigned; macOS uses ad-hoc signing and is not notarized. The user explicitly waived private build delivery and authorized direct publication. No affected-account live test result is implied.

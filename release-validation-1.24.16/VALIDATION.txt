@@ -1,0 +1,9 @@
+PlazCode 1.24.16 — exact-source platform and browser validation; packaged macOS desktop lifetime checks are verified by the evidence gates above.
+Changes: reliable ClickUp startup receipts for accepted and delayed context parts; compact default startup instructions and saved-note previews without truncating custom preferences; explicit model-refusal detection with no repeated handshake request; Stop and conversation-change guards during receipt observation.
+The user explicitly requested direct publication without a private build. Sanitized production-core browser fixtures reproduce the reported receipt and model-refusal failures, including full multipart startup and mock Studio/Blender/file tool loops. No affected live ClickUp account, arbitrary custom agent, or affected user's Studio/Blender installation was tested. Model acceptance varies and is not guaranteed.
+Platform checks and scanner evidence belong to the exact validated source run. Windows binaries are unsigned; macOS uses ad-hoc signing, not notarization. The release retains the validated native executable bytes; release notices, changelog and package metadata are promoted.
+Microsoft Defender runner result before assembly:
+Scan starting...
+Scan finished.
+Scanning D:\a\PlazCode\PlazCode\build-src-1.24.16\PlazCode/defender-scan found no threats.
+The scanned checksum and availability are recorded in release-validation-1.24.16.

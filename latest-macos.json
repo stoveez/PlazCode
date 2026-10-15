@@ -1,9 +1,48 @@
 {
-  "version": "1.24.15",
-  "desktop_version": "1.24.15",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.15.zip",
-  "sha256": "bb74f137cc309bdb218a376c491cb2b46035b7814c5d70c729fb41d8c85be0b5",
+  "version": "1.24.16",
+  "desktop_version": "1.24.16",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.16.zip",
+  "sha256": "3db1a2bd4e78ee2307ec01568d78b72656d80540529b0dcabecc23be7da088bd",
   "release_notes": [
+    {
+      "version": "1.24.16",
+      "title": "Reliable ClickUp startup receipts",
+      "summary": "ClickUp startup continues after accepted context parts, uses compact defaults, and stops clearly when the selected AI model declines the connection.",
+      "added": [],
+      "improved": [
+        "Use compact default ClickUp startup instructions and bounded saved-note previews; keep full notes available through the memory reader and preserve custom instructions exactly.",
+        "Observe a startup acknowledgement through the existing response timeout when its receipt is delayed."
+      ],
+      "fixed": [
+        "Confirm each startup context part from a persisted new user row and its exact new assistant acknowledgement when rich-text rendering changes the user row.",
+        "Recognize explicit ClickUp model refusals before sending a protocol correction; leave startup stopped and the composer unlocked.",
+        "Cancel receipt observation on Stop or a known conversation change without sending again."
+      ],
+      "notes": [
+        "Validated on Windows, macOS and Linux with Chromium/Firefox regressions and packaged macOS desktop checks before publishing.",
+        "Affected live ClickUp accounts were not reproduced. AI models can still decline the connection request. Windows is unsigned; macOS is not notarized."
+      ],
+      "github": {
+        "summary": "ClickUp startup receipt and model-refusal fixes.",
+        "sections": [
+          {
+            "title": "🛠️ Fixes",
+            "items": [
+              "Accepted startup parts continue after rendered text changes or delayed acknowledgements.",
+              "Compact defaults reduce startup context while preserving custom instructions.",
+              "Explicit model refusals stop without repeated handshake requests."
+            ]
+          },
+          {
+            "title": "🧪 Validation and limitations",
+            "items": [
+              "Windows, macOS, Linux and Chromium/Firefox checks; packaged Mac desktop lifetime checked before publication.",
+              "Affected live accounts were not reproduced. A ClickUp model can still decline. Windows unsigned; Mac not notarized."
+            ]
+          }
+        ]
+      }
+    },
     {
       "version": "1.24.15",
       "title": "ClickUp, Ultra and recoverable Skills",
@@ -209,41 +248,6 @@
             "title": "🧪 Checks",
             "items": [
               "Automated regressions passed. Not yet tested live in Notion, Studio or Blender."
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "version": "1.24.11",
-      "title": "Notion startup send fix",
-      "summary": "Fixes Notion startup getting stuck with a half-written command list in the chat box, which then left every command as not run.",
-      "added": [],
-      "improved": [
-        "If Notion stops accepting a long startup message part-way, PlazCode switches to sending it as a file straight away instead of waiting again."
-      ],
-      "fixed": [
-        "Notion no longer leaves part of PlazCode's command list in the chat box with “Message was not confirmed” after Start Agent.",
-        "Commands no longer stay “not run” after that startup failure, because PlazCode clears its own leftover draft."
-      ],
-      "notes": [
-        "Text you typed yourself is still never cleared.",
-        "Automated platform/browser regressions passed. This fix was not tested on a live Notion account."
-      ],
-      "github": {
-        "sections": [
-          {
-            "title": "🛠️ Notion startup fixed",
-            "items": [
-              "**No half-written drafts:** if Notion stops accepting the long startup message, PlazCode clears its own leftover text and sends the full message as a file.",
-              "**Commands run again:** the leftover draft no longer blocks every later command.",
-              "**Less waiting:** after one stalled attempt, later long messages go straight to the file method."
-            ]
-          },
-          {
-            "title": "🧪 Checks",
-            "items": [
-              "Platform/browser regressions passed. Text you typed is never cleared. Not yet tested on a live Notion account."
             ]
           }
         ]

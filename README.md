@@ -1,3 +1,13 @@
+PlazCode 1.24.16 — Reliable ClickUp startup receipts
+
+ClickUp startup continues after accepted context parts, uses compact defaults, and stops clearly when the selected AI model declines the connection.
+
+- Use compact default ClickUp startup instructions and bounded saved-note previews; keep full notes available through the memory reader and preserve custom instructions exactly.
+- Observe a startup acknowledgement through the existing response timeout when its receipt is delayed.
+- Confirm each startup context part from a persisted new user row and its exact new assistant acknowledgement when rich-text rendering changes the user row.
+- Recognize explicit ClickUp model refusals before sending a protocol correction; leave startup stopped and the composer unlocked.
+- Cancel receipt observation on Stop or a known conversation change without sending again.
+
 PlazCode 1.24.15 — ClickUp, Ultra and recoverable Skills
 
 Use PlazCode in ClickUp Brain and existing AI-agent chats, activate the unified Ultra effort, recover deleted skills, and find clearly labelled donation links.
