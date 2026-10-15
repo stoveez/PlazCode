@@ -11,24 +11,24 @@ const PlazCodeTaskCenter = (() => {
     const el = (tag, text, cls) => { const node = document.createElement(tag); if (text) node.textContent = text; if (cls) node.className = cls; return node; };
     // Mixed status messages can contain raw external errors; never catalog-match them.
     const localize=()=>globalThis.PlazCodeI18n?.mountStatic?.(container);
-    const user=(tag,text)=>{const n=el(tag,text);n.setAttribute('data-i18n-user-content','');return n;};
+    const user=(tag,text)=>{const n=el(tag,text);n.setAttribute('data-i18n-user-content','');n.dir=tag==='pre'?'ltr':'auto';return n;};
     const status = el('div', '', 'pc-task-status'), list = el('div'), refresh = el('button', 'Refresh task history'); refresh.type = 'button';
     status.setAttribute('data-i18n-user-content','');
     const intro = el('p', 'AgentScript file backups persist across restarts. Studio restore uses verified undo records in the open Studio session. Later edits or unsupported operations block automatic restore.');
     const workflowBox = el('details'), workflowTitle = el('summary', 'Reusable workflows'); workflowBox.appendChild(workflowTitle);
     for (const [name, prompt] of workflows) { const button = el('button', name); button.type = 'button'; button.onclick = () => launch(prompt); workflowBox.appendChild(button); }
-    const custom = el('textarea'); custom.placeholder = 'Save your own workflow prompt…'; custom.maxLength = 8000; custom.setAttribute('aria-label', 'Custom workflow');
+    const custom = el('textarea');custom.dir='auto'; custom.placeholder = 'Save your own workflow prompt…'; custom.maxLength = 8000; custom.setAttribute('aria-label', 'Custom workflow');
     const saveWorkflow = el('button', 'Save workflow'), runWorkflow = el('button', 'Run saved workflow'); saveWorkflow.type = runWorkflow.type = 'button';
     try { custom.value = localStorage.getItem('plazcodeSavedWorkflow') || ''; } catch {}
     saveWorkflow.onclick = () => { try { localStorage.setItem('plazcodeSavedWorkflow', custom.value);status.textContent = 'Workflow saved on this device.'; } catch { status.textContent = 'Could not save this workflow.'; } };
     runWorkflow.onclick = () => launch(custom.value); workflowBox.append(custom, saveWorkflow, runWorkflow);
     const protectionBox=el('details'),protectionTitle=el('summary','Protected systems');
     const engine=el('select');for(const value of ['local','roblox']){const option=el('option',value==='local'?'AgentScript':'RobloxScript');option.value=value;engine.appendChild(option);}
-    const path=el('input');path.placeholder='Script, file or folder path';path.maxLength=500;path.setAttribute('aria-label','Protected path');
+    const path=el('input');path.dir='ltr';path.placeholder='Script, file or folder path';path.maxLength=500;path.setAttribute('aria-label','Protected path');
     const protect=el('button','Protect path');protect.type='button';const protectedList=el('div');
     protectionBox.append(protectionTitle,el('p','AgentScript pauses writes to listed paths. Studio protection pauses mutating commands until you approve that task, because arbitrary Luau can compute its targets.'),engine,path,protect,protectedList);
     protect.onclick=async()=>{try{const result=await request({action:'protect',engine:engine.value,path:path.value});if(!result?.ok)throw Error(result?.error);path.value='';await update();}catch(error){status.textContent=error.message||String(error);}};
-    const projectBox=el('details'),projectTitle=el('summary','Project memory scope');const project=el('input');project.placeholder='Project name (empty = global only)';project.maxLength=80;project.setAttribute('aria-label','Project memory scope');const projectSave=el('button','Save chat project');projectSave.type='button';projectBox.append(projectTitle,el('p','Give related chats the same project name. They share project facts plus global preferences; other projects stay separate. Existing memories remain global.'),project,projectSave);
+    const projectBox=el('details'),projectTitle=el('summary','Project memory scope');const project=el('input');project.dir='auto';project.placeholder='Project name (empty = global only)';project.maxLength=80;project.setAttribute('aria-label','Project memory scope');const projectSave=el('button','Save chat project');projectSave.type='button';projectBox.append(projectTitle,el('p','Give related chats the same project name. They share project facts plus global preferences; other projects stay separate. Existing memories remain global.'),project,projectSave);
     projectSave.onclick=async()=>{try{const result=await request({action:'project',project:project.value});if(!result?.ok)throw Error(result?.error);status.textContent='Project scope saved. New memories follow this scope.';}catch(error){status.textContent=error.message||String(error);}};
     container.append(intro, projectBox, workflowBox, protectionBox, refresh, status, list);
     container.classList.add('pc-task-center');

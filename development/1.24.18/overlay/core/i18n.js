@@ -24,7 +24,7 @@ const key=text=>String(text??'').replace(/\s+/g,' ').trim();
 const data=()=>global.PlazCodeLocaleData||{en:{}};
 const has=source=>Object.prototype.hasOwnProperty.call(data().en||{},key(source));
 let language='en';const bindings=new Set(),nodeBindings=new WeakMap(),mounts=new WeakMap(),owners=new Set(),pickers=new Set(),listeners=new Set();
-const EXCLUDE='script,style,textarea,input,pre,code,kbd,samp,[contenteditable],[data-i18n-user-content],[data-pc-language-options],.rs-mcp-info,.rs-task-title,.rs-task-label,.rs-tool-raw,.rs-tool-output,.rs-template-name,.rs-memory-content,.rs-lib-card,.rs-cowork-item,.rs-task-row,[data-prompt-index]';
+const EXCLUDE='.brand-word,.pc-ultra-label,script,style,textarea,input,pre,code,kbd,samp,[contenteditable],[data-i18n-user-content],[data-pc-language-options],.rs-mcp-info,.rs-task-title,.rs-task-label,.rs-tool-raw,.rs-tool-output,.rs-template-name,.rs-memory-content,.rs-lib-card,.rs-cowork-item,.rs-task-row,[data-prompt-index]';
 const SAFE_NEW='button,label,option,summary,[data-pc-i18n],[data-plazcode-version],#rs-action,#rs-status,#rs-state,#titleEffort,#sidebarEffort';
 const excluded=node=>{const e=node.nodeType===1?node:node.parentElement;return !e||!!e.closest(EXCLUDE);};
 function t(source,values){
@@ -33,14 +33,14 @@ function t(source,values){
  return result;
 }
 function addBinding(node,attr){
- if(excluded(node))return;
+ if(excluded(node)&&!(attr&&['placeholder','aria-label'].includes(attr)&&node.matches?.('input,textarea')&&!node.parentElement?.closest('[data-i18n-user-content]')))return;
  const raw=attr?node.getAttribute(attr):node.nodeValue;if(!raw||!has(raw))return;
  let list=nodeBindings.get(node);if(!list){list=new Map();nodeBindings.set(node,list);}const id=attr||'text';
  if(list.has(id)){applyBinding(list.get(id));return;}
  const b={node,attr,source:key(raw),raw,last:raw};list.set(id,b);bindings.add(b);applyBinding(b);
 }
 function applyBinding(b){
- const node=b.node;if(!node.isConnected||excluded(node))return;
+ const node=b.node;if(!node.isConnected||(excluded(node)&&!(b.attr&&['placeholder','aria-label'].includes(b.attr)&&node.matches?.('input,textarea')&&!node.parentElement?.closest('[data-i18n-user-content]'))))return;
  const current=b.attr?node.getAttribute(b.attr):node.nodeValue;
  if(current!==b.last){if(!has(current))return;b.source=key(current);b.raw=current;}
  const translated=t(b.source),leading=b.raw.match(/^\s*/)?.[0]||'',trailing=b.raw.match(/\s*$/)?.[0]||'';
@@ -53,7 +53,7 @@ function scan(root){
  const doc=root.ownerDocument||global.document;
  if(!doc)return;
  for(const e of [root,...root.querySelectorAll('*')]){
-  if(excluded(e))continue;
+  if(excluded(e)){if(e.matches?.('input,textarea'))for(const attr of ['placeholder','aria-label'])if(e.hasAttribute(attr))addBinding(e,attr);continue;}
   for(const attr of ['title','aria-label','placeholder'])if(e.hasAttribute?.(attr))addBinding(e,attr);
   for(const n of e.childNodes||[])if(n.nodeType===3)addBinding(n);
  }
@@ -118,7 +118,7 @@ function mountPicker(host,options={}){
   const q=fold(search.value);const filtered=languages.filter(x=>fold(x.name+' '+x.nativeName+' '+x.code).includes(q));
   select.replaceChildren();
   // Filtering must never select/save a different language by itself.
-  for(const lang of languages.filter(x=>x.code===value||filtered.includes(x))){const o=doc.createElement('option');o.value=lang.code;o.textContent=lang.nativeName+' — '+lang.name;o.lang=lang.code;o.dir=lang.dir;select.append(o);}
+  for(const lang of languages.filter(x=>x.code===value||filtered.includes(x))){const o=doc.createElement('option');o.value=lang.code;o.textContent=lang.nativeName===lang.name?lang.name:lang.nativeName+' — '+lang.name;o.lang=lang.code;o.dir=lang.dir;select.append(o);}
   select.value=value;select.disabled=saving||!filtered.length;
   searchLabel.textContent=t('Search languages');search.placeholder=t('Search by name or language code');label.textContent=t('Interface language');help.textContent=t('Changes PlazCode’s interface in the desktop app and extension.');
   status.textContent=saving?t('Saving language…'):saveError?t('Language could not be saved. Try again.'):!filtered.length?t('No languages found.'):'';

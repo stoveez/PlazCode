@@ -59,7 +59,7 @@ let html=htmlSource;
 html=html.replace('__PLAZCODE_I18N_CATALOG__',actual?read('core/i18n-catalog.js'):'');
 html=html.replace('__PLAZCODE_I18N__',actual?read('core/i18n.js'):`(${contractRuntime.toString()})();`);
 for(const [token,file] of Object.entries({SKILLS:'skills-ui.js',EXPLORER:'explorer-ui.js',MEDIA:'media.js',MEMORY:'memory.js',TASK:'task-center.js',TEMPLATE:'templates.js',TOOLKIT:'toolkit-ui.js',VERSION:'version.js'})) html=html.replace(`__PLAZCODE_${token}_UI__`,()=>read(`core/${file}`));
-html=html.replace(/__PLAZCODE_VERSION__/g,'1.24.17').replace(/__PLAZCODE_PAIRING_KEY__/g,'fixture-only-key');
+html=html.replace(/__PLAZCODE_VERSION__/g,'1.24.18').replace(/__PLAZCODE_PAIRING_KEY__/g,'fixture-only-key');
 const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
 new vm.Script(script, {filename:'desktop-injected.js'});
 
@@ -84,7 +84,7 @@ new vm.Script(script, {filename:'desktop-injected.js'});
       preferences={...preferences,...body};fs.writeFileSync(prefsPath,JSON.stringify(preferences));return reply({ok:true,preferences});
     }
     if(req.url==='/api/desktop/state')return reply(state());
-    if(req.url==='/api/desktop/update')return reply({installed:'1.24.17',latest:'1.24.17',state:'idle',release_notes:[]});
+    if(req.url==='/api/desktop/update')return reply({installed:'1.24.18',latest:'1.24.18',state:'idle',release_notes:[]});
     if(req.url==='/api/mcp/catalog')return reply({servers:[{id:'fixture',name:'Settings',description:'Language',command:'C:\\Game\\main.exe',args:['--language','en'],enabled:false}]});
     if(req.url==='/api/desktop/agent')return reply({ok:true,messages:[{role:'result',text:authored}],revision:1});
     if(req.url==='/api/memory')return reply({notes:[],project:'fixture'});
@@ -95,7 +95,7 @@ new vm.Script(script, {filename:'desktop-injected.js'});
     await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
     const base=`http://127.0.0.1:${server.address().port}`;
     // Native source defaults to :3000; the fixture boot redirects only to this private local server.
-    browser=await playwright.chromium.launch({headless:true,executablePath:process.env.PLAZCODE_TEST_CHROMIUM || '/usr/local/bin/chromium',args:['--no-sandbox']});
+    browser=await playwright.chromium.launch({headless:true,...(process.env.PLAZCODE_TEST_CHROMIUM?{executablePath:process.env.PLAZCODE_TEST_CHROMIUM}:fs.existsSync('/usr/local/bin/chromium')?{executablePath:'/usr/local/bin/chromium'}:{}),args:['--no-sandbox']});
     const context=await browser.newContext({viewport:{width:1360,height:1000}});
     await context.addInitScript(url=>{window.__PLAZCODE_BOOT__={apiUrl:url,key:'fixture-only-key'};},base);
     const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
@@ -122,10 +122,17 @@ new vm.Script(script, {filename:'desktop-injected.js'});
       await page.waitForFunction(code=>document.documentElement.lang===code && PlazCodeI18n.getLanguage()===code,code);
       assert.equal(await page.locator('html').getAttribute('dir'),code==='ar'?'rtl':'ltr');
       assert.equal(JSON.parse(fs.readFileSync(prefsPath,'utf8')).rsLanguage,code);
-      assert.equal(await page.locator('#customInstructions').inputValue(),authored,'language never rewrites instructions');
+      assert.equal(await page.locator('#customInstructions').inputValue(),authored,'language never rewrites instructions');assert.equal(await page.locator('.brand-word').innerText(),'PlazCode','brand is never translated');
+      if(process.env.PLAZCODE_LANGUAGE_SCREENSHOTS && ['es','ar'].includes(code)) {
+        const dir=process.env.PLAZCODE_LANGUAGE_SCREENSHOTS;fs.mkdirSync(dir,{recursive:true});
+        await page.locator('#languageSettings').scrollIntoViewIfNeeded();
+        await page.screenshot({path:path.join(dir,'desktop-settings-'+code+'.png')});
+        if(code==='ar') {await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(dir,'desktop-settings-ar-mobile.png')});await page.setViewportSize({width:1360,height:1000});}
+      }
+
       if(code==='ar') {
         assert.equal(await page.locator('#customInstructions').getAttribute('dir'),'auto');
-        assert.equal(await page.locator('#explorerWorkspace').evaluate(n=>getComputedStyle(n).direction),'ltr');
+        assert.equal(await page.locator('#explorerWorkspace [data-ex=editor]').evaluate(n=>getComputedStyle(n).direction),'ltr');
         assert.equal(await page.locator('#terminal').evaluate(n=>getComputedStyle(n).direction),'ltr');
         assert.equal(await page.locator('input[type=number]').first().evaluate(n=>getComputedStyle(n).direction),'ltr');
       }

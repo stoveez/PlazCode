@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PlazCode \u00d7 Roblox Studio & AgentScript",
-  "version": "1.24.17",
+  "version": "1.24.18",
   "minimum_chrome_version": "111",
   "description": "PlazCode connects supported AI chats to Roblox Studio and local AgentScript with animation, VFX, Luau knowledge, web research, and project tools.",
   "permissions": [
@@ -83,7 +83,7 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "PlazCode 1.24.17 \u2014 RS/AS",
+    "default_title": "PlazCode 1.24.18 \u2014 RS/AS",
     "default_icon": {
       "16": "icon.png",
       "48": "icon.png",
@@ -181,10 +181,10 @@
         "https://deepseek.com/*"
       ],
       "js": [
-        "core/i18n-catalog.js",
-        "core/i18n.js",
         "core/debug-capture.js",
         "core/input-isolation.js",
+        "core/i18n-catalog.js",
+        "core/i18n.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -240,10 +240,10 @@
         "https://chat.openai.com/*"
       ],
       "js": [
-        "core/i18n-catalog.js",
-        "core/i18n.js",
         "core/debug-capture.js",
         "core/input-isolation.js",
+        "core/i18n-catalog.js",
+        "core/i18n.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -290,10 +290,10 @@
         "https://www.claude.com/*"
       ],
       "js": [
-        "core/i18n-catalog.js",
-        "core/i18n.js",
         "core/debug-capture.js",
         "core/input-isolation.js",
+        "core/i18n-catalog.js",
+        "core/i18n.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -337,10 +337,10 @@
         "https://gemini.google.com/*"
       ],
       "js": [
-        "core/i18n-catalog.js",
-        "core/i18n.js",
         "core/debug-capture.js",
         "core/input-isolation.js",
+        "core/i18n-catalog.js",
+        "core/i18n.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -387,10 +387,10 @@
         "https://www.kimi.ai/*"
       ],
       "js": [
-        "core/i18n-catalog.js",
-        "core/i18n.js",
         "core/debug-capture.js",
         "core/input-isolation.js",
+        "core/i18n-catalog.js",
+        "core/i18n.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -434,10 +434,10 @@
         "https://chat.z.ai/*"
       ],
       "js": [
-        "core/i18n-catalog.js",
-        "core/i18n.js",
         "core/debug-capture.js",
         "core/input-isolation.js",
+        "core/i18n-catalog.js",
+        "core/i18n.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -481,10 +481,10 @@
         "https://arena.ai/*"
       ],
       "js": [
-        "core/i18n-catalog.js",
-        "core/i18n.js",
         "core/debug-capture.js",
         "core/input-isolation.js",
+        "core/i18n-catalog.js",
+        "core/i18n.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -531,10 +531,10 @@
         "https://www.freebuff.com/*"
       ],
       "js": [
-        "core/i18n-catalog.js",
-        "core/i18n.js",
         "core/debug-capture.js",
         "core/input-isolation.js",
+        "core/i18n-catalog.js",
+        "core/i18n.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -588,10 +588,10 @@
         "https://chat.qwen.ai/*"
       ],
       "js": [
-        "core/i18n-catalog.js",
-        "core/i18n.js",
         "core/debug-capture.js",
         "core/input-isolation.js",
+        "core/i18n-catalog.js",
+        "core/i18n.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -645,10 +645,10 @@
         "https://gpt.crax.lol/*"
       ],
       "js": [
-        "core/i18n-catalog.js",
-        "core/i18n.js",
         "core/debug-capture.js",
         "core/input-isolation.js",
+        "core/i18n-catalog.js",
+        "core/i18n.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -693,10 +693,10 @@
         "https://www.use.ai/*"
       ],
       "js": [
-        "core/i18n-catalog.js",
-        "core/i18n.js",
         "core/debug-capture.js",
         "core/input-isolation.js",
+        "core/i18n-catalog.js",
+        "core/i18n.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -743,10 +743,10 @@
         "https://www.oxalpha.org/*"
       ],
       "js": [
-        "core/i18n-catalog.js",
-        "core/i18n.js",
         "core/debug-capture.js",
         "core/input-isolation.js",
+        "core/i18n-catalog.js",
+        "core/i18n.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -794,10 +794,10 @@
         "https://*.notion.com/*"
       ],
       "js": [
-        "core/i18n-catalog.js",
-        "core/i18n.js",
         "core/debug-capture.js",
         "core/input-isolation.js",
+        "core/i18n-catalog.js",
+        "core/i18n.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",
@@ -841,10 +841,10 @@
         "https://app.clickup.com/*"
       ],
       "js": [
-        "core/i18n-catalog.js",
-        "core/i18n.js",
         "core/debug-capture.js",
         "core/input-isolation.js",
+        "core/i18n-catalog.js",
+        "core/i18n.js",
         "core/motion-interchange.js",
         "core/motion-preview.js",
         "core/motion-tools.js",

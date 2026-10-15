@@ -59,8 +59,8 @@ const PlazCodeMemory = (() => {
           row.ontoggle = () => { if (row.open) openIds.add(entry.id); else openIds.delete(entry.id); };
           const summary = document.createElement('summary'); const heading = document.createElement('strong'); heading.setAttribute('data-i18n-user-content','');heading.textContent = titleOf(entry);
           const source = document.createElement('small');source.setAttribute('data-i18n-user-content',''); source.textContent = (entry.project ? 'Project: '+entry.project : 'Global')+' \xb7 '+entry.source; summary.append(heading, source);
-          const title = document.createElement('input'); title.setAttribute('data-entry-title',''); title.setAttribute('aria-label','Note title'); title.maxLength = 120; title.value = titleOf(entry);
-          const text = document.createElement('textarea'); text.setAttribute('data-entry-text',''); text.setAttribute('aria-label','Saved memory'); text.maxLength = 500000; text.value = entry.text;
+          const title = document.createElement('input'); title.setAttribute('data-entry-title',''); title.setAttribute('aria-label','Note title'); title.dir='auto';title.maxLength = 120; title.value = titleOf(entry);
+          const text = document.createElement('textarea'); text.setAttribute('data-entry-text',''); text.setAttribute('aria-label','Saved memory'); text.dir='auto';text.maxLength = 500000; text.value = entry.text;
           const save = document.createElement('button'); save.textContent = 'Save edit'; save.onclick = () => mutate({action:'edit',id:entry.id,title:title.value,text:text.value});
           const remove = document.createElement('button'); remove.textContent = 'Remove'; remove.onclick = () => mutate({action:'remove',id:entry.id});
           row.append(summary, title, text, save, remove); list.appendChild(row);
@@ -137,6 +137,7 @@ const PlazCodeMemory = (() => {
         }catch(error){status.textContent=error.message||String(error);}
       };
     }
+    for(const field of root.querySelectorAll('[data-memory-new-title],[data-memory-new],[data-transfer-text]'))field.dir='auto';
     localize();refresh(); return { refresh };
   }
   function exportPackage(memory, chat, scope, includeHistory) {

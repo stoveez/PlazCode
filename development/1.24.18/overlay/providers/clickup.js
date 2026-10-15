@@ -194,7 +194,7 @@ const RSProvider = (() => {
     const button=sendButton();
     if(!button)return {reason:'missing',buttonFound:false};
     if(button.disabled)return {reason:'disabled',buttonFound:true};
-    if(button.getAttribute('aria-disabled')==='true')return {reason:'aria-disabled',buttonFound:true};
+    if(safeRead(()=>button.getAttribute('aria-disabled'),null)==='true')return {reason:'aria-disabled',buttonFound:true};
     return {reason:actionable(button)?'ready':'obscured',buttonFound:true};
   }
   function sendUnavailableMessage(reason) {
@@ -332,7 +332,7 @@ const RSProvider = (() => {
     const sameChat=()=>conversationKey()===key || (key.endsWith(':new') && conversationKey().startsWith(key.slice(0,-3)));
     let rejected='',attempted=false,wrote=false,touched=false,writtenEditor=null,ownedStartup=false;
     const priorDraft=editorText(),priorAttachments=attachmentNodes().length;
-    const onDraftInput=event=>{if(event.isTrusted&&writtenEditor&&(event.target===writtenEditor||writtenEditor.contains(event.target)))touched=true;};
+    const onDraftInput=event=>{if(event.isTrusted&&writtenEditor&&(event.target===writtenEditor||safeRead(()=>writtenEditor.contains(event.target),false)))touched=true;};
     const unwatch=()=>{for(const type of ['beforeinput','input','paste'])document.removeEventListener(type,onDraftInput,true);};
     try {
       if(isStopped())throw Error('Stopped before ClickUp send. Nothing was submitted.');
