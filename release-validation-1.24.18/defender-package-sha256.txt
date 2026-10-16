@@ -1,0 +1,5 @@
+
+Algorithm : SHA256
+Hash      : B8C71AAFFAA1F132B17044CB3A43ECFC000514A627E901F76E107D3449026BE9
+Path      : D:\a\PlazCode\PlazCode\artifacts\PlazCode-1.24.18-development.zip
+

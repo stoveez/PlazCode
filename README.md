@@ -1,3 +1,15 @@
+PlazCode 1.24.18 — Interface languages and ClickUp startup reliability
+
+Adds 14 offline interface-language choices and improves ClickUp startup draft acceptance and repeated history reads while preserving protected user content and send safeguards.
+
+- Choose English, Spanish, French, Russian, Arabic, Simplified or Traditional Chinese, Japanese, Korean, German, Brazilian Portuguese, Italian, Hindi or Turkish in desktop, extension and bar settings.
+- Search language names and codes; persist the selection with existing preferences and use scoped Arabic right-to-left layout.
+- Translate built-in interface text offline while leaving user-authored content, paths, commands and PlazCode/Ultra branding unchanged.
+- Cache ClickUp history reads and avoid redundant owned-message masking work during tool-result loops.
+- Keep the exact ClickUp composer protected but natively writable while delayed draft/model acceptance enables Send; repeated lock sweeps no longer close that acceptance window.
+- Stop before sending if the composer remounts or a different unsent draft is already present. Preserve exact-route rollback and never force disabled Send or replay uncertain delivery.
+- Retain startup staging, complete tool-result paging, native launch/update behavior and existing features.
+
 PlazCode 1.24.17 — ClickUp tool results and Blender command lists
 
 ClickUp reads large tool results through complete retained pages and correctly selects Blender when its catalog request places server outside params.

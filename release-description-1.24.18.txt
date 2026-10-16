@@ -1,0 +1,29 @@
+## ✨ PlazCode 1.24.18
+
+Adds 14 offline UI languages and fixes locally reproduced ClickUp acceptance and repeated-scan problems without bypassing native send safety.
+
+### 🌐 Interface languages
+
+- Fourteen choices across desktop, extension and bar settings, searchable by native/English name or code.
+- Offline catalogs, preference persistence, scoped Arabic RTL and protected authored/technical content.
+
+### 🛠️ ClickUp reliability
+
+- Protected native-editability window for delayed draft acceptance, with exact editor/route checks and remount aborts.
+- Different existing drafts are preserved without clicking; disabled controls are never forced and ambiguous sends are not replayed.
+- Cached history reads and mutation-safe masking reduce repeated work between tool calls; existing result paging and startup features remain.
+
+### 🧪 Validation and limitations
+
+- Exact-source platform/browser and real packaged Mac desktop lifetime gates are required before publication; validated native bytes are not rebuilt during promotion.
+- Delayed-model evidence is from local sanitized fixtures, not actual Quill. Signed-in ClickUp connection/feedback transport also passed. Affected accounts, Microsoft Edge binary and real-project edits were not tested.
+- Windows unsigned; Mac ad-hoc signed and not notarized. GitHub provenance does not replace platform signing.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.18.zip** for Windows, **PlazCode-macOS-1.24.18.zip** for Mac, or **PlazCode-Firefox-1.24.18.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.

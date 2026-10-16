@@ -1,9 +1,60 @@
 {
-  "version": "1.24.17",
-  "desktop_version": "1.24.17",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.17.zip",
-  "sha256": "a49cae10d89adc4dee547f0d785b0e2b6fd1cd3a3c2768df53ffe77ba2a34b45",
+  "version": "1.24.18",
+  "desktop_version": "1.24.18",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.18.zip",
+  "sha256": "5553ad9e18ca168cf06b0ab34549f70c08530c730b426a8b7abf4151424ccd6e",
   "release_notes": [
+    {
+      "version": "1.24.18",
+      "title": "Interface languages and ClickUp startup reliability",
+      "summary": "Adds 14 offline interface-language choices and improves ClickUp startup draft acceptance and repeated history reads while preserving protected user content and send safeguards.",
+      "added": [
+        "Choose English, Spanish, French, Russian, Arabic, Simplified or Traditional Chinese, Japanese, Korean, German, Brazilian Portuguese, Italian, Hindi or Turkish in desktop, extension and bar settings.",
+        "Search language names and codes; persist the selection with existing preferences and use scoped Arabic right-to-left layout."
+      ],
+      "improved": [
+        "Translate built-in interface text offline while leaving user-authored content, paths, commands and PlazCode/Ultra branding unchanged.",
+        "Cache ClickUp history reads and avoid redundant owned-message masking work during tool-result loops."
+      ],
+      "fixed": [
+        "Keep the exact ClickUp composer protected but natively writable while delayed draft/model acceptance enables Send; repeated lock sweeps no longer close that acceptance window.",
+        "Stop before sending if the composer remounts or a different unsent draft is already present. Preserve exact-route rollback and never force disabled Send or replay uncertain delivery.",
+        "Retain startup staging, complete tool-result paging, native launch/update behavior and existing features."
+      ],
+      "notes": [
+        "Publication requires successful exact-source browser and Linux/Windows/macOS validation plus actual packaged Mac desktop lifetime, visibility and updater-relaunch checks.",
+        "Local delayed-model tests are sanitized model-bound fixtures, not actual Quill or live ClickUp accounts. Hosted browser fixtures use a mocked bridge; a signed-in ClickUp connection and labelled feedback transport also passed without project tools. Affected accounts, Microsoft Edge binary and real project edits were not tested.",
+        "Windows binaries are unsigned. The Mac app is ad-hoc signed, not notarized. Final native bytes are reused from validated artifacts; there is no separate user test-build delivery."
+      ],
+      "github": {
+        "summary": "Adds 14 offline UI languages and fixes locally reproduced ClickUp acceptance and repeated-scan problems without bypassing native send safety.",
+        "sections": [
+          {
+            "title": "🌐 Interface languages",
+            "items": [
+              "Fourteen choices across desktop, extension and bar settings, searchable by native/English name or code.",
+              "Offline catalogs, preference persistence, scoped Arabic RTL and protected authored/technical content."
+            ]
+          },
+          {
+            "title": "🛠️ ClickUp reliability",
+            "items": [
+              "Protected native-editability window for delayed draft acceptance, with exact editor/route checks and remount aborts.",
+              "Different existing drafts are preserved without clicking; disabled controls are never forced and ambiguous sends are not replayed.",
+              "Cached history reads and mutation-safe masking reduce repeated work between tool calls; existing result paging and startup features remain."
+            ]
+          },
+          {
+            "title": "🧪 Validation and limitations",
+            "items": [
+              "Exact-source platform/browser and real packaged Mac desktop lifetime gates are required before publication; validated native bytes are not rebuilt during promotion.",
+              "Delayed-model evidence is from local sanitized fixtures, not actual Quill. Signed-in ClickUp connection/feedback transport also passed. Affected accounts, Microsoft Edge binary and real-project edits were not tested.",
+              "Windows unsigned; Mac ad-hoc signed and not notarized. GitHub provenance does not replace platform signing."
+            ]
+          }
+        ]
+      }
+    },
     {
       "version": "1.24.17",
       "title": "ClickUp tool results and Blender command lists",
@@ -173,68 +224,12 @@
           }
         ]
       }
-    },
-    {
-      "version": "1.24.13",
-      "title": "Skills, connection and Blender fixes",
-      "summary": "The approved test build 6: faster startup, reliable connection status, improved Skills controls, a one-click Save as skill card, and the user-tested Blender screenshot and dashboard fixes.",
-      "added": [
-        "Favourite stars and two-click skill deletion. Delete all keeps favourites, starter skills, UltraGUI references and shared workflows.",
-        "A one-click Save as skill card above the chat box for lasting preferences. It closes after 45 seconds without hover or focus; closing saves nothing."
-      ],
-      "improved": [
-        "MCP add-ons start in parallel in the background instead of blocking Studio startup.",
-        "Up to 8 favourite skills are always included within their project, engine and domain, followed by the 3 best other matches.",
-        "Short task checklist labels on other providers; Notion keeps its established startup wording.",
-        "Packaged launchers, Firefox extension copies and checksum manifests now match the reviewed source."
-      ],
-      "fixed": [
-        "False disconnected status and stale dashboard connection labels.",
-        "Blender screenshots use an off-screen viewport capture and a unique receipt; no stale image is returned without a receipt.",
-        "Automatic completed-task skill candidates are disabled, duplicate saves are refused, and untouched duplicate candidates are cleaned up.",
-        "Clarification panels no longer sit behind overlays; the typing mask is lifted while questions wait.",
-        "Native paste and editing shortcuts work in PlazCode text boxes on pages with capture handlers.",
-        "Claude waits for an enabled Send control instead of clicking a guessed composer button.",
-        "OS Error 1450 recovery, provider startup handshakes and verifiably unsent Notion tool results."
-      ],
-      "notes": [
-        "The user approved test build 6 for publication. Exact-source automated checks passed on Linux, Windows and macOS, with Chromium/Firefox and real Blender CI checks. Live provider accounts and real Roblox Studio imports were not tested by CI.",
-        "The user-tested Studio heal guard is preserved. Automatic helper restart remains inactive because the bridge has no mcp_status handler.",
-        "Windows binaries are unsigned. The Mac app is ad-hoc signed, not notarized. GLM HTML server errors are unchanged."
-      ],
-      "github": {
-        "summary": "Approved build 6 with Skills improvements, faster startup, and the user-tested Blender screenshot and dashboard fixes.",
-        "sections": [
-          {
-            "title": "⭐ Skills",
-            "items": [
-              "Favourite stars, safe deletion and duplicate protection; automatic task candidates are off.",
-              "Up to 8 favourites are always used within their scope. Save as skill appears above the chat box and closes after 45 seconds."
-            ]
-          },
-          {
-            "title": "🛠️ Fixes",
-            "items": [
-              "Parallel add-on startup and accurate Studio status. The tested heal guard is unchanged; automatic helper restart remains inactive.",
-              "Blender off-screen screenshots with unique capture receipts.",
-              "Visible clarification panels, working paste, safer Claude sends and Notion startup fixes."
-            ]
-          },
-          {
-            "title": "🧪 Checks",
-            "items": [
-              "Exact-source Linux/Windows/Mac and browser checks passed; the user approved build 6. CI did not test live provider accounts or real Studio imports.",
-              "Windows is unsigned; Mac is ad-hoc signed, not notarized."
-            ]
-          }
-        ]
-      }
     }
   ],
   "platforms": {
     "macos": {
-      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.17.zip",
-      "sha256": "e07e9e5513c5edc299fa88340e5511cc9b990bd453b47eb7008a24c8f63d1fce"
+      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.18.zip",
+      "sha256": "edfbd8739d7f5dfba31f8f48d312115fc1da03c3b8f1e2a47e53eba2272c53c3"
     }
   }
 }

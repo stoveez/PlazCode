@@ -1,0 +1,13 @@
+PlazCode 1.24.18 — exact-source platform/browser gates and packaged macOS desktop lifetime checks passed before promotion.
+Validated source: 6ec4a67a7be3bd6ae511a89fdcddf5f17d9ddf31
+Validation run: https://github.com/stoveez/PlazCode/actions/runs/38835229819
+Changes: 14 offline interface languages with persistence, scoped Arabic RTL and authored-content protection; ClickUp protected draft/model acceptance, remount and preexisting-draft safeguards; cached ClickUp history reads and mutation-safe owned-message masking to reduce repeated tool-loop scans.
+Existing startup staging, retained tool-result paging, server selection, rollback, native launch/update behavior and other released features are retained. Final native executable and macOS app bytes are reused from the validated development artifacts, not rebuilt during publication. Only release notices, checksums and package metadata change.
+Local Chromium model-bound fixtures reproduce delayed acceptance and a stale initially-enabled model; they are not actual Quill or signed-in ClickUp. Hosted Chromium/Firefox fixtures use a mocked bridge. A signed-in ClickUp Ask Brain connection-only startup and a clearly labelled 8,585-character feedback transport were tested successfully without executing local/project tools. Affected accounts, Microsoft Edge binary, real Studio GUI creation and real-project Blender edits were not tested. Any hosted real-Blender regression is limited to its isolated test workload.
+Publication follows the user's authorization for a direct update after validation, without a private-build delivery/review step.
+Windows binaries are unsigned. macOS uses ad-hoc signing and is not notarized. GitHub provenance is not Authenticode or Apple notarization.
+Microsoft Defender runner availability/result for the exact native artifact before release-notice assembly:
+Scan starting...
+Scan finished.
+Scanning D:\a\PlazCode\PlazCode\build-src-1.24.18\PlazCode/defender-scan found no threats.
+Checksums, platform evidence and packaged Mac lifetime proof are recorded in release-validation-1.24.18.
