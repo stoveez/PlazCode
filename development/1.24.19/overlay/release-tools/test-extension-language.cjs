@@ -14,6 +14,8 @@ async function storage(page){await page.evaluate(()=>{window.localeStore={};wind
  const host=page.locator('#rs-menu [data-pc-language-picker]'),select=host.locator('select'),search=host.locator('input');await select.waitFor({state:'visible'});assert.equal(await select.locator('option').count(),15);assert.equal(await select.inputValue(),'en');
  await search.fill('日本');assert.deepEqual(await select.locator('option').evaluateAll(ns=>ns.map(n=>n.value)),['en','ja']);assert.equal(await page.evaluate(()=>localeSaves.filter(x=>x.rsLanguage).length),0);await search.fill('');
  await page.evaluate(()=>provider.writeDraft('Home Settings Save — my own draft'));
+ await search.fill('Polski');assert.deepEqual(await select.locator('option').evaluateAll(ns=>ns.map(n=>n.value)),['en','pl']);await search.fill('');
+ await select.selectOption('pl');await page.waitForFunction(()=>PlazCodeI18n.getLanguage()==='pl');assert.equal(await page.evaluate(()=>localeStore.rsLanguage),'pl');assert.equal(await page.evaluate(()=>PlazCodeI18n.t('Settings')),JSON.parse(read('core/locales/pl.json')).Settings);assert.equal(await page.evaluate(()=>provider.editorText()),'Home Settings Save — my own draft');
  await select.selectOption('es');await page.waitForFunction(()=>PlazCodeI18n.getLanguage()==='es');assert.equal(await page.evaluate(()=>localeStore.rsLanguage),'es');assert.equal(await page.locator('html').getAttribute('dir'),null,'never set host site direction');assert.equal(await page.evaluate(()=>provider.editorText()),'Home Settings Save — my own draft');await shots(page,'bar-settings-es-desktop');
  await page.evaluate(()=>externalLocale('ar'));await page.waitForFunction(()=>document.querySelector('#rs-root').dir==='rtl');assert.equal(await select.inputValue(),'ar');assert.equal(await page.locator('html').getAttribute('dir'),null);await shots(page,'bar-settings-ar-desktop');
  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(350);await shots(page,'bar-settings-ar-mobile');
@@ -27,7 +29,7 @@ async function storage(page){await page.evaluate(()=>{window.localeStore={};wind
  await popup.goto('https://plazcode-fixture.invalid/popup.html');await storage(popup);
  // Runtime captured persistence callback reads the live storage API.
  const ph=popup.locator('#popup-language-picker'),ps=ph.locator('select');await ps.waitFor({state:'visible'});assert.equal(await ps.locator('option').count(),15);
- for(const code of ['es','ar']){await ps.selectOption(code);await popup.waitForFunction(code=>document.documentElement.lang===code,code);await shots(popup,'popup-'+code);assert.equal(await popup.locator('html').getAttribute('dir'),code==='ar'?'rtl':'ltr');}
+ for(const code of ['pl','es','ar']){await ps.selectOption(code);await popup.waitForFunction(code=>document.documentElement.lang===code,code);await shots(popup,'popup-'+code);assert.equal(await popup.locator('html').getAttribute('dir'),code==='ar'?'rtl':'ltr');}
  await popup.setViewportSize({width:390,height:844});await shots(popup,'popup-ar-mobile');assert.equal(popupErrors.length,0,popupErrors.join('\n'));await popup.close();
  console.log('PASS extension languages: bar/popup search, persistence, external refresh, failure rollback, user draft isolation, scoped RTL, responsive control');
  }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
