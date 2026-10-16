@@ -1,0 +1,13 @@
+PlazCode 1.24.19 — exact-source platform/browser gates and packaged macOS desktop lifetime checks passed before promotion.
+Validated source: a99a4cdcee9669c07c48dec65f32bdffb8d67143
+Validation run: https://github.com/stoveez/PlazCode/actions/runs/38920540191
+Changes: Polish (Polski) joins the existing 14 offline interface languages, with 877 translated interface strings across desktop, bar and popup; native preference persistence/search and authored-content isolation are retained. Shared response handling preserves exact assistant evidence across verified same-turn remounts, invalidates changed identities, and rechecks conversation/send/session ownership after asynchronous visibility parking before dispatch. Stopped-loop recovery instructions now direct the user to the PlazCode bar.
+Existing ClickUp startup/send/performance safeguards, complete result paging, Studio/Blender integrations, Ultra, skill recovery, donation links, language isolation and native launch/update behavior are retained. Final native executable and macOS app bytes are reused from validated development artifacts, not rebuilt during publication. Only release notices, checksums and package metadata change.
+Local unit and offline Chromium fixtures exercise shared response identity, sweep ownership, captured-text bookkeeping and actual asynchronous dispatch handoffs; an offline Chromium fixture uses the real Claude reader with controlled DOM changes. Desktop/bar/popup language fixtures verify Polish selection, search, persistence and protection of user content. These tests do not establish the affected user's live Claude root cause. No signed-in affected Claude account or real Studio project was used. Provider identity fallback limitations and preexisting watchdog marking semantics remain outside the scoped fix; this is not a comprehensive no-replay guarantee. Hosted browser fixtures use a mocked bridge; actual Microsoft Edge was not tested.
+Publication follows the user's authorization for a direct update after validation, without a private-build delivery/review step.
+Windows binaries are unsigned. macOS uses ad-hoc signing and is not notarized. GitHub provenance is not Authenticode or Apple notarization.
+Microsoft Defender runner availability/result for the exact native artifact before release-notice assembly:
+Scan starting...
+Scan finished.
+Scanning D:\a\PlazCode\PlazCode\build-src-1.24.19\PlazCode/defender-scan found no threats.
+Checksums, platform evidence and packaged Mac lifetime proof are recorded in release-validation-1.24.19.

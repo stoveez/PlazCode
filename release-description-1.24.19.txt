@@ -1,0 +1,29 @@
+## ✨ PlazCode 1.24.19
+
+Polish joins the offline interface languages, and the shared reply loop handles verified remounts more reliably without borrowing another turn’s command.
+
+### 🌐 Polish interface
+
+- Polski — Polish across desktop, bar and popup: 877 translated interface strings, searchable by name or code.
+- Fifteen offline language choices. English stays default; AI replies, prompts, code and tool arguments are unchanged.
+
+### 🛠️ Shared reply recovery
+
+- Retain exact assistant evidence across verified same-turn remounts; clear it on changed turn/chat/send/session identity.
+- Check ownership again after visibility waits and before tool dispatch; pause if it cannot be verified.
+- Clearer stopped-loop instructions point to Start or Restart in the PlazCode bar. Existing ClickUp, Studio, Blender, Ultra and skill features remain.
+
+### 🧪 Validation and limits
+
+- Exact-source platform/browser checks and actual packaged Mac lifetime/update-relaunch gates are required. Validated native bytes are reused.
+- Offline/unit fixtures include the real Claude reader and async loop handoffs, not the affected live account. Real Studio projects and the Edge binary were not tested; unreliable provider identities remain a limitation.
+- Windows unsigned; Mac ad-hoc signed, not notarized. GitHub provenance does not replace platform signing.
+
+### 📥 How to update
+
+- Open PlazCode, or choose **Updates → Update now**.
+- Manual downloads: **PlazCode-1.24.19.zip** for Windows, **PlazCode-macOS-1.24.19.zip** for Mac, or **PlazCode-Firefox-1.24.19.zip** for Firefox.
+- Reload your extension and refresh your AI tabs. Firefox users: reload the temporary add-on after restarting Firefox.
+- Your settings, memory and connections are kept.
+
+Test details are included in VALIDATION.txt.

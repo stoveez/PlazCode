@@ -1,3 +1,14 @@
+PlazCode 1.24.19 — Polish and shared reply recovery
+
+Adds Polish throughout the PlazCode interface and improves shared reply recovery across verified assistant remounts, with ownership checks before tool dispatch.
+
+- Polski — Polish in desktop, extension bar and popup language settings, with all 877 interface strings translated.
+- Fifteen searchable offline language choices; English remains the default and user-authored content is not translated.
+- Carry the exact parsed assistant text into dispatch bookkeeping when a verified reply is temporarily blank or remounted.
+- Explain unreadable replies accurately and direct stopped-loop recovery to Start or Restart in the PlazCode bar.
+- Keep same-turn reply evidence only with unchanged fresh identity and conversation/send/session ownership; discard evidence when a node is reused for another turn.
+- Recheck reply ownership after visibility waits before dispatch. Pause without dispatching that reply if ownership cannot be verified.
+
 PlazCode 1.24.18 — Interface languages and ClickUp startup reliability
 
 Adds 14 offline interface-language choices and improves ClickUp startup draft acceptance and repeated history reads while preserving protected user content and send safeguards.
