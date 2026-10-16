@@ -11,8 +11,8 @@ permissions:
 env:
   GH_TOKEN: ${{ github.token }}
   # Parent sets these only after the final source commit has a successful run.
-  VALIDATED_SHA: 'SET_VALIDATED_SHA_AFTER_SUCCESS'
-  VALIDATION_RUN: 'SET_VALIDATION_RUN_AFTER_SUCCESS'
+  VALIDATED_SHA: '6ec4a67a7be3bd6ae511a89fdcddf5f17d9ddf31'
+  VALIDATION_RUN: '38835229819'
 concurrency:
   group: plazcode-final-1.24.18
   cancel-in-progress: true
