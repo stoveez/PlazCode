@@ -338,6 +338,33 @@ async function correctness(page, size) {
     }
     core.rememberExecuted(oldAssistant);
     results.executedTurnRemembered = core.isRememberedExecuted(oldAssistant, p.itemText(oldAssistant));
+    // Semantic attribute changes need the same immediate invalidation as text
+    // mutations. Warm both text readers BEFORE each transition; checking only
+    // after an observer callback can conceal a takeRecords() correctness gap.
+    const thinkingBody = oldAssistant.querySelector('[data-test="quill-delta-to-html__comment"]');
+    const thinkingMatches = expected => p.itemText(oldAssistant) === expected && p.classifyText(oldAssistant, '.rs-chip') === expected;
+    const afterObserver = () => new Promise(resolve => setTimeout(resolve, 0));
+    thinkingMatches(command);
+    thinkingBody.setAttribute('data-is-thinking', 'true');
+    results.thinkingTrueExcludedSynchronously = thinkingMatches('');
+    await afterObserver();
+    results.thinkingTrueExcludedAfterCallback = thinkingMatches('');
+    // Independently warm an excluded string even on the broken provider. An
+    // empty setup text node invalidates through the already-tested childList
+    // path; it does not alter the reply or the attribute transition under test.
+    thinkingBody.append(document.createTextNode(''));
+    thinkingMatches('');
+    thinkingBody.setAttribute('data-is-thinking', 'false');
+    results.thinkingFalseRestoresTextSynchronously = thinkingMatches(command);
+    await afterObserver();
+    results.thinkingFalseRestoresTextAfterCallback = thinkingMatches(command);
+    thinkingBody.setAttribute('data-is-thinking', 'true');
+    thinkingBody.append(document.createTextNode(''));
+    thinkingMatches('');
+    thinkingBody.removeAttribute('data-is-thinking');
+    results.thinkingAttributeRemovalRestoresTextSynchronously = thinkingMatches(command);
+    await afterObserver();
+    results.thinkingAttributeRemovalRestoresTextAfterCallback = thinkingMatches(command);
     // Role-cache invalidation must be synchronous, including avatar subtree edits.
     const roleItem = row(3), avatar = roleItem.querySelector('cu-chat-user-avatar');
     const originalAvatar = avatar.innerHTML;
@@ -373,6 +400,36 @@ async function correctness(page, size) {
     results.hiddenThreadExcludedSynchronously = p.allItems().length === 0;
     remountedThread.removeAttribute('aria-hidden');
     results.unhiddenThreadRestoredSynchronously = p.allItems().length === size + 1;
+    // A formerly matching selector no longer matches after an attribute is
+    // removed. Both deactivation and reactivation must discard the old snapshot,
+    // including its counts/last reply, before any observer callback can run.
+    const activeThreadMatches = active => active
+      ? p.allItems().length === size + 1 && p.userCount() + p.assistantCount() === size + 1 && p.readAssistant().present
+      : p.allItems().length === 0 && p.userCount() === 0 && p.assistantCount() === 0 && !p.readAssistant().present;
+    for (const attribute of ['data-brain-prompt-surface', 'data-test']) {
+      const originalValue = remountedThread.getAttribute(attribute);
+      activeThreadMatches(true);
+      remountedThread.removeAttribute(attribute);
+      const prefix = attribute === 'data-test' ? 'threadSelectorAttribute' : 'threadSurfaceAttribute';
+      results[prefix + 'RemovalExcludesSynchronously'] = activeThreadMatches(false);
+      await afterObserver();
+      results[prefix + 'RemovalExcludesAfterCallback'] = activeThreadMatches(false);
+      remountedThread.setAttribute(attribute, originalValue);
+      results[prefix + 'RestoreIncludesSynchronously'] = activeThreadMatches(true);
+      await afterObserver();
+      results[prefix + 'RestoreIncludesAfterCallback'] = activeThreadMatches(true);
+    }
+    const selectorRow = row(3), selectorValue = selectorRow.getAttribute('data-test');
+    const selectorRowMatches = active => p.allItems().includes(selectorRow) === active && p.allItems().length === size + (active ? 1 : 0);
+    selectorRowMatches(true);
+    selectorRow.removeAttribute('data-test');
+    results.itemSelectorAttributeRemovalExcludesSynchronously = selectorRowMatches(false);
+    await afterObserver();
+    results.itemSelectorAttributeRemovalExcludesAfterCallback = selectorRowMatches(false);
+    selectorRow.setAttribute('data-test', selectorValue);
+    results.itemSelectorAttributeRestoreIncludesSynchronously = selectorRowMatches(true);
+    await afterObserver();
+    results.itemSelectorAttributeRestoreIncludesAfterCallback = selectorRowMatches(true);
     const unknown = addItem('user', 'late author fixture', 'perf-unknown-role');
     const unknownAvatar = unknown.querySelector('cu-chat-user-avatar'); unknownAvatar.replaceChildren();
     const knownCount = p.allItems().length;

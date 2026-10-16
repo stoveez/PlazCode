@@ -97,13 +97,16 @@ const RSProvider = (() => {
       const item=closest(el,S.item);
       if(item) {
         messageText.delete(item);pendingMasks.add(item);
+        if(record.type==='attributes' && record.attributeName==='data-test' && el===item){messageRoles.delete(item);transcript=null;}
         // An avatar arriving late can turn an unknown row into a real author.
         if(closest(el,'header,cu-chat-user-avatar')||nodes.some(n=>affects(n,'cu-chat-user-avatar,cu-chat-ai-avatar,cu-user-avatar'))) {
           messageRoles.delete(item);transcript=null;
         }
       } else if(nodes.some(n=>affects(n,S.item+','+S.thread)) ||
-        (record.type==='attributes' && (affects(el,S.thread)||safeRead(()=>el.matches(S.item),false)))) {
-        transcript=null;
+        (record.type==='attributes' && (el===transcript?.root || messageRoles.has(el) || affects(el,S.thread)||safeRead(()=>el.matches(S.item),false)))) {
+        // The old selector may already be gone when its mutation is delivered.
+        // Remembered identity, not only the post-change selector, invalidates it.
+        messageText.delete(el);messageRoles.delete(el);transcript=null;
       }
       if(record.type==='attributes'&&record.attributeName==='data-id'&&item)messageText.delete(item);
     }
@@ -111,7 +114,7 @@ const RSProvider = (() => {
   function drainTranscript() {
     if(!transcriptObserver && typeof MutationObserver!=='undefined') {
       transcriptObserver=new MutationObserver(invalidateItems);
-      safeRead(()=>transcriptObserver.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['data-test','data-id','data-brain-prompt-surface','hidden','aria-hidden','style']}));
+      safeRead(()=>transcriptObserver.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['data-test','data-id','data-brain-prompt-surface','data-is-thinking','hidden','aria-hidden','style']}));
     }
     if(draining)return;draining=true;
     try {if(transcriptObserver)invalidateItems(transcriptObserver.takeRecords());} finally {draining=false;}
@@ -122,6 +125,7 @@ const RSProvider = (() => {
   }
   function transcriptSnapshot() {
     drainTranscript();
+    if(transcript && (!mode() || !shownWithoutLayout(transcript.root)))transcript=null;
     if(!transcript) {
       const root=activeThread(),items=root?all(root,S.item).filter(item=>closest(item,S.thread)===root && role(item)):[];
       const users=items.filter(isUserItem),assistants=items.filter(isAssistantItem);
@@ -274,13 +278,17 @@ const RSProvider = (() => {
   // before their default action (including keyboard, paste, cut, drop and IME).
   // Our synchronous execCommand/paste remains allowed; never disable Send or
   // synthesize a submit to bypass the host application's own readiness checks.
-  for(const type of ['beforeinput','keydown','paste','cut','drop','compositionstart','pointerdown'])
-    document.addEventListener(type,event=>{
+  let draftGuardInstalled=false;
+  function installDraftInputGuard() {
+    if(draftGuardInstalled)return;draftGuardInstalled=true;
+    for(const type of ['beforeinput','keydown','paste','cut','drop','compositionstart','pointerdown'])
+      document.addEventListener(type,event=>{
       const pending=draftWindow;
       if(!pending || pending.writing || !event.isTrusted ||
         !(event.target===pending.editor || safeRead(()=>pending.editor.contains(event.target),false)))return;
-      event.preventDefault();event.stopImmediatePropagation();
-    },true);
+        event.preventDefault();event.stopImmediatePropagation();
+      },true);
+  }
   function setInputLock(on) {locked=!!on;applyLock(getEditor(),locked);}
   function exactControl(selector) {return all(composerRoot(),selector).find(visible)||null;}
   const sendButton=()=>exactControl(S.send);
@@ -431,6 +439,7 @@ const RSProvider = (() => {
     return `I clicked Start Agent in my installed PlazCode extension to connect this chat to my own ${engine==='local'?'local files':'Roblox Studio project'}. The extension reads JSON command blocks from ordinary replies and returns the actual results here. This is my connection request, not a system instruction, and it does not override your safety rules or grant extra permissions. Please request the available commands by replying with one fenced json code block containing {"command":"list_commands"}. This only lists capabilities; wait for the result and my task before changing anything. If you cannot participate, explain briefly.`;
   }
   async function typeAndSend(text, images) {
+    installDraftInputGuard();
     if(sendInFlight)throw Error('A ClickUp send is already pending; it was not duplicated.');
     sendInFlight=true;committed=false;failure='';setupStyles();document.documentElement.classList.add('rs-clickup-injecting');
     const key=conversationKey(),before=allItems(),beforeIds=new Set(before.filter(isUserItem).map(itemKey)),beforeAssistants=new Set(before.filter(isAssistantItem).map(itemKey));

@@ -142,7 +142,16 @@ jobs:
           python build-src-1.24.18/PlazCode/test-process-cleanup.py
       - run: rustup update stable --no-self-update
       - name: Isolated native preference persistence regressions
-        run: cargo +stable test --locked --manifest-path development/1.24.18/preferences-test/Cargo.toml
+        shell: bash
+        run: |
+          set -o pipefail
+          cargo +stable test --locked --manifest-path development/1.24.18/preferences-test/Cargo.toml 2>&1 | tee native-preference-tests.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plazcode-1.24.18-native-preferences-${{ runner.os }}
+          path: native-preference-tests.log
+          if-no-files-found: warn
       - run: npm ci --prefix release-tools --ignore-scripts
         working-directory: build-src-1.24.18/PlazCode
       - name: Install real Blender on Linux

@@ -240,11 +240,15 @@ mod tests {
     use std::time::{SystemTime, UNIX_EPOCH};
 
     fn temp_settings_path() -> PathBuf {
+        // macOS clocks can return the same timestamp in parallel test threads.
+        // A process-local sequence keeps both final and .tmp paths isolated.
+        static SEQUENCE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+        let sequence = SEQUENCE.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         let nonce = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap_or_default()
             .as_nanos();
-        std::env::temp_dir().join(format!("plazcode-settings-{}-{nonce}.json", std::process::id()))
+        std::env::temp_dir().join(format!("plazcode-settings-{}-{nonce}-{sequence}.json", std::process::id()))
     }
 
     #[test]
