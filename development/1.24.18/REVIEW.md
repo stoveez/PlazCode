@@ -1,6 +1,6 @@
-# PlazCode 1.24.18 — private validation build
+# PlazCode 1.24.18 — validated update preparation
 
-No main branch, release, promotion, or update-feed changes are authorized by this work. Test on codex/plazcode-1.24.18 first.
+The user explicitly authorized direct publication after the ClickUp startup and performance fixes pass validation, without another private-build delivery. Develop and validate on codex/plazcode-1.24.18; expose no update feed until native/browser and actual packaged Mac desktop gates pass.
 
 ## Interface languages
 
@@ -37,3 +37,12 @@ No main branch, release, promotion, or update-feed changes are authorized by thi
 Base is the published1.24.17 source, SHA25635af2180823382c057580fab9a41455f5f907e232c249af087d25c97b7873e24. prepare.py applies only this overlay to build-src-1.24.18/PlazCode and synchronizes extension copies. Version18 Cargo changes are package-version-only; dependency pins remain unchanged. package.py keeps the inherited platform pruning, source parity, Firefox rebuild and checksums. Catalog keys are packed once to avoid repeated English source text; runtime contract is unchanged and inline-script delimiters are escaped.
 
 Validation workflow preserves the browser job and three-platform native matrix, isolated native preference crate, full regression and Windows Defender checks. Artifact: plazcode-1.24.18-Windows-validation. Signing, Defender, final package parity and platform compilation are not established until that run succeeds. Never interpret a configured check as passing evidence.
+
+## ClickUp startup and performance follow-up
+
+- A delayed model-bound composer reproduced immediate relock preventing draft/model acceptance (40ms/350ms); an exact-editor/exact-route writable acceptance window fixes the fixture without forcing disabled Send. Trusted typing is still blocked. Existing drafts are preserved without rewriting or clicking, and remount/route/Stop/uncertain-delivery safeguards remain.
+- Warm 512-turn histories previously reread about 103 million text characters in eight polling cycles. Mutation-aware item/role/text caches with synchronous observer draining avoid unchanged-history walks and repeated enumeration. Old edits, avatars, root replacements, routes and virtualized reused rows invalidate correctly; raw result payloads are not truncated.
+- Header discovery no longer measures geometry and forces layout of the full transcript. Native composer/button visibility and Send hit-testing remain geometric. The benchmark uses structural budgets; wall-clock timing is diagnostic, not a no-freeze guarantee.
+- Dedicated Chromium startup model tests passed 11 cases; existing readiness 11 and browser/full-core 9 groups passed. The long-history benchmark passes 64/512-turn structural budgets and semantic checks including 500KiB edits, lossless results, masking, role changes, hidden-header scope, dedupe and remounts.
+- Signed-in ClickUp Ask Brain accepted one connection-only startup message and returned list_commands JSON. It also accepted one clearly labelled 8,585-character transport fixture with a persisted user-row receipt (~3.05 seconds). No real bridge or project edit was executed. These are not affected users' accounts or an actual Microsoft Edge binary.
+- Final hosted validation and artifact checks remain required before publication; earlier test-build validation does not establish the new source commit.

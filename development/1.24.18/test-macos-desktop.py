@@ -1,10 +1,18 @@
 """Check the packaged macOS desktop's lifetime and real updater relaunch function."""
 from pathlib import Path
-import ctypes, json, os, signal, subprocess, tempfile, time
+import ctypes, hashlib, json, os, re, signal, subprocess, tempfile, time
 
 install = Path(os.environ['PLAZCODE_MAC_TEST_INSTALL']).resolve()
 binary = install / 'PlazCode.app/Contents/MacOS/PlazCode'
 version = json.loads((install / 'PlazCode-Extension/manifest.json').read_text())['version']
+assert version == '1.24.18', 'Desktop validation requires the exact 1.24.18 package'
+assert re.fullmatch(r'[0-9a-f]{40}', os.environ['VALIDATED_SHA'])
+assert re.fullmatch(r'[1-9][0-9]*', os.environ['VALIDATION_RUN'])
+package = Path(os.environ['PLAZCODE_MAC_TEST_ARCHIVE']).resolve()
+provenance = {'validated_sha': os.environ['VALIDATED_SHA'],
+              'validation_run_id': os.environ['VALIDATION_RUN'],
+              'native_package_sha256': hashlib.sha256(package.read_bytes()).hexdigest(),
+              'native_binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest()}
 helper = (install / 'Update-PlazCode.command').read_text()
 function = helper[helper.index('relaunch_updated(){'):helper.index('\n[[ "$expectedhash"')]
 results = []
@@ -86,7 +94,7 @@ with tempfile.TemporaryDirectory(prefix='plazcode-macos-desktop-') as temporary:
                 assert alive(pid), f'{mode} desktop exited without an explicit quit; inspect agent.log'
                 assert on_screen(pid)==expected_visible, f'{mode} desktop window disappeared or changed visibility without a requested action'
                 time.sleep(.2)
-            results.append({'mode': mode, 'version': version, 'alive_seconds': duration, 'desktop_ready': True, 'window_visible': expected_visible})
+            results.append({**provenance, 'mode': mode, 'version': version, 'alive_seconds': duration, 'desktop_ready': True, 'window_visible': expected_visible})
             print('PASS macOS desktop readiness, updater relaunch and process lifetime:', results[-1], flush=True)
         finally:
             Path("mac-desktop-result.json").write_text(json.dumps(results, indent=2) + "\n")

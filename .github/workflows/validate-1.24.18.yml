@@ -63,6 +63,12 @@ jobs:
       - name: ClickUp send readiness and uncertain-send protection
         run: node release-tools/test-clickup-send-readiness.cjs
         working-directory: build-src-1.24.18/PlazCode
+      - name: ClickUp delayed model acceptance and protected existing drafts
+        run: node release-tools/test-clickup-startup-model.cjs
+        working-directory: build-src-1.24.18/PlazCode
+      - name: ClickUp long-history bounded reads and cache correctness
+        run: node release-tools/test-clickup-performance.cjs
+        working-directory: build-src-1.24.18/PlazCode
       - name: Mixed widgets preserve user content across language changes
         run: node release-tools/test-language-widgets.cjs
         working-directory: build-src-1.24.18/PlazCode

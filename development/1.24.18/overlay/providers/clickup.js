@@ -23,7 +23,7 @@ const RSProvider = (() => {
   const all = (root, selector) => root ? safeRead(() => Array.from(root.querySelectorAll(selector)), []) : [];
   const closest = (node, selector) => node ? safeRead(() => node.closest(selector)) : null;
   let diag = () => {}, locked = false, sendInFlight = false, committed = false;
-  let failure = "", writeGeneration = 0;
+  let failure = "", writeGeneration = 0, draftWindow = null;
   const originals = new WeakMap(), ids = new WeakMap(); let nextId = 0;
   const norm = value => String(value || "").replace(/\r\n?/g,"\n").replace(/[\u200b\ufeff]/g,"").replace(/\u00a0/g," ").trim();
   function visible(node) {
@@ -33,12 +33,24 @@ const RSProvider = (() => {
       return r.width>0 && r.height>0 && s.display!=="none" && s.visibility!=="hidden" && s.opacity!=="0";
     }, false);
   }
+  // Author/route discovery needs rendered visibility, not pixel geometry.
+  // Measuring a header forces ClickUp to lay out its entire long transcript
+  // before we can mask injected results. Leave geometric hit-testing to Send.
+  function shownWithoutLayout(node) {
+    if(!node || closest(node,'[hidden],[aria-hidden="true"],#rs-root'))return false;
+    return safeRead(()=>{
+      for(let el=node;el;el=el.parentElement){const style=getComputedStyle(el);
+        if(style.display==='none'||style.visibility==='hidden'||style.visibility==='collapse'||style.opacity==='0')return false;
+      }
+      return true;
+    },false);
+  }
   function mode() {
     if (location.hostname !== "app.clickup.com") return "";
     if (/^\/\d+\/ai\/brain\/?$/.test(location.pathname)) return "brain";
     if (/^\/\d+\/chat\/r\//.test(location.pathname)) {
       const headers=all(document,'[data-test="chat-room-header__title-container"]');
-      if (headers.some(h=>visible(h) && query(h,'cu-chat-ai-avatar'))) return "agent";
+      if (headers.some(h=>shownWithoutLayout(h) && query(h,'cu-chat-ai-avatar'))) return "agent";
     }
     return "";
   }
@@ -62,8 +74,67 @@ const RSProvider = (() => {
   const composerFrame = () => closest(getEditor(),'.refinement-prompt-wrapper__form-input-wrapper') ||
     closest(getEditor(),'.refinement-prompt-wrapper') || composerRoot();
   const barAnchor = () => composerFrame();
-  function rawItems() {
-    const root=activeThread();return root?all(root,S.item).filter(item=>closest(item,S.thread)===root && role(item)):[];
+  // ClickUp keeps a large rendered transcript. Counts, diagnostics and the
+  // response watcher must not recursively reread every historical result on
+  // each poll. Cache DOM-derived data until its owning message actually changes.
+  // takeRecords() makes synchronous reads safe too (before the observer callback).
+  let transcript=null, transcriptObserver=null, transcriptRoute='', draining=false;
+  const messageText=new WeakMap(), messageRoles=new WeakMap(), pendingMasks=new Set();
+  function ownedMutationNode(node) {
+    const el=node?.nodeType===1?node:node?.parentElement;
+    return !!el && !!closest(el,'#rs-root,#rs-input-cover,#rs-diag-log,.rs-chip,.rs-chat-activity');
+  }
+  function affects(node,selector) {
+    return node?.nodeType===1 && (safeRead(()=>node.matches(selector),false)||!!query(node,selector));
+  }
+  function invalidateItems(records) {
+    if(!records){transcript=null;return;}
+    for(const record of records) {
+      if(ownedMutationNode(record.target))continue;
+      const nodes=[...(record.addedNodes||[]),...(record.removedNodes||[])];
+      if(nodes.length && nodes.every(ownedMutationNode))continue;
+      const el=record.target?.nodeType===1?record.target:record.target?.parentElement;
+      const item=closest(el,S.item);
+      if(item) {
+        messageText.delete(item);pendingMasks.add(item);
+        // An avatar arriving late can turn an unknown row into a real author.
+        if(closest(el,'header,cu-chat-user-avatar')||nodes.some(n=>affects(n,'cu-chat-user-avatar,cu-chat-ai-avatar,cu-user-avatar'))) {
+          messageRoles.delete(item);transcript=null;
+        }
+      } else if(nodes.some(n=>affects(n,S.item+','+S.thread)) ||
+        (record.type==='attributes' && (affects(el,S.thread)||safeRead(()=>el.matches(S.item),false)))) {
+        transcript=null;
+      }
+      if(record.type==='attributes'&&record.attributeName==='data-id'&&item)messageText.delete(item);
+    }
+  }
+  function drainTranscript() {
+    if(!transcriptObserver && typeof MutationObserver!=='undefined') {
+      transcriptObserver=new MutationObserver(invalidateItems);
+      safeRead(()=>transcriptObserver.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['data-test','data-id','data-brain-prompt-surface','hidden','aria-hidden','style']}));
+    }
+    if(draining)return;draining=true;
+    try {if(transcriptObserver)invalidateItems(transcriptObserver.takeRecords());} finally {draining=false;}
+    const route=location.href;
+    if(route!==transcriptRoute || (transcript?.root && !transcript.root.isConnected)) {
+      transcriptRoute=route;transcript=null;pendingMasks.clear();
+    }
+  }
+  function transcriptSnapshot() {
+    drainTranscript();
+    if(!transcript) {
+      const root=activeThread(),items=root?all(root,S.item).filter(item=>closest(item,S.thread)===root && role(item)):[];
+      const users=items.filter(isUserItem),assistants=items.filter(isAssistantItem);
+      transcript={root,items,users,assistants};
+      for(const item of users)pendingMasks.add(item);
+    }
+    return transcript;
+  }
+  function rawItems() {return transcriptSnapshot().items;}
+  function maskPendingItems() {
+    if(!pendingMasks.size)return;
+    const items=Array.from(pendingMasks);pendingMasks.clear();
+    maskInjectedItems(items.filter(item=>item.isConnected));
   }
   function maskInjectedItems(items) {
     for(const item of items) {
@@ -71,6 +142,10 @@ const RSProvider = (() => {
       const text=itemText(item);
       if(text.includes('⟦RS-SYS⟧') || (typeof RSParse!=='undefined' && RSParse.isInjectedFeedback(text))) {
         item.setAttribute('data-rs-clickup-injected','1');item.classList.add('rs-hidden');
+      } else if(safeRead(()=>item.hasAttribute('data-rs-clickup-injected'),false)) {
+        // Virtualizers can reuse a previously injected row for ordinary text.
+        // Remove only the mask this provider owns; never hide the new message.
+        item.removeAttribute('data-rs-clickup-injected');item.classList.remove('rs-hidden');
       }
     }
   }
@@ -107,10 +182,15 @@ const RSProvider = (() => {
     bar.style.clipPath=top<r.height?`polygon(0 0,100% 0,100% 100%,${right}px 100%,${right}px ${top}px,${left}px ${top}px,${left}px 100%,0 100%)`:'';
   }
   function allItems() {
-    const items=rawItems();maskInjectedItems(items);return items;
+    const items=rawItems();maskPendingItems();return items;
   }
   function role(item) {
     if (!item) return "";
+    drainTranscript();
+    if(messageRoles.has(item))return messageRoles.get(item);
+    const value=readRole(item);messageRoles.set(item,value);return value;
+  }
+  function readRole(item) {
     // Use the owning message's avatar, not names, response text or quotations.
     const avatar=query(item,'cu-chat-user-avatar');
     if (!avatar || closest(avatar,S.item)!==item) return "";
@@ -135,12 +215,18 @@ const RSProvider = (() => {
     };
     walk(root);return norm(text);
   }
-  function itemText(item) {
-    const body=query(item,S.body); return textWithout(query(body,S.content)||body,S.thinking);
+  function cachedItemText(item,exclude='') {
+    drainTranscript();if(!item)return '';
+    // textWithout already excludes our chip. Share the common read/classifier
+    // string rather than retaining duplicate copies of large JSON tool results.
+    const extra=exclude==='.rs-chip'?'':exclude;
+    let entries=messageText.get(item);if(!entries){entries=new Map();messageText.set(item,entries);}
+    if(entries.has(extra))return entries.get(extra);
+    const body=query(item,S.body),text=textWithout(query(body,S.content)||body,[S.thinking,extra].filter(Boolean).join(','));
+    entries.set(extra,text);return text;
   }
-  function classifyText(item, exclude) {
-    const body=query(item,S.body); return textWithout(query(body,S.content)||body,[S.thinking,exclude].filter(Boolean).join(','));
-  }
+  const itemText=item=>cachedItemText(item);
+  const classifyText=(item,exclude)=>cachedItemText(item,exclude);
   function itemKey(item) {
     if (!item) return null;
     const owner=closest(item.parentElement,'[data-id]');
@@ -149,9 +235,9 @@ const RSProvider = (() => {
     if (!ids.has(item)) ids.set(item,++nextId);
     return role(item)+':dom:'+ids.get(item);
   }
-  const assistantCount=()=>allItems().filter(isAssistantItem).length;
-  const userCount=()=>allItems().filter(isUserItem).length;
-  const lastAssistant=()=>allItems().filter(isAssistantItem).at(-1)||null;
+  const assistantCount=()=>transcriptSnapshot().assistants.length;
+  const userCount=()=>transcriptSnapshot().users.length;
+  const lastAssistant=()=>transcriptSnapshot().assistants.at(-1)||null;
   const lastAssistantId=()=>itemKey(lastAssistant());
   const streamLen=item=>itemText(item===undefined?lastAssistant():item).length;
   const readAssistant=()=>{const item=lastAssistant();return {present:!!item,item,reply:itemText(item),thinking:''};};
@@ -171,13 +257,30 @@ const RSProvider = (() => {
     if (!editor) return;
     if (on) {
       if (!originals.has(editor)) originals.set(editor,safeRead(()=>editor.getAttribute('contenteditable'), null));
-      editor.setAttribute('data-rs-locked','1');editor.setAttribute('contenteditable','false');
+      // Quill's user-source DOM/model reconciliation can run after insertText
+      // returns. Keep ONLY this exact editor writable until native Send settles;
+      // core sweeps must not disable Quill in the middle of that acceptance.
+      const accepting=draftWindow?.editor===editor && draftWindow.key===conversationKey();
+      if(safeRead(()=>editor.getAttribute('data-rs-locked'),null)!=='1')editor.setAttribute('data-rs-locked','1');
+      const editable=accepting?'true':'false';
+      if(safeRead(()=>editor.getAttribute('contenteditable'),null)!==editable)editor.setAttribute('contenteditable',editable);
     } else {
       const original=originals.get(editor);
       if (originals.has(editor)) {if(original===null)editor.removeAttribute('contenteditable');else editor.setAttribute('contenteditable',original);originals.delete(editor);}
       editor.removeAttribute('data-rs-locked');
     }
   }
+  // A native-editability window is not permission for user input. Capture edits
+  // before their default action (including keyboard, paste, cut, drop and IME).
+  // Our synchronous execCommand/paste remains allowed; never disable Send or
+  // synthesize a submit to bypass the host application's own readiness checks.
+  for(const type of ['beforeinput','keydown','paste','cut','drop','compositionstart','pointerdown'])
+    document.addEventListener(type,event=>{
+      const pending=draftWindow;
+      if(!pending || pending.writing || !event.isTrusted ||
+        !(event.target===pending.editor || safeRead(()=>pending.editor.contains(event.target),false)))return;
+      event.preventDefault();event.stopImmediatePropagation();
+    },true);
   function setInputLock(on) {locked=!!on;applyLock(getEditor(),locked);}
   function exactControl(selector) {return all(composerRoot(),selector).find(visible)||null;}
   const sendButton=()=>exactControl(S.send);
@@ -219,7 +322,7 @@ const RSProvider = (() => {
     await waitFor(()=>!!getEditor(),5000);
     return {ready:!!getEditor(),detail:modeWarning()};
   }
-  function enforceComposer() {setupStyles();maskInjectedItems(rawItems());syncBarCutout();if(locked)applyLock(getEditor(),true);return {ready:!!getEditor()};}
+  function enforceComposer() {setupStyles();allItems();syncBarCutout();if(locked)applyLock(getEditor(),true);return {ready:!!getEditor()};}
   async function writeDraft(text, expected) {
     const editor=getEditor(),key=conversationKey(),generation=++writeGeneration;
     if(!editor)throw Error('ClickUp AI chat box is not available. Open Ask Brain or an agent chat.');
@@ -228,6 +331,7 @@ const RSProvider = (() => {
     if(expected!==undefined && norm(editorText())!==norm(expected))return {ok:false,reason:'The draft changed; it was not overwritten.'};
     const before=editorText(),relock=locked;
     try {
+      if(draftWindow?.editor===editor)draftWindow.writing=true;
       editor.setAttribute('contenteditable','true');editor.focus();
       const range=document.createRange();range.selectNodeContents(editor);
       const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);
@@ -237,11 +341,12 @@ const RSProvider = (() => {
         const data=new DataTransfer();data.setData('text/plain',text);
         editor.dispatchEvent(new ClipboardEvent('paste',{bubbles:true,cancelable:true,clipboardData:data}));
       }
-      const okay=await waitFor(()=>generation!==writeGeneration||conversationKey()!==key||norm(editorText())===norm(text),2500);
-      if(!okay||generation!==writeGeneration||conversationKey()!==key||norm(editorText())!==norm(text))
+      if(draftWindow?.editor===editor)draftWindow.writing=false;
+      const okay=await waitFor(()=>generation!==writeGeneration||conversationKey()!==key||getEditor()!==editor||norm(editorText())===norm(text),2500);
+      if(!okay||generation!==writeGeneration||conversationKey()!==key||getEditor()!==editor||norm(editorText())!==norm(text))
         throw Error('ClickUp did not confirm the exact draft. Nothing was submitted; inspect the chat box before retrying.');
       return {ok:true};
-    } finally {if(relock)applyLock(getEditor(),true);}
+    } finally {if(draftWindow?.editor===editor)draftWindow.writing=false;if(relock)applyLock(getEditor(),true);}
   }
   function fileFromImage(image,index) {
     if(typeof PlazCodeMedia!=='undefined')return PlazCodeMedia.fileFrom(image,index);
@@ -332,7 +437,7 @@ const RSProvider = (() => {
     const sameChat=()=>conversationKey()===key || (key.endsWith(':new') && conversationKey().startsWith(key.slice(0,-3)));
     let rejected='',attempted=false,wrote=false,touched=false,writtenEditor=null,ownedStartup=false;
     const priorDraft=editorText(),priorAttachments=attachmentNodes().length;
-    const onDraftInput=event=>{if(event.isTrusted&&writtenEditor&&(event.target===writtenEditor||safeRead(()=>writtenEditor.contains(event.target),false)))touched=true;};
+    const onDraftInput=event=>{if(event.isTrusted&&!draftWindow?.writing&&writtenEditor&&(event.target===writtenEditor||safeRead(()=>writtenEditor.contains(event.target),false)))touched=true;};
     const unwatch=()=>{for(const type of ['beforeinput','input','paste'])document.removeEventListener(type,onDraftInput,true);};
     try {
       if(isStopped())throw Error('Stopped before ClickUp send. Nothing was submitted.');
@@ -341,14 +446,18 @@ const RSProvider = (() => {
       text=String(text??'');
       if(text.length>18000)throw Error('PlazCode did not submit this ClickUp message: it exceeds the conservative 18,000-character transport bound. Use smaller/paged tool results; startup context is split automatically.');
       ownedStartup=text===startupRequest('local')||text===startupRequest('roblox')||!!startupAcknowledgement(text);
-      await writeDraft(text);wrote=true;writtenEditor=getEditor();
+      if(norm(priorDraft)&&norm(priorDraft)!==norm(text))throw Error('ClickUp already has a different unsent draft. It was preserved. Send or clear it before retrying. Nothing was submitted.');
+      writtenEditor=getEditor();
+      draftWindow={editor:writtenEditor,key,writing:false};
       for(const type of ['beforeinput','input','paste'])document.addEventListener(type,onDraftInput,true);
+      await writeDraft(text);wrote=true;
       if(images?.length)await attachImages(images);
-      await waitFor(()=>isStopped()||conversationKey()!==key||norm(editorText())!==norm(text)||actionable(sendButton()),15000);
+      await waitFor(()=>isStopped()||conversationKey()!==key||getEditor()!==writtenEditor||touched||norm(editorText())!==norm(text)||actionable(sendButton()),15000);
       if(isStopped())throw Error('Stopped before ClickUp send. Nothing was submitted.');
       if(conversationKey()!==key)throw Error('The ClickUp conversation changed before send. Nothing was submitted.');
+      if(getEditor()!==writtenEditor)throw Error('The ClickUp chat box was replaced before send. Nothing was submitted; inspect the current draft before retrying.');
       const button=sendButton();
-      const state=sendAvailability(),draftMatches=norm(editorText())===norm(text);
+      const state=sendAvailability(),draftMatches=!touched&&norm(editorText())===norm(text);
       if(state.reason!=='ready'||!draftMatches){
         diag('clickup.send.blocked',{...state,draftMatches,characters:text.length});
         throw Error((!draftMatches?'The ClickUp draft changed; it was preserved.':sendUnavailableMessage(state.reason))+' Nothing was submitted.');
@@ -388,7 +497,7 @@ const RSProvider = (() => {
       failure=String(error.message||error)+(restored?' The unsent PlazCode startup draft was removed; your previous draft was restored.':'');
       throw Error(failure);
     }
-    finally {unwatch();sendInFlight=false;document.documentElement.classList.remove('rs-clickup-injecting');if(locked)applyLock(getEditor(),true);}
+    finally {unwatch();draftWindow=null;sendInFlight=false;document.documentElement.classList.remove('rs-clickup-injecting');if(locked)applyLock(getEditor(),true);}
   }
   function stopGeneration() {const button=stopButton();if(actionable(button))button.click();}
   function scanError() {
@@ -433,7 +542,7 @@ const RSProvider = (() => {
     authoritativeSendResult:true,thinkingSel:S.thinking,
     promptExtra:'You are running in ClickUp Ask Brain or an AI-agent chat. The user installed PlazCode to operate their local Roblox Studio, Blender and AgentScript files. Use the PlazCode JSON command protocol in your normal chat reply, not ClickUp native task/Doc/agent-creation tools. First request list_commands, acknowledge PlazCode is ready after receiving the reference, then wait for the user. A native ClickUp capability cannot replace a PlazCode command or prove a local edit occurred. Do not create or modify ClickUp tasks, Docs or agents merely to carry out a local Studio/Blender/file request.',
     init({diag:d,isStopped:s}={}){if(d)diag=d;if(s)isStopped=s;setupStyles();setInterval(syncBarCutout,150);},
-    allItems,isUserItem,isAssistantItem,itemText,classifyText,itemKey,
+    allItems,invalidateItems,isUserItem,isAssistantItem,itemText,classifyText,itemKey,
     assistantCount,userCount,lastAssistant,lastAssistantId,readAssistant,streamLen,snapshot,
     getEditor,editorText,chatIsEmpty,isFreshChat,composerFrame,barAnchor,conversationKey,
     canRestoreSession:()=>!rawItems().some(item=>isUserItem(item)&&nativeFailure(item)&&itemText(item).includes('⟦RS-SYS⟧')),
