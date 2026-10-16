@@ -56,7 +56,7 @@ const RSProvider = (() => {
   }
   function activeThread() {
     if (!mode()) return null;
-    return all(document,S.thread).filter(node=>!closest(node,'#rs-root,[hidden],[aria-hidden="true"]') && safeRead(()=>getComputedStyle(node).display!=='none',false)).at(-1) || null;
+    return all(document,S.thread).filter(shownWithoutLayout).at(-1) || null;
   }
   function prompts() {
     if (!mode()) return [];
@@ -456,6 +456,7 @@ const RSProvider = (() => {
       if(text.length>18000)throw Error('PlazCode did not submit this ClickUp message: it exceeds the conservative 18,000-character transport bound. Use smaller/paged tool results; startup context is split automatically.');
       ownedStartup=text===startupRequest('local')||text===startupRequest('roblox')||!!startupAcknowledgement(text);
       if(norm(priorDraft)&&norm(priorDraft)!==norm(text))throw Error('ClickUp already has a different unsent draft. It was preserved. Send or clear it before retrying. Nothing was submitted.');
+      if(!norm(priorDraft)&&!priorAttachments&&sendAvailability().reason==='ready')throw Error('ClickUp is still settling its empty draft: Send is already enabled before any text is entered. Wait for the editor to settle, then retry. Nothing was written or submitted.');
       writtenEditor=getEditor();
       draftWindow={editor:writtenEditor,key,writing:false};
       for(const type of ['beforeinput','input','paste'])document.addEventListener(type,onDraftInput,true);

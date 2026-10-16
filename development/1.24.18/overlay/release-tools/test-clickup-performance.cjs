@@ -400,6 +400,12 @@ async function correctness(page, size) {
     results.hiddenThreadExcludedSynchronously = p.allItems().length === 0;
     remountedThread.removeAttribute('aria-hidden');
     results.unhiddenThreadRestoredSynchronously = p.allItems().length === size + 1;
+    const host = document.createElement('div');
+    remountedThread.before(host); host.append(remountedThread); host.style.display = 'none';
+    results.hiddenThreadAncestorExcludedSynchronously = p.allItems().length === 0;
+    host.style.display = '';
+    results.visibleThreadAncestorRestoredSynchronously = p.allItems().length === size + 1;
+    host.before(remountedThread); host.remove();
     // A formerly matching selector no longer matches after an attribute is
     // removed. Both deactivation and reactivation must discard the old snapshot,
     // including its counts/last reply, before any observer callback can run.

@@ -56,6 +56,11 @@ async function fixture(browser, options = {}) {
     if(options.priorDraft)document.querySelector('.ql-editor').textContent=options.priorDraft;
     mount();
     if(options.priorDraft){window.model=options.priorDraft;button.disabled=false;}
+    if(options.initiallyEnabledBlank){
+      // A host can briefly retain an accepted model while its DOM is empty.
+      // Do not let the next write/click submit that stale model.
+      window.model='OLD ACCEPTED MODEL';button.disabled=false;
+    }
     provider.init({isStopped: () => stopped, diag: (name, data) => trace.push({event: name, ...data})});
     provider.setInputLock(options.locked !== false);
     // Faster wall-clock deadlines, but genuine event ordering and delayed model
@@ -109,6 +114,19 @@ async function result(page) {
       await page.close();
     }
     if (reproduce) return;
+    {
+      const page = await fixture(browser, {delay:350,initiallyEnabledBlank:true});
+      const r = await result(page);
+      assert.equal(r.ok, false, JSON.stringify(r));
+      assert.deepEqual(r.sent, [], 'blank DOM with already-enabled Send must never click the stale host model');
+      assert.equal(r.draft, '', 'reject the unsettled host before writing any startup draft');
+      assert.equal(r.model, 'OLD ACCEPTED MODEL', 'leave the host model untouched');
+      assert(!r.trace.some(t => t.event === 'dom' || t.event === 'native-click'), 'no editor DOM mutation or native Send click');
+      assert.equal(r.ambiguous, false); assert.equal(r.retry, false);
+      assert.equal(r.editable, 'false'); assert.equal(r.locked, true);
+      console.log('PASS blank DOM with initially-enabled Send aborts before any write or click');
+      await page.close();
+    }
     for (const options of [{remount:true}, {routeChange:true}, {stop:true}, {foreignDraft:true}, {nativeDisabled:true}, {ariaDisabled:true}, {ambiguous:true}]) {
       const page = await fixture(browser, {...options,delay:120}); const r = await result(page);
       assert.equal(r.ok, false, JSON.stringify(r)); assert.equal(r.retry, false);

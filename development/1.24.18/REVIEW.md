@@ -46,3 +46,9 @@ Validation workflow preserves the browser job and three-platform native matrix, 
 - Dedicated Chromium startup model tests passed 11 cases; existing readiness 11 and browser/full-core 9 groups passed. The long-history benchmark passes 64/512-turn structural budgets and semantic checks including 500KiB edits, lossless results, masking, role changes, hidden-header scope, dedupe and remounts.
 - Signed-in ClickUp Ask Brain accepted one connection-only startup message and returned list_commands JSON. It also accepted one clearly labelled 8,585-character transport fixture with a persisted user-row receipt (~3.05 seconds). No real bridge or project edit was executed. These are not affected users' accounts or an actual Microsoft Edge binary.
 - Final hosted validation and artifact checks remain required before publication; earlier test-build validation does not establish the new source commit.
+
+### Additional review gates
+
+Independent review added warm-cache thinking-attribute transitions and removal/restoration of item/thread selectors; all are invalidated synchronously as well as after observer callbacks. Hidden thread ancestors are excluded without pixel geometry. A prewrite check also refuses blank DOM with an already enabled Send, avoiding a synthetic stale-model submission before changing any text. The browser fixture now models native draft acceptance/empty-disabled Send rather than sending raw DOM unconditionally.
+
+The first follow-up CI exposed a pure-function VM harness loading the provider without a document; input-guard listeners are now installed lazily when transport is actually used. Native preference test paths add an atomic sequence to avoid parallel clock collisions (test-only); the exact earlier Mac failure cause was not available from public logs. All ten isolated native preference tests passed locally, and the next hosted run passed this isolated gate on Linux, Windows and Mac. Full final-source validation is still required.

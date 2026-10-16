@@ -6,18 +6,20 @@ async function check(browser,name){
   const {page}=await pageFor(browser);
   const result=await page.evaluate(async kind=>{
    const p=provider,editor=p.getEditor(),button=p.composerFrame().querySelector('[data-test="refinement-prompt-submit-button"]');
+   const nativeState=fixtureComposerStates.get(editor);
+   const keepSendDisabled=()=>{nativeState.forceDisabled=true;nativeState.refresh();};
    history.replaceState({},'','/90141771095/ai/brain?conversationId=fixture');
    const original=kind==='restore-original'?'My own unsent question':'';
    if(original)await p.writeDraft(original);
    const text=kind==='user-message'?'Please help with my project':p.startupRequest('roblox');
    const diagnostics=[];let stopped=false;p.init({diag:(name,data)=>diagnostics.push({name,data}),isStopped:()=>stopped});
-   if(['disabled','restore-original','user-message'].includes(kind))button.disabled=true;
+   if(['disabled','restore-original','user-message'].includes(kind))keepSendDisabled();
    if(kind==='missing')button.remove();
    if(kind==='aria-disabled')button.setAttribute('aria-disabled','true');
    if(kind==='obscured'){const r=button.getBoundingClientRect(),block=document.createElement('div');block.style.cssText=`position:fixed;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;z-index:9999`;document.body.append(block);}
    const realNow=Date.now,realTimeout=setTimeout;let tick=realNow();Date.now=()=>tick+=1000;window.setTimeout=(fn,ms,...args)=>realTimeout(fn,Math.min(ms,1),...args);
    if(['changed','stopped','chat-change'].includes(kind)){
-    button.disabled=true;const exec=document.execCommand.bind(document);document.execCommand=(...args)=>{const result=exec(...args);if(args[2]===text)queueMicrotask(()=>{
+    keepSendDisabled();const exec=document.execCommand.bind(document);document.execCommand=(...args)=>{const result=exec(...args);if(args[2]===text)queueMicrotask(()=>{
      if(kind==='changed'){editor.textContent='A new draft from the user';editor.dispatchEvent(new InputEvent('input',{bubbles:true}));}
      if(kind==='stopped')stopped=true;
      if(kind==='chat-change')history.replaceState({},'','/90141771095/ai/brain?conversationId=other');
