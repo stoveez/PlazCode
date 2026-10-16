@@ -1,6 +1,6 @@
 """Read-only promotion regressions: temporary ZIPs/repos, never assemble a release."""
 from pathlib import Path
-import ast,copy,hashlib,importlib.util,json,os,subprocess,sys,tempfile,zipfile
+import ast,copy,hashlib,importlib.util,json,os,re,subprocess,sys,tempfile,zipfile
 from unittest import mock
 sys.dont_write_bytecode=True
 spec=importlib.util.spec_from_file_location('promotion',Path(__file__).with_name('promote.py'))
@@ -149,7 +149,28 @@ assert functions(mac_source)==functions(old_mac),'Actual desktop visibility/proc
 for proof in ["duration = 210 if mode == 'foreground' else 15",'while time.monotonic() < deadline:',"assert alive(pid)",'assert on_screen(pid)==expected_visible',"['/usr/bin/codesign','--verify','--deep','--strict'"]:
  assert proof in mac_source,proof
 workflow=(promotion.ROOT/'.github/workflows/publish-1.24.18.yml').read_text()
-for expected in ['SET_VALIDATED_SHA_AFTER_SUCCESS','SET_VALIDATION_RUN_AFTER_SUCCESS','promote.py --check-validation','PLAZCODE_MAC_TEST_ARCHIVE','needs: wait-native','needs: mac-desktop','actions/attest-build-provenance@v2','gh attestation verify','git merge-base --is-ancestor origin/main HEAD']:
+def verify_workflow_pins(text):
+ sha=re.findall(r"^  VALIDATED_SHA: '([^']+)'$",text,re.M)
+ run=re.findall(r"^  VALIDATION_RUN: '([^']+)'$",text,re.M)
+ assert len(sha)==len(run)==1, 'Require one global validation pin pair'
+ placeholders=(sha[0]=='SET_VALIDATED_SHA_AFTER_SUCCESS',run[0]=='SET_VALIDATION_RUN_AFTER_SUCCESS')
+ assert all(placeholders) or (not any(placeholders) and re.fullmatch(r'[0-9a-f]{40}',sha[0]) and re.fullmatch(r'[1-9][0-9]*',run[0])), 'Require both placeholders or both valid exact-run pins'
+verify_workflow_pins(workflow)
+for sha,run,valid in [
+ ('SET_VALIDATED_SHA_AFTER_SUCCESS','SET_VALIDATION_RUN_AFTER_SUCCESS',True),
+ ('a'*40,'123456',True),
+ ('SET_VALIDATED_SHA_AFTER_SUCCESS','123456',False),
+ ('a'*40,'SET_VALIDATION_RUN_AFTER_SUCCESS',False),
+ ('main','123456',False),
+ ('a'*40,'latest',False),
+ ('a'*40,'0',False),
+]:
+ fixture=f"  VALIDATED_SHA: '{sha}'\n  VALIDATION_RUN: '{run}'\n"
+ if valid:verify_workflow_pins(fixture)
+ else:rejected(verify_workflow_pins,fixture)
+rejected(verify_workflow_pins,"  VALIDATED_SHA: '"+'a'*40+"'\n")
+rejected(verify_workflow_pins,fixture+fixture)
+for expected in ['promote.py --check-validation','PLAZCODE_MAC_TEST_ARCHIVE','needs: wait-native','needs: mac-desktop','actions/attest-build-provenance@v2','gh attestation verify','git merge-base --is-ancestor origin/main HEAD']:
  assert expected in workflow,expected
 assert workflow.index('python3 publish_release.py')<workflow.index('git push origin HEAD:main')
 assert 'prepare-ultra.py' not in workflow
