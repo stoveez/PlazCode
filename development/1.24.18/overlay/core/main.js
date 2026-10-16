@@ -10464,7 +10464,7 @@ statusTimer = rsInterval(() => bg({ type: "status" }).then(onStatus), 5000);
     if (records.every(isOwnMutation)) return;
     if (P.ignoreMutationRecords && P.ignoreMutationRecords(records)) return;
     ui.invalidateExportHistory();
-    if (P.invalidateItems) P.invalidateItems();
+    if (P.invalidateItems) P.invalidateItems(records);
     if (P.preprocessMutations) P.preprocessMutations(records, { active: !A.enhancing && (A.started || A.starting || A.running) });
     if (mutationNeedsPreHide(records)) preHideWholeItems();
     scheduleSweep();
