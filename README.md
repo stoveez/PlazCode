@@ -1,3 +1,11 @@
+PlazCode 1.24.20 — ClickUp Ask Brain connects again
+
+Fixes Start Agent on ClickUp's Ask Brain, which used to stop right after the AI's first reply and never finish connecting. Nothing else changes.
+
+- Start Agent now finishes connecting in a new ClickUp Ask Brain chat. Before, PlazCode stopped about a second after Brain's first reply, the bar said "Not connected to this chat yet", and the rest of the setup was never sent.
+- Why it happened: ClickUp changes the page address as soon as a new chat gets its first message, and PlazCode took that for a different chat. It now treats it as the same chat.
+- Everything else is unchanged: other AI sites, ClickUp agent chats, and your settings, memory and connections.
+
 PlazCode 1.24.19 — Polish and shared reply recovery
 
 Adds Polish throughout the PlazCode interface and improves shared reply recovery across verified assistant remounts, with ownership checks before tool dispatch.

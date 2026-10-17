@@ -1,9 +1,47 @@
 {
-  "version": "1.24.19",
-  "desktop_version": "1.24.19",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.19.zip",
-  "sha256": "bea7bc58992e8642ac738759411e10395c66a0be1fb244155ce2e773a4b155d0",
+  "version": "1.24.20",
+  "desktop_version": "1.24.20",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.20.zip",
+  "sha256": "b67d5525f72447fba87da0610b53796026f531b309e5aee7a46ad76946530041",
   "release_notes": [
+    {
+      "version": "1.24.20",
+      "title": "ClickUp Ask Brain connects again",
+      "summary": "Fixes Start Agent on ClickUp's Ask Brain, which used to stop right after the AI's first reply and never finish connecting. Nothing else changes.",
+      "added": [],
+      "improved": [],
+      "fixed": [
+        "Start Agent now finishes connecting in a new ClickUp Ask Brain chat. Before, PlazCode stopped about a second after Brain's first reply, the bar said \"Not connected to this chat yet\", and the rest of the setup was never sent.",
+        "Why it happened: ClickUp changes the page address as soon as a new chat gets its first message, and PlazCode took that for a different chat. It now treats it as the same chat.",
+        "Everything else is unchanged: other AI sites, ClickUp agent chats, and your settings, memory and connections."
+      ],
+      "notes": [
+        "Tried on a real ClickUp Ask Brain chat in AgentScript mode: all five setup steps went through and PlazCode reported it was ready. Before the fix, the same test stopped after the first reply.",
+        "ClickUp agent chats and Firefox were not changed and were not tried on a live account. Automated tests on Windows, Mac and Linux must pass before this is published.",
+        "The Windows app is unsigned and the Mac app is not notarized, as in earlier versions. Your computer may ask you to confirm opening it."
+      ],
+      "github": {
+        "summary": "Fixes Start Agent on ClickUp's Ask Brain, which stopped right after the AI's first reply and never finished connecting.",
+        "sections": [
+          {
+            "title": "🛠️ What's fixed",
+            "items": [
+              "Start Agent now finishes connecting in a new ClickUp Ask Brain chat. Before, it stopped a second after Brain's first reply and said \"Not connected to this chat yet\".",
+              "ClickUp changes the page address when a new chat gets its first message, and PlazCode mistook that for a different chat. It now knows it is the same chat.",
+              "Nothing else changes: other AI sites, ClickUp agent chats, and your settings, memory and connections stay as they were."
+            ]
+          },
+          {
+            "title": "🧪 What was checked",
+            "items": [
+              "Tried on a real ClickUp Ask Brain chat: all five setup steps went through and PlazCode said it was ready. The same test failed before the fix.",
+              "ClickUp agent chats and Firefox were not changed and not tried on a live account.",
+              "The Windows app is unsigned and the Mac app is not notarized, as before. Your computer may ask you to confirm opening it."
+            ]
+          }
+        ]
+      }
+    },
     {
       "version": "1.24.19",
       "title": "Polish and shared reply recovery",
@@ -181,67 +219,12 @@
           }
         ]
       }
-    },
-    {
-      "version": "1.24.15",
-      "title": "ClickUp, Ultra and recoverable Skills",
-      "summary": "Use PlazCode in ClickUp Brain and existing AI-agent chats, activate the unified Ultra effort, recover deleted skills, and find clearly labelled donation links.",
-      "added": [
-        "ClickUp Ask Brain and existing AI-agent chats support the usual PlazCode Studio, Blender and local-file commands.",
-        "Deleted Skills tab with Restore, confirmed permanent deletion and a separate Delete All for deleted items.",
-        "Desktop Donations page after Templates with labelled 50, 100, 500 and 1,000 Robux links opening in the current/default browser."
-      ],
-      "improved": [
-        "Ultra replaces the visible UltraCode effort label and adds animated gradient text with reduced-motion and forced-colour accessibility fallbacks.",
-        "UltraCode and UltraGUI work as hidden internal components; relevant UltraLab companion enhancements activate only at Ultra effort. The eleven starter skills remain visible.",
-        "ClickUp startup sends bounded, acknowledged context parts without truncating instructions or automatically replaying uncertain sends.",
-        "Updated donation destinations and amounts everywhere in the shared bar settings and desktop page."
-      ],
-      "fixed": [
-        "ClickUp toolbar follows the actual chatbox width and position while Ask/Agents tabs stay visible and clickable.",
-        "Injected ClickUp startup/tool messages stay hidden after UI remounts; failed startup cannot restore a false Ready state.",
-        "Removed Condo Lock classification, strikes and cooldown lockouts across all supported providers, including migration of old stored locks. Other permissions and safety controls are unchanged."
-      ],
-      "notes": [
-        "User-tested build 3 was approved for publication after successful ClickUp use. Exact-source Windows/macOS/Linux and Chromium/Firefox CI passed; packaged macOS desktop lifetime checks gate publication.",
-        "Older hard-deleted skills cannot be recovered. Permanent deletion is irreversible through PlazCode, not forensic erasure of external backups.",
-        "UltraLab is a bundled reference toolkit with scoped task routing. External services, credentials, dependencies and asset rights remain subject to setup and verification.",
-        "Windows is unsigned; macOS is ad-hoc signed, not notarized. Custom agents and real affected Studio/Blender/file projects are not claimed as exhaustively live-tested."
-      ],
-      "github": {
-        "summary": "ClickUp support, unified Ultra effort, recoverable Skills and updated donations.",
-        "sections": [
-          {
-            "title": "✨ New features",
-            "items": [
-              "Use PlazCode tools in ClickUp Brain and existing AI-agent chats.",
-              "Ultra effort combines hidden UltraCode/UltraGUI methods with selected-only UltraLab enhancements and animated labels.",
-              "Restore Deleted Skills or permanently remove them, including a separate trash Delete All.",
-              "Donation links are updated and clearly labelled, with a new desktop Donations page."
-            ]
-          },
-          {
-            "title": "🛠️ Fixes",
-            "items": [
-              "Bounded, confirmed ClickUp startup and a chatbox-aligned toolbar with usable Ask/Agents tabs.",
-              "Condo Lock removed across supported sites; unrelated permissions remain."
-            ]
-          },
-          {
-            "title": "🧪 Checks",
-            "items": [
-              "Approved after the user tested build 3 in ClickUp; platform/browser and packaged Mac checks passed.",
-              "Older hard-deleted skills are not recoverable. Windows unsigned; Mac not notarized."
-            ]
-          }
-        ]
-      }
     }
   ],
   "platforms": {
     "macos": {
-      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.19.zip",
-      "sha256": "c301e570eefbffa518836dcbb8e2caadba814f96ab0854a9e4937fd4a74ae8f0"
+      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.20.zip",
+      "sha256": "b28b897d70bbc2cc1f43ac4e28fd13d06012caa342c01ba68817147d64254143"
     }
   }
 }
