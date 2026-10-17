@@ -291,4 +291,11 @@ if __name__=='__main__':
     parser.add_argument('--check-validation',action='store_true',help='Read-only exact-source and four-job validation gate')
     args=parser.parse_args()
     if args.check_validation:check_validation(ROOT/'ci-artifacts')
-    else:main()
+    else:
+        try:main()
+        except BaseException as error:
+            # Surface the real failure as a GitHub annotation (hosted logs are not always readable).
+            import traceback
+            text=traceback.format_exc()[-1500:].replace('%','%25').replace('\r','').replace('\n','%0A')
+            print('::error title=promote failed::'+type(error).__name__+': '+str(error)[:300].replace('\n',' ')+'%0A'+text,flush=True)
+            raise
