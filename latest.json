@@ -1,48 +1,55 @@
 {
-  "version": "1.24.28",
-  "desktop_version": "1.24.28",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.28.zip",
-  "sha256": "a5d8c24e1ed883265cd59541f29ffb1548c38f91ac5a3ac72311a2009cc4ba56",
+  "version": "1.24.29",
+  "desktop_version": "1.24.29",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.29.zip",
+  "sha256": "08444db2235c66398faf640ae642920894fa3a6d096c8727d0298e967665fb0f",
   "release_notes": [
     {
-      "version": "1.24.28",
-      "title": "Update and Codex fixes",
-      "summary": "A quick fix for updates that sometimes failed their safety check, plus Codex support.",
+      "version": "1.24.29",
+      "title": "Fast game reading, full memory and reliable updates",
+      "summary": "The AI reads your whole game and all its memory quickly, PlazCode's Studio tools work again, and updates no longer fail or get stuck.",
       "added": [
-        "PlazCode now finds Codex's chat box on chatgpt.com/codex."
+        "read_scripts: the AI reads many scripts, whole folders or the entire game in one go instead of one script at a time.",
+        "At the start of every chat PlazCode gives the AI all your vault notes (except saved chats and the archive) and the project memory."
       ],
-      "improved": [],
+      "improved": [
+        "The update safety check reads the downloaded package directly, so security software scanning new files can no longer break it. No check was loosened."
+      ],
       "fixed": [
-        "Updates sometimes stopped with \"Release signature or file verification failed\" even though the download was fine. Security software scanning the new files could block the check for a moment; PlazCode now waits and checks again (up to three times) before giving up, and shows the real reason if it still fails.",
-        "PlazCode's own program check retries files that are briefly in use by another program, without relaxing any check."
+        "PlazCode's own Studio tools (lighting presets, UI and effects builders, script analysis and more) could not run at all: Roblox Studio refused to load them.",
+        "Updates sometimes stopped with \"Release signature or file verification failed\" even though the download was fine.",
+        "An update could stay stuck at \"Verifying and installing\" behind a hidden error window; a stuck updater is now stopped after 15 minutes without changing anything.",
+        "The Effort and Approval menus hid their last choice (Ultra, Bypass approval) behind the bar."
       ],
       "notes": [
-        "The update fix starts working from the update after this one; a failed update to 1.24.28 retries by itself every 40 minutes, or choose Update now.",
-        "Codex was checked on a test page with a Codex-like layout; it was not tried live.",
+        "The update fixes protect updates from 1.24.29 on; updating to 1.24.29 still uses the updater you have, which retries by itself.",
+        "Reading all memory at the start makes chats with a big vault take a little longer to start.",
         "Windows is unsigned and Mac is not notarized, as before; your computer may ask you to confirm opening it."
       ],
       "github": {
-        "summary": "***Updates no longer fail at random, and Codex now works.***",
+        "summary": "***The AI reads your whole game and all its memory fast, Studio tools work again, and updates stop failing.***",
         "sections": [
           {
             "title": "✨ What's new",
             "items": [
-              "PlazCode finds Codex's chat box on chatgpt.com/codex."
+              "The AI reads many scripts, whole folders or the entire game in one go, instead of one script at a time.",
+              "Every chat starts with all your vault notes and the project memory (saved chats and the archive stay on demand)."
             ]
           },
           {
             "title": "🛠️ What's fixed",
             "items": [
-              "Updates sometimes stopped with \"Release signature or file verification failed\" though the download was fine. Security software scanning the new files could block the check for a moment. PlazCode now waits and checks again, and shows the real reason if it still fails.",
-              "PlazCode's own file check retries files briefly in use by another program. No check is relaxed."
+              "PlazCode's own Studio tools (lighting, UI and effects builders, script analysis) could not run at all. They work again.",
+              "Updates sometimes failed with \"Release signature or file verification failed\". The check now reads the download directly, so security software can't break it. No check was loosened.",
+              "Updates could stay stuck at \"Verifying and installing\". A stuck updater now stops after 15 minutes without changing anything, and errors name the exact file.",
+              "The Effort and Approval menus no longer hide Ultra and Bypass approval behind the bar."
             ]
           },
           {
             "title": "🧪 What was checked",
             "items": [
-              "Windows, Mac and Linux builds, both browsers, updates and Mac startup.",
-              "Codex was checked on a practice page, not live.",
-              "This fix protects your next update. If updating to 1.24.28 fails, PlazCode retries by itself, or choose Update now.",
+              "Fast reading was tested on a real 62-script game, Studio tools with the official Luau compiler, updates on real Windows and Mac, menus in a real browser.",
+              "Big vaults make chats start a little slower. Update fixes apply from 1.24.29 on.",
               "Windows is unsigned and Mac is not notarized, as before."
             ]
           }
@@ -235,12 +242,12 @@
   ],
   "platforms": {
     "macos": {
-      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.28.zip",
-      "sha256": "46c8d5842541861a911f89d552ff1127c4c7f67ba5116f64a9496c5d7f33fa1d"
+      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.29.zip",
+      "sha256": "c7edc9da57b65f676cccc5fb16563f5e79852ff4d907c30dc1f5032b9a0b4948"
     }
   },
   "security": {
-    "payload": "{\"schema\":1,\"kind\":\"update\",\"channel\":\"release\",\"version\":\"1.24.28\",\"platform\":\"windows\",\"sha256\":\"a5d8c24e1ed883265cd59541f29ffb1548c38f91ac5a3ac72311a2009cc4ba56\"}",
-    "signature": "4c63a5c54297f0c7adafda45191fa392f350be79e886677d23f8a060712b54433de6efa34c16fb8a96ad29fcaa77a8310f93d79251a923d7e08aa6415cec1c0c"
+    "payload": "{\"schema\":1,\"kind\":\"update\",\"channel\":\"release\",\"version\":\"1.24.29\",\"platform\":\"windows\",\"sha256\":\"08444db2235c66398faf640ae642920894fa3a6d096c8727d0298e967665fb0f\"}",
+    "signature": "d56e19f666c324a25dcc6f76a597bbf41b333586a09c85b0bccb52843ea052978d46a88931e4a1804e4ec14974ccb5dfaebca3534760057f0c4968a3378abe0b"
   }
 }
