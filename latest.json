@@ -1,77 +1,69 @@
 {
-  "version": "1.24.30",
-  "desktop_version": "1.24.30",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.30.zip",
-  "sha256": "e76879ba98b1ff37575be73b024e2b9bfaa66c336572b3baa99476d24ec40d08",
+  "version": "1.24.31",
+  "desktop_version": "1.24.31",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.31.zip",
+  "sha256": "9a74402d7dbb13191c88bc280165e212c3d3aac27e80bb1e9b3d539574794ca8",
   "release_notes": [
     {
-      "version": "1.24.30",
-      "title": "Smarter scripts, smoother workflows and safer connections",
-      "summary": "Roblox-aware Luau checks, more AI sites, command batches, background terminal jobs, cleaner memory and stronger protection.",
+      "version": "1.24.31",
+      "title": "Startup, sign-in and ChatGPT fixes",
+      "summary": "Fixes for ChatGPT, DeepSeek, startup and sign-in problems found since 1.24.30, plus a guest mode.",
       "added": [
-        "Luau checks in Settings: Advisory is on by default; optional Blocking mode puts a script back when an edit adds a syntax error. Type errors and warnings are shown to the AI for correction. Checks never run the generated code.",
-        "Roblox-aware code help: analyze_luau and luau_lookup use the open place to find mistakes, definitions, references, types, completions and function parameters. The checker downloads once on first use; no extra setup.",
-        "MiMo Chat and UltraSpeed support, plus Arena Direct, Battle, Side by Side and Agent modes.",
-        "Ro-Engineer Roblox standards (by excaldev, MIT licence) are built in: modern typed Luau, safe client/server code, clean-up, performance, system design, game loops and economy. One short set of core standards is used on every Roblox task; the topic guides are used when they fit.",
-        "A Logs page in the PlazCode app: every startup, AI turn, command and problem (including the AI site's own console errors) is saved for 14 days. Filter by problems, startups, turns, Studio or updates, see what led up to an error, and copy it for an AI. The AI can also read these logs itself with plazcode_logs to find out what went wrong.",
-        "Run up to eight prepared commands in one reply. Each keeps its own approval and Stop checks; a failure stops the remaining commands.",
-        "Long builds, tests and servers can run as managed background jobs, with live output, progress checks and Stop."
+        "Guest mode: if a profile can't be created, \"Use PlazCode as a guest\" keeps your settings, skills and memory on this computer, separate from online profiles.",
+        "Safer file work: the AI can use paths inside your project and preview files read-only.",
+        "Memory notes are loaded only when they are relevant, and AI results use one standard shape.",
+        "Command batches use one call shape, and the AI is told which capabilities are granted."
       ],
       "improved": [
-        "The PlazCode app only connects to the extension loaded from its own PlazCode folder. Copies that were edited or loaded from somewhere else are refused with a message saying what to do.",
-        "PlazCode's instructions and its Studio tools' Luau now live inside the PlazCode app and are only given to the official extension, to make casual copying harder without adding user setup.",
-        "Your PlazCode folder is tidier: about 90 old test files and old internal notes left behind by earlier versions are removed automatically, and new downloads no longer include internal notes. The app, the extensions, the updaters and your settings stay where they are.",
-        "Protection now varies by release, with independent checks and shorter internal JavaScript names; normal use, Stop, user settings and updates stay available.",
-        "Optional console checks no longer hold up tool results; completed commands settle faster on supported AI sites while DeepSeek keeps deliberate request pacing."
+        "Windows startup errors now name the folder and the missing file, and the Mac check matches the real app layout.",
+        "Slow Blender scenes get more time, and long single-line edits are handled in safe pieces."
       ],
       "fixed": [
-        "On Mac, opening PlazCode straight from a freshly downloaded zip could stop with \"PlazCode program files changed or are incomplete ... No such file or directory\".",
-        "The PlazCode app no longer keeps saying \"Desktop bridge disconnected\" while PlazCode is working. The extension no longer makes every request wait while it re-checks its own files, the app counts the open connection as connected, and the app's own file check is shared between commands instead of repeated for each one. Real drops are now listed with their reason on the Logs page.",
-        "Some antivirus programs could flag the PlazCode download as harmful because the app stored its list of computer-control commands as plain text. That text is now stored in a scrambled form; nothing about how PlazCode works changed.",
-        "Arena sends no longer trigger PlazCode's long-address guard. Sign-in and first-use Terms prompts now explain what to do instead of retrying.",
-        "Account requests retry once after a non-JSON host response and report its HTTP status in Logs.",
-        "Interrupted Luau checks refresh their temporary analysis state; switching profiles clears the Luau service and pending results.",
-        "DeepSeek shares persisted send cooldowns across tabs and browsers on this computer, pauses on repeated limits, cancels stale queued sends after Stop/chat changes, and avoids repeated image clicks or fallback sends. Provider restrictions can still apply.",
-        "Learn as you work skips startup handshakes, chat summaries, raw tool logs and unsupported automatic notes. Manual notes and existing data remain.",
-        "Arena tool hangs, false stops, raw command text and argument-shape failures; Luau setup cancellation/timeouts and project fallback budgets.",
-        "Continuation prompts after startup, repeated workflow stops, MiMo reconnection, and task/sidebar/workspace display problems.",
-        "Long tool results keep spaces and newlines at page joins instead of silently losing characters."
+        "ChatGPT: startup no longer hangs on \"Starting Up\" or \"Send paused\", including in Work mode.",
+        "ChatGPT: typing freezes, false \"sent\" confirmations and lost tool results.",
+        "Leftover startup text no longer stays in the message box.",
+        "The screenshot pop-up no longer shows a black box.",
+        "DeepSeek: false startup warnings, stuck sends and broken line breaks.",
+        "Sign-up and log-in recover from busy or offline servers; saved logins stay usable.",
+        "Windows: false \"program files changed\" startup error, and Windows paths inside the project.",
+        "Blender: first-time setup on Windows.",
+        "Ox Alpha: Copy is no longer counted as a message sent.",
+        "The AI keeps working on your project after short follow-ups."
       ],
       "notes": [
-        "First-party PlazCode 1.24.30 is proprietary. Third-party licences and earlier GPL releases keep their existing terms. Source ZIPs are not distributed.",
-        "If PlazCode says the extension is not the official one: remove it from your browser's extensions page and load the PlazCode-Extension folder from the PlazCode folder you use (Firefox is not affected).",
-        "Update the PlazCode app and the extension together (the app's updater does this). An extension newer than the app now says \"PlazCode app needed\" instead of starting.",
+        "Update the PlazCode app and the extension together (the app's updater does this).",
         "Windows is unsigned and Mac is not notarized, as before; your computer may ask you to confirm opening it."
       ],
       "github": {
-        "summary": "***Smarter Roblox help, fewer interruptions, and MiMo joins the supported AIs.***",
+        "summary": "***Fixes for ChatGPT, DeepSeek, startup and sign-in problems found since 1.24.30.***",
         "sections": [
           {
             "title": "✨ What's new",
             "items": [
-              "MiMo (Chat and UltraSpeed) is now supported, making 16 browser AIs plus Ollama. More Arena modes too.",
-              "Run up to eight commands in one reply; long builds and servers can keep running in the background.",
-              "Roblox-aware Luau checks and code help, with optional rollback if a change adds a syntax error.",
-              "Ro-Engineer starter guides (excaldev, MIT) and a new Logs page in the app."
+              "Guest mode: if a profile can't be created, \"Use PlazCode as a guest\" keeps your settings, skills and memory on this computer.",
+              "Safer file work: the AI can use paths inside your project and preview files read-only.",
+              "Memory is loaded only when it's relevant."
             ]
           },
           {
             "title": "🛠️ What's fixed",
             "items": [
-              "Arena: tool calls that spun forever, random stops, raw code showing in the chat, rejected arguments and slow follow-ups.",
-              "DeepSeek: duplicate sends and sends left waiting after Stop or switching chats.",
-              "The AI no longer says tools like the task checklist are missing from the command list.",
-              "Searching a big project no longer freezes for a minute.",
-              "Long results no longer lose spaces or line breaks.",
-              "Cleaner automatic memory, more reliable Luau checks, and a tidier Ultra look (no purple outline on the selected page).",
-              "Mac first-launch startup, stronger official-extension checks, and a tidier app folder.",
-              "From 1.24.30, PlazCode's own code is proprietary. Third-party and older-release licences are unchanged. No source ZIPs are shared."
+              "ChatGPT: startup no longer hangs on \"Starting Up\" or \"Send paused\", including in Work mode.",
+              "ChatGPT: typing freezes, false \"sent\" confirmations and lost tool results are fixed.",
+              "Leftover startup text no longer stays in the message box.",
+              "Screenshot pop-up no longer shows a black box.",
+              "DeepSeek: false startup warnings, stuck sends and broken line breaks.",
+              "Sign-up and log-in recover from busy or offline servers; saved logins stay.",
+              "Windows: false \"program files changed\" startup error. Windows paths work in the project.",
+              "Blender: first-time setup on Windows and slow scenes.",
+              "Ox Alpha: Copy no longer counts as a message sent.",
+              "The AI keeps working on your project after short follow-ups."
             ]
           },
           {
             "title": "🧪 What was checked",
             "items": [
-              "Automated app, Luau, browser and protection checks. AI sites were tested on practice pages; live AI and Studio sessions still need testing.",
+              "Automated tests on Windows, Mac and Linux, and on practice pages. ChatGPT Work mode was tried live; other AI sites and Studio were not.",
               "The Windows app is unsigned and the Mac app is not notarized, as before. Your computer may ask you to confirm opening it."
             ]
           }
@@ -264,12 +256,12 @@
   ],
   "platforms": {
     "macos": {
-      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.30.zip",
-      "sha256": "820a21df6626667acca1f4da06557bd094e085c783f3a84ca05b9f18229c4466"
+      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.31.zip",
+      "sha256": "77b99c260a04956bc3a002d2be5e1b351ed83cca2e4bd530872587962e7b687b"
     }
   },
   "security": {
-    "payload": "{\"schema\":1,\"kind\":\"update\",\"channel\":\"release\",\"version\":\"1.24.30\",\"platform\":\"windows\",\"sha256\":\"e76879ba98b1ff37575be73b024e2b9bfaa66c336572b3baa99476d24ec40d08\"}",
-    "signature": "c2bf80c348e9b53ec6b70a5af93e9064f34f87f976823df8a84173d8c42e60584d66eb0e6342ef166f93b90c656d0216185813946a4efda918ca2aa1027cce05"
+    "payload": "{\"schema\":1,\"kind\":\"update\",\"channel\":\"release\",\"version\":\"1.24.31\",\"platform\":\"windows\",\"sha256\":\"9a74402d7dbb13191c88bc280165e212c3d3aac27e80bb1e9b3d539574794ca8\"}",
+    "signature": "2c41f4f71c5224af389503159f9b28f21c7c527e0ab3693733ef9bd5d42d3dfd03abd53e6c0d13e7a6b077441f15631f054926f77419cf19495cd30ad788eb03"
   }
 }
