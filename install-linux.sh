@@ -1,5 +1,5 @@
 #!/bin/sh
-# PlazCode for Linux, one-line install (1.24.33, owner: "much more easier and beginner friendly"):
+# PlazCode for Linux, one-line install (1.24.34, owner: "much more easier and beginner friendly"):
 #   curl -fsSL https://raw.githubusercontent.com/stoveez/PlazCode/main/install-linux.sh | sh
 # It downloads the official PlazCode for Linux, checks it, puts it in ~/PlazCode (no admin password), adds it to your
 # app menu and opens it. Run the same line again to update. To remove PlazCode:

@@ -1,69 +1,76 @@
 {
-  "version": "1.24.33",
-  "desktop_version": "1.24.33",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.33.zip",
-  "sha256": "2bfdec916c8cd66b19a16770579fb22c21a6a32573da15e20090a74bb254d990",
+  "version": "1.24.34",
+  "desktop_version": "1.24.34",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-1.24.34.zip",
+  "sha256": "d3867afabbbc4394b399b4cf5e26c27bc063e8d9bcf74e840f813d69197ff251",
   "release_notes": [
     {
-      "version": "1.24.33",
-      "title": "PlazCode works in your tabs and apps, easy app connections and a fresh look",
-      "summary": "Apps & servers that connect your creative apps for you, helper agents, a fresh look and an easy Linux install.",
+      "version": "1.24.34",
+      "title": "Ask PlazCode in your own chat, a smoother app and less plan usage",
+      "summary": "Ask PlazCode runs in the chat you are using, the app is smoother, and PlazCode uses less of your AI plan.",
       "added": [
-        "Blender in RobloxScript: models reach Studio at the right size, facing the right way, with colours.",
-        "When the AI works in a tab or desktop app, it glows in your theme colour, shows PlazCode's cursor and a live preview in the chat; moving your mouse takes over.",
-        "Ask PlazCode (Alt+P, or the bar button in AgentScript): a side chat that sees the tab or whole screen you share and can control it when you switch that on.",
-        "New Apps & servers page: connect Blender, Godot, Unity, Figma and Blockbench with a checklist that ticks itself off.",
-        "PlazCode adds its own helpers to Blender, Unity, Figma and Blockbench and removes them on disconnect. Blender can also run in the background with safe mode on.",
-        "Guided browser extension setup on every system: PlazCode opens the extensions page and shows the folder to load.",
-        "Linux: install with one line, curl -fsSL https://raw.githubusercontent.com/stoveez/PlazCode/main/install-linux.sh | sh . It adds itself to your app menu and updates itself. Roblox Studio through Vinegar is experimental.",
-        "Helper agents: the AI can start up to two extra chats to work on parts of a task at once.",
-        "Several commands per reply: reads run together, changes run in order.",
-        "A fresh app look with grouped pages, smoother page changes, glow and a theme builder.",
-        "Mac: now opens on macOS 10.15 Catalina too. Memory search needs macOS 12; on Catalina, use Firefox.",
-        "A redesigned PlazCode bar, settings menu (tabs and search), toolbar popup and Ask PlazCode panel that match the app's look and follow its Feel settings."
+        "Ask PlazCode runs in the AI chat you are using (the tab you opened it from, else the AI tab you used last) instead of a background DeepSeek chat. A background chat opens only when no AI chat tab is open.",
+        "Ask PlazCode shows the reply as it is written, with thinking dots while you wait.",
+        "The AI can use other desktop apps by the names on their buttons and fields (app_do), on Windows and Mac; it asks before risky steps such as send, delete or buy.",
+        "The AI can maximize, minimize or restore a window in one step.",
+        "The live preview can be dragged and minimized into a small Live pill.",
+        "The glow stays on while the AI is still working.",
+        "Taking control back needs a click or a key press; moving the mouse or scrolling no longer pauses the AI.",
+        "Less AI plan usage: the status line after each command is sent in full only when it changes, the start-up command list is smaller, and the AI sends at most 2 commands per reply.",
+        "A switch to turn off the PlazCode vault (both Memory settings) for people who keep their own notes tool.",
+        "The task list folds into its pill when you minimize PlazCode, and the pill can be dragged.",
+        "Smoother Windows app: lighter page changes, no blur when none is chosen, and endless animations rest while the window is behind others.",
+        "ClickUp support has been removed; the app lists 15 browser AIs + Ollama."
       ],
       "improved": [],
       "fixed": [
-        "Notion: commands right after a sentence run again instead of sticking on processing.",
-        "DeepSeek, Qwen, Kimi and similar sites: the startup check no longer fails. Kimi's command card now appears at startup instead of raw JSON.",
-        "Freebuff: the bar no longer gets stuck on \"Starting\" or \"Freebuff is writing\" after PlazCode is ready, and sits on the right chat box in Code and Chat mode.",
-        "Gemini: the command card lines up with the reply. The bar keeps its buttons on one row on narrower chat boxes.",
-        "Ask PlazCode's background chat window stays minimised while it opens.",
-        "Commands no longer wait on the link between the extension and the app.",
-        "AI sites' own console errors are no longer listed as PlazCode errors on the browser's extensions page."
+        "Resume no longer flips straight back to Pause.",
+        "DeepSeek starts on DeepSeek pages in other languages and on Edge.",
+        "Gemini: command cards line up with the reply, typing is no longer laggy, and it no longer says the bridge is not active.",
+        "Ask PlazCode answers no longer go missing or arrive late.",
+        "ChatGPT keeps working when its window is not in front.",
+        "plazcode_clarify: your own \"Other\" answer can be submitted, and the buttons no longer cover that box.",
+        "The Mac app window works on macOS 10.15 Catalina again.",
+        "Settings: the language list no longer opens behind other sections, and the stray arrow in its corner is gone."
       ],
       "notes": [
         "Update the PlazCode app and the extension together (the app's updater does this).",
         "Windows is unsigned and Mac is not notarized, as before; your computer may ask you to confirm opening it."
       ],
       "github": {
-        "summary": "***PlazCode can now work in your tabs and apps while you watch, plus easy app connections and a fresh look.***",
+        "summary": "***Ask PlazCode runs in your own chat, a smoother app, and less AI plan usage.***",
         "sections": [
           {
             "title": "✨ What's new",
             "items": [
-              "Ask PlazCode (Alt+P, or the bar button in AgentScript): a side chat that sees your tab or screen and can control it if you allow it.",
-              "When the AI works in a tab or app, it glows in your theme colour with PlazCode's cursor and a live preview in the chat. Move your mouse to take over.",
-              "Apps & servers: connect Blender, Godot, Unity, Figma and Blockbench with a checklist that ticks itself off. Guided extension setup too.",
-              "Blender works in RobloxScript too. Models reach Studio at the right size, facing the right way, with colours.",
-              "Linux: one-line install with automatic updates: curl -fsSL https://raw.githubusercontent.com/stoveez/PlazCode/main/install-linux.sh | sh (Studio via Vinegar: experimental)",
-              "A redesigned PlazCode bar, settings menu and toolbar popup that match the app.",
-              "Helper agents, several commands per reply, and Mac support from macOS 10.15 (memory search needs 12)."
+              "Ask PlazCode runs in the AI chat you are using, not a background DeepSeek chat. Replies show as they are written.",
+              "The AI can use other desktop apps by their button names and maximize, minimize or restore windows in one step.",
+              "Live preview can be dragged or minimized; the glow stays on while the AI works.",
+              "Only a click or key press takes control back; moving the mouse or scrolling no longer pauses the AI.",
+              "Less AI plan usage: shorter status lines, smaller start-up list, at most 2 commands per reply.",
+              "Switch to turn off the PlazCode vault if you use your own notes.",
+              "The task list folds away with PlazCode and can be dragged.",
+              "Smoother Windows app: lighter page changes, less blur, idle animations rest.",
+              "ClickUp support removed; the app lists 15 browser AIs + Ollama."
             ]
           },
           {
             "title": "🛠️ What's fixed",
             "items": [
-              "Startup works again on Notion, DeepSeek, Qwen and Kimi (Kimi shows its command card).",
-              "Freebuff no longer sticks on \"Starting\" or \"Freebuff is writing\".",
-              "Gemini's command card lines up; the bar stays on one row.",
-              "Commands no longer wait on the link to the app."
+              "Resume no longer flips back to Pause.",
+              "DeepSeek starts on non-English pages and on Edge.",
+              "Gemini: cards line up, no typing lag, no false \"bridge not active\".",
+              "Ask PlazCode answers no longer go missing, and it shows thinking dots.",
+              "ChatGPT keeps working when its window is not in front.",
+              "plazcode_clarify: your own \"Other\" answer can be sent.",
+              "Mac app window works on Catalina again.",
+              "Settings language list no longer hides behind sections."
             ]
           },
           {
             "title": "🧪 What was checked",
             "items": [
-              "Automated tests on Windows, Mac and Linux. The Kimi/Freebuff fixes and tab control are not yet re-tried on the real sites. Report anything odd.",
+              "Automated tests on Windows, Mac and Linux; Gemini checked live, most others not yet. Report anything odd.",
               "Windows is unsigned and Mac is not notarized, as before."
             ]
           }
@@ -284,12 +291,12 @@
   ],
   "platforms": {
     "macos": {
-      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.33.zip",
-      "sha256": "1bd6670e33650418ea68c5353b7cd905ff72b45b017bf970f66a980f47b8dc0f"
+      "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-macOS-1.24.34.zip",
+      "sha256": "a5e4f8be486f8a597d96d60f8ee6507c0b5c20dc516a947670e073db41063f5a"
     }
   },
   "security": {
-    "payload": "{\"schema\":1,\"kind\":\"update\",\"channel\":\"release\",\"version\":\"1.24.33\",\"platform\":\"windows\",\"sha256\":\"2bfdec916c8cd66b19a16770579fb22c21a6a32573da15e20090a74bb254d990\"}",
-    "signature": "0ce6915cf0686a266504c118fa0fa7b5772efde0a6f7699aa5fe317afc43bbac42811065cd7de7a1dc97b54fa082bd860ac1b6cfddee3073096b99c205e62f0d"
+    "payload": "{\"schema\":1,\"kind\":\"update\",\"channel\":\"release\",\"version\":\"1.24.34\",\"platform\":\"windows\",\"sha256\":\"d3867afabbbc4394b399b4cf5e26c27bc063e8d9bcf74e840f813d69197ff251\"}",
+    "signature": "357f1dae2207d9ba00da8eba2325e275903a8484f9757f455ff9d25b5af530f70727640bc4e26982d35958f906471c10fdb7f11dfa2203bccab6c2515fed2308"
   }
 }
