@@ -1,70 +1,48 @@
 {
-  "version": "1.24.35",
-  "desktop_version": "1.24.35",
-  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-Linux-1.24.35.tar.gz",
-  "sha256": "4bb0da573a6d1930be6627cf7c0f70ac0dc6237249f083e60c92aec49b7382e7",
+  "version": "1.24.36",
+  "desktop_version": "1.24.36",
+  "url": "https://raw.githubusercontent.com/stoveez/PlazCode/main/PlazCode-Linux-1.24.36.tar.gz",
+  "sha256": "af6efba64473550e1fad89749ccb494d254e5072487f073385a02e0f3d43d0cc",
   "release_notes": [
     {
-      "version": "1.24.35",
-      "title": "The AI tests and fixes your Roblox games, folder skills and synced settings",
-      "summary": "When the AI finishes a Roblox task, PlazCode now plays the game, checks the UI and has the AI fix what broke.",
+      "version": "1.24.36",
+      "title": "The taskbar stays usable while the AI controls the screen, and Roblox Studio through TuxBlox on Linux",
+      "summary": "A quick follow-up: your taskbar works while the AI controls the screen, and Linux users can connect Roblox Studio through TuxBlox.",
       "added": [
-        "Playtest & Fix: when the AI says a Roblox task that changed scripts is done, PlazCode presses Play for 10 seconds, reads the errors from the server and the client, stops Play and has the AI fix them (at most 2 rounds). Switch: Playtest when done.",
-        "UI check: a Roblox UI standard for the AI, ui_audit / ui_tokens studio skills, and an automatic check of the menus the AI built before the playtest. Switch: Check UI when done.",
-        "PlazLib: ready-made Luau building helpers (parts, models, tweens, touch pads, UI) added to build code only when used.",
-        "Import a whole folder of skills: Choose a folder, drop a folder, or a .zip. Each folder with a SKILL.md becomes a skill; its other files are references the AI opens only when needed. Importing again updates them.",
-        "Resume or Start fresh after a tab reload or crash during a run.",
-        "Keep my computer awake during runs (app Settings, Automation; off by default).",
-        "The Ask PlazCode panel is left out of the AI's pictures of your screen.",
-        "Automatic Debugger, Stop playtest on error, Multi-Agent, Playtest when done and Check UI when done are now in the app's Automation settings too."
+        "Linux: Roblox Studio through TuxBlox as well as Vinegar. PlazCode starts TuxBlox's own Studio helper directly (normal install or Flatpak), so no fake flatpak or edited menu entry is needed. When Studio is open, PlazCode uses whichever one runs it, else TuxBlox first.",
+        "Linux: the Roblox Studio card on the Apps page covers TuxBlox and Vinegar and shows the helper's own message when it cannot start."
       ],
-      "improved": [],
+      "improved": [
+        "Linux: a Studio helper that stops at once is retried after a growing pause instead of every second, and a slow first start gets up to a minute."
+      ],
       "fixed": [
-        "DeepSeek with web search on: commands after a citation number or a heading were read as plain text, so nothing ran and the raw JSON stayed on screen. They run now.",
-        "DeepSeek no longer turns on DeepThink or turns off Search when you press Start; your own choices are kept.",
-        "DeepSeek: the raw JSON no longer flickers with the tool card while the AI writes.",
-        "\"Send paused\" while the AI uses a tool happens far less on ChatGPT, DeepSeek, Claude, Gemini and Kimi.",
-        "An old chat no longer starts running by itself when you switch to it.",
-        "Every Appearance setting works: panel opacity, blur, corner radius, border thickness and colour.",
-        "Settings changed in the extension reach the app and back, even if the app was closed; they no longer flip back.",
-        "The Mac app layout on macOS 10.15 Catalina."
+        "Windows: while the AI controls the screen (glowing edges and the Stop bar at the top), the taskbar no longer disappears: it shows when you move the mouse down, appears in screenshots and works while paused."
       ],
       "notes": [
         "Update the PlazCode app and the extension together (the app's updater does this).",
         "Windows is unsigned and Mac is not notarized, as before; your computer may ask you to confirm opening it."
       ],
       "github": {
-        "summary": "***When the AI finishes a Roblox task, PlazCode now plays the game, checks the UI and has the AI fix what broke.***",
+        "summary": "***A quick follow-up: your taskbar works while the AI controls the screen, and Linux users can connect Roblox Studio through TuxBlox.***",
         "sections": [
           {
             "title": "✨ What's new",
             "items": [
-              "Playtest & Fix: after a Roblox task, PlazCode plays the game for 10 s, reads the errors and has the AI fix them.",
-              "UI check: the AI follows a UI standard and the menus it builds are checked and fixed before the playtest.",
-              "PlazLib: ready-made Luau helpers so the AI builds faster with fewer mistakes.",
-              "Import a whole folder of skills (or drop a folder or .zip).",
-              "Resume or Start fresh after a tab reload or crash during a run.",
-              "Keep my computer awake during runs (off by default).",
-              "The Ask PlazCode panel is hidden from the AI's screen pictures.",
-              "Automation switches like Playtest when done are in the app too."
+              "Linux: Roblox Studio works through TuxBlox as well as Vinegar. No fake flatpak or edited menu entry needed.",
+              "Linux: PlazCode uses whichever one runs your open Studio (TuxBlox first) and shows the helper's own message if it cannot start.",
+              "Linux: a helper that stops at once is retried less often, and a slow first start gets up to a minute."
             ]
           },
           {
             "title": "🛠️ What's fixed",
             "items": [
-              "DeepSeek with web search on: commands that stayed raw JSON blocks and did nothing now run.",
-              "DeepSeek keeps your DeepThink and Search choices at Start; no more raw JSON flicker.",
-              "\"Send paused\" during tool use is far rarer on ChatGPT, DeepSeek, Claude, Gemini and Kimi.",
-              "Old chats no longer start running by themselves.",
-              "Every Appearance setting works, including panel opacity, blur, corners and borders.",
-              "Settings from the extension sync to the app and back, even if the app was closed.",
-              "Mac app layout on Catalina."
+              "Windows: the taskbar no longer disappears while the AI controls your screen. It shows when you move the mouse down, appears in screenshots and works while paused."
             ]
           },
           {
             "title": "🧪 What was checked",
             "items": [
-              "Automated tests on Windows, Mac and Linux; the Roblox helpers ran in the real Luau engine. Not yet tried in real Studio or most live AI sites. Report anything odd.",
+              "Automated tests on Windows, Mac and Linux, including the real Linux app with a stand-in TuxBlox. Not yet tried on a real Linux PC with TuxBlox, or with a real taskbar. Report anything odd.",
               "Windows is unsigned and Mac is not notarized, as before."
             ]
           }
@@ -284,7 +262,7 @@
     }
   ],
   "security": {
-    "payload": "{\"schema\":1,\"kind\":\"update\",\"channel\":\"release\",\"version\":\"1.24.35\",\"platform\":\"linux\",\"sha256\":\"4bb0da573a6d1930be6627cf7c0f70ac0dc6237249f083e60c92aec49b7382e7\"}",
-    "signature": "34bb12e3f84130e7eca4a5a6ac5af3f9c8ddea8fd4ac7eebf310f943f09e7761da859d052b35e329699cae263996d3fb21bd134aa6bd4651ba7773dc6d68200e"
+    "payload": "{\"schema\":1,\"kind\":\"update\",\"channel\":\"release\",\"version\":\"1.24.36\",\"platform\":\"linux\",\"sha256\":\"af6efba64473550e1fad89749ccb494d254e5072487f073385a02e0f3d43d0cc\"}",
+    "signature": "a634a3787afa8319aacf3e3b7137c150df532497cfd8b01cb2ab42a197da991f303ea8be56dfae951c060bdf506a524ed238407449630dc8ee523be0fe937b0d"
   }
 }
